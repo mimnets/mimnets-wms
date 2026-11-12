@@ -16,6 +16,8 @@
 // listing widgets: item limits, required alt text, unsafe links, listing
 // modes, draft/archived records hidden, no person contact details, file
 // type and size, the gallery markup, and persistence after a restart.
+// m1-072 adds the slideshow: one H1 slide at most, banner slide markup,
+// display options as classes, and defaults for slideshows stored before.
 
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -598,6 +600,14 @@ async function sectionWidgets() {
     slides: [ item({ _image: [ noAlt ] }) ]
   }));
   check('slideshow refuses an image without alt text', r.status === 400, String(r.status));
+  r = await patchMain(widgetsPage, widget('assurer-slideshow', {
+    slides: [ 1, 2 ].map(n => item({
+      _image: [ imgA ],
+      heading: `H1 slide ${n}`,
+      headingLevel: 'h1'
+    }))
+  }));
+  check('slideshow refuses two H1 slides (m1-072)', r.status === 400, String(r.status));
   r = await patchMain(widgetsPage, widget('assurer-organizations', {
     mode: 'all',
     limit: 5000
@@ -617,6 +627,7 @@ async function sectionWidgets() {
 
   // The full set.
   const FEATURE_OK = 'https://example.com/feature-link';
+  const SLIDE_OK = 'https://example.com/slide-link';
   r = await patchMain(widgetsPage,
     widget('assurer-feature-grid', {
       columns: '2',
@@ -681,9 +692,43 @@ async function sectionWidgets() {
       _images: [ imgB, imgA ],
       captionSource: 'title',
       columns: '3'
+    }),
+    // m1-072: a banner slide and an image-only slide, with chosen options.
+    widget('assurer-slideshow', {
+      autoplay: true,
+      interval: 5,
+      height: 'medium',
+      transition: 'slide',
+      imageEffect: 'zoom',
+      textEntrance: 'fade',
+      controls: 'dots',
+      slides: [
+        item({
+          _image: [ imgA ],
+          eyebrow: `${P2} eyebrow`,
+          heading: `${P2} banner heading`,
+          headingLevel: 'h3',
+          text: 'Banner slide text.',
+          textAcross: 'center',
+          textDown: 'bottom',
+          overlay: 'light',
+          buttons: [ item({
+            linkText: `${P2} slide button`,
+            linkType: 'url',
+            linkUrl: SLIDE_OK,
+            style: 'outline'
+          }) ]
+        }),
+        item({ _image: [ imgB ] })
+      ]
+    }),
+    // Stored as before m1-072: no display options, so the defaults apply.
+    widget('assurer-slideshow', {
+      autoplay: false,
+      slides: [ item({ _image: [ imgA ] }), item({ _image: [ imgB ] }) ]
     })
   );
-  check('editor saves a page with all eight section widgets', r.status === 200 && r.json.main?.items?.length === 10,
+  check('editor saves a page with all eight section widgets', r.status === 200 && r.json.main?.items?.length === 12,
     `${r.status} ${JSON.stringify(r.json).slice(0, 200)}`);
   const saved = r.json.main?.items || [];
   check('javascript: link never stored', !JSON.stringify(saved).includes('javascript:'));
@@ -713,6 +758,21 @@ async function sectionWidgets() {
   check('gallery: ordered images link to the full image, with alt text and captions',
     galleryAt > -1 && html.indexOf(`${P} image B alt text`, galleryAt) < html.indexOf(`${P} image A alt text`, galleryAt) &&
     html.includes('data-gallery-link') && html.includes(`>${P} image B</figcaption>`));
+  const slideshows = html.split('data-assurer-slideshow').slice(1);
+  const banner = slideshows[0] || '';
+  const old = slideshows[1] || '';
+  check('slideshow: banner slide renders heading level, text, eyebrow and button (m1-072)',
+    banner.includes(`<h3 class="assurer-slideshow__heading">${P2} banner heading</h3>`) &&
+    banner.includes('Banner slide text.') && banner.includes(`${P2} eyebrow`) &&
+    banner.includes(`href="${SLIDE_OK}"`) && banner.includes('assurer-button--outline'));
+  check('slideshow: chosen options become classes; pause button with autoplay; dots only',
+    /assurer-slideshow--height-medium[^"]*--transition-slide[^"]*--effect-zoom[^"]*--enter-fade/.test(html) &&
+    banner.includes('data-pause') && banner.includes('data-dot=') && !banner.includes('data-next') &&
+    banner.includes('assurer-slideshow__text--center') && banner.includes('assurer-slideshow__text--overlay-light'));
+  check('slideshow: image-only slide has no text block', (banner.match(/data-slide-text/g) || []).length === 1);
+  check('slideshow stored before m1-072 renders with the defaults, no pause button without autoplay',
+    /assurer-slideshow--height-short[^"]*--width-content[^"]*--transition-fade[^"]*--effect-none[^"]*--enter-rise/.test(html) &&
+    !old.includes('data-pause') && old.includes('data-prev') && old.includes('data-dot='));
 
   // Unpublished edits stay private; anonymous visitors cannot ask for drafts.
   const draftItems = JSON.parse(JSON.stringify(saved));

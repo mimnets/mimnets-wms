@@ -3,7 +3,8 @@
 //
 // The heading and body live in an area so editors change them in place on
 // the page; image and buttons are edited through the widget's modal.
-import { linkFields } from '../../lib/link.js';
+import { bannerButtons } from '../../lib/banner.js';
+import { entranceStyle } from '../../lib/motion.js';
 
 export default {
   extend: '@apostrophecms/widget-type',
@@ -73,32 +74,12 @@ export default {
           }
         ]
       },
-      buttons: {
-        type: 'array',
-        label: 'Buttons',
-        titleField: 'linkText',
-        max: 2,
-        fields: {
-          add: {
-            ...linkFields(),
-            style: {
-              type: 'select',
-              label: 'Style',
-              def: 'primary',
-              choices: [
-                {
-                  label: 'Primary',
-                  value: 'primary'
-                },
-                {
-                  label: 'Outline',
-                  value: 'outline'
-                }
-              ]
-            }
-          }
-        }
-      }
+      buttons: bannerButtons()
+    }
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
     }
   }
 };

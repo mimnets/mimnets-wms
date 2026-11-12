@@ -57,7 +57,7 @@ Verified by the agent as a non-admin editor (not human acceptance; see the [m1-0
 | Footer from global settings | `views/layout.jsx` + global | all | **Implemented (m1-014)**: footer text, contact, locations, social links, copyright name; falls back to the old line when empty |
 | Breadcrumbs | `views/layout.jsx`, `lib/breadcrumbs.js` | all except home | **Implemented (m1-020)**: same items as the BreadcrumbList JSON-LD; outside `<main>` |
 | Hero | `assurer-hero` | home, divisions, categories, corporate pages | Implemented |
-| Slideshow | `assurer-slideshow` | home | Implemented |
+| Slideshow | `assurer-slideshow` | home | Implemented; **m1-072**: banner slides (heading level, text, buttons, position, overlay), display options, pause/play control (WCAG 2.2.2), swipe; allowed in layout columns |
 | Rich text, image, video, columns | core | everywhere | Implemented |
 | Card grid (manual) | `assurer-product-grid` / `-card` | home, `/products` | Implemented |
 | Feature grid | `assurer-feature-grid` | home, services, about | Planned |
@@ -135,7 +135,8 @@ photography refresh is recommended (implementation plan, P2).
 - Visible focus styles; no information by colour alone; links say where they go (no bare "MORE":
   use "More about knitted bottoms" or an accessible label).
 - Forms: visible labels, error messages linked to fields, no CAPTCHA that blocks assistive tech.
-- Motion: respect `prefers-reduced-motion`; no auto-moving text effects.
+- Motion: respect `prefers-reduced-motion`; no auto-moving text effects. (m1-072: the slideshow
+  and the "Entrance animation" style follow this; slide text moves once when its slide appears.)
 - Videos: captions or a transcript for the company profile video.
 - Language set on `<html>` (`en`), and on inline passages in other languages.
 - Checked with axe or Lighthouse plus a manual keyboard pass in each feature's browser checklist.

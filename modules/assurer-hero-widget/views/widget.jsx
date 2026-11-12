@@ -1,5 +1,5 @@
 // Hero banner. `widget` holds the fields defined in ../index.js.
-import { linkHref } from '../../../lib/link.js';
+import BannerButtons from '../../../lib/views/BannerButtons.jsx';
 
 export default function ({ widget }, { Area, apos }) {
   const image = widget._backgroundImage?.[0];
@@ -10,12 +10,6 @@ export default function ({ widget }, { Area, apos }) {
         ? ` background-position: ${apos.attachment.focalPointToObjectPosition(attachment)};`
         : '')
     : '';
-  const buttons = (widget.buttons || [])
-    .map(item => ({
-      ...item,
-      href: linkHref(item)
-    }))
-    .filter(item => item.href);
 
   return (
     <section
@@ -30,18 +24,7 @@ export default function ({ widget }, { Area, apos }) {
         <div className="assurer-hero__content">
           <Area doc={widget} name="content" />
         </div>
-        {buttons.length > 0 && (
-          <div className="assurer-hero__buttons">
-            {buttons.map(item => (
-              <a
-                className={`assurer-button assurer-button--${item.style || 'primary'}`}
-                href={item.href}
-              >
-                {item.linkText}
-              </a>
-            ))}
-          </div>
-        )}
+        <BannerButtons items={widget.buttons} className="assurer-hero__buttons" />
       </div>
     </section>
   );

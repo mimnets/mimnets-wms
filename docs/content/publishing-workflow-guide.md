@@ -55,3 +55,9 @@ text, and anything in Global Content (it appears on every page).
 - **Accounts.** An admin creates accounts with the right role
   (`node app @apostrophecms/user:add <name> contributor` or `editor`) or in the Users manager. A
   role can be changed later without losing content.
+- **Slideshows and motion** (m1-072). A page has one H1 heading. A slide heading is H2 by
+  default; choose H1 only when the slideshow is the page title and no hero on the page uses H1.
+  Visitors can always pause a slideshow; it starts paused while you edit the page, so use
+  Preview to see it move. An "Entrance animation" (Styles button on layouts, columns and
+  sections) plays once when the section scrolls into view; visitors who ask their device for
+  less motion see no animation.
