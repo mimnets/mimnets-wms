@@ -5,6 +5,7 @@
 // item schema keeps titles and text short and typed.
 import { requireAltText } from '../../lib/alt-text.js';
 import { linkFields } from '../../lib/link.js';
+import { entranceStyle } from '../../lib/motion.js';
 import {
   anchorField, columnsField, introField
 } from '../../lib/listing.js';
@@ -18,6 +19,11 @@ export default {
   },
   icons: {
     'view-module-icon': 'ViewModule'
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
+    }
   },
   fields: {
     add: {

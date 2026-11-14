@@ -156,6 +156,19 @@ export default {
                 {
                   _id: self.apos.util.generateId(),
                   _image: [ images.slide1 ],
+                  // A banner slide (m1-072): heading, text and buttons.
+                  eyebrow: 'Demo',
+                  heading: 'Demo banner slide',
+                  headingLevel: 'h2',
+                  text: 'Placeholder text for a banner slide with a headline and buttons.',
+                  buttons: [
+                    {
+                      linkText: 'View products',
+                      linkType: 'url',
+                      linkUrl: '#products',
+                      style: 'primary'
+                    }
+                  ],
                   caption: 'Demo slide 1 — placeholder caption'
                 },
                 {

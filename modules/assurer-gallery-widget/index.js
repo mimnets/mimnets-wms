@@ -4,6 +4,7 @@
 // an accessible lightbox instead (no lightbox package). Every image needs
 // alt text, because gallery images are informative.
 import { requireAltText } from '../../lib/alt-text.js';
+import { entranceStyle } from '../../lib/motion.js';
 import {
   anchorField, columnsField, introField
 } from '../../lib/listing.js';
@@ -17,6 +18,11 @@ export default {
   },
   icons: {
     'image-multiple-icon': 'ImageMultiple'
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
+    }
   },
   fields: {
     add: {

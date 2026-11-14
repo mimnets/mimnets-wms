@@ -307,6 +307,8 @@ Relationship fields are prefixed with `_` (e.g., `_linkPage`, `_author`).
 |------|---------|---------|
 | `lib/area.js` | `pageArea`, `columnArea`, `nestedColumnArea` (grouped widget menus) | Area field `options` |
 | `lib/link.js` | `linkFields(condition)`, `linkHref(item)` | Page-or-URL link fields |
+| `lib/banner.js` | `bannerButtons()` (render with `lib/views/BannerButtons.jsx`) | Call-to-action buttons on banners |
+| `lib/motion.js` | `entranceStyle` | `styles: { add: { entrance: entranceStyle } }` |
 
 ```js
 import { pageArea } from '../../lib/area.js';

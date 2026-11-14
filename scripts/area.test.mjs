@@ -1,5 +1,6 @@
 // Unit tests for the m1-071 widget menus in lib/area.js: which widgets each
 // place offers, the group order, and that every listed project widget exists.
+// The slideshow joined layout columns in m1-072.
 // Run: npm run test:unit
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
@@ -43,12 +44,13 @@ test('page main areas keep every widget they had and gain the starters', () => {
   assert.ok(!page.includes('nested-layout'));
 });
 
-test('a layout column offers the hero and grids, no slideshow and no layout starter', () => {
+test('a layout column offers the hero, slideshow and grids, no layout starter', () => {
   const column = types(columnArea);
   assert.ok(column.includes('assurer-hero'));
+  assert.ok(column.includes('assurer-slideshow'));
   assert.ok(column.includes('assurer-feature-grid'));
   assert.ok(column.includes('nested-layout'));
-  for (const type of [ 'assurer-slideshow', '@apostrophecms/layout', 'layout-3', 'layout-4', 'layout-6' ]) {
+  for (const type of [ '@apostrophecms/layout', 'layout-3', 'layout-4', 'layout-6' ]) {
     assert.ok(!column.includes(type), type);
   }
 });

@@ -5,6 +5,7 @@
 import {
   anchorField, columnsField, docIds, introField, limitField, loadListed, modeField
 } from '../../lib/listing.js';
+import { entranceStyle } from '../../lib/motion.js';
 
 const CATEGORY_TYPE = 'assurer-product-category-page';
 
@@ -17,6 +18,11 @@ export default {
   },
   icons: {
     'package-variant-icon': 'PackageVariant'
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
+    }
   },
   fields: {
     add: {

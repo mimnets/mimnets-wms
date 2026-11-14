@@ -1,0 +1,271 @@
+// Slideshow (m1-072). Markup: modules/assurer-slideshow-widget/views/widget.jsx;
+// state classes (is-active, is-leaving, is-ready, is-paused, is-placing) come
+// from its player, ui/src/index.js.
+
+.assurer-slideshow {
+  position: relative;
+  margin: 0 0 var(--assurer-space-section);
+  // Text and controls size to the slideshow, so it also fits a layout column.
+  container-type: inline-size;
+}
+
+// Edge to edge on full-width pages. `--assurer-vw` is the page width without
+// the scrollbar (set by modules/asset/ui/src/page-width.js); `100vw` would
+// include it and scroll the page sideways. Without the script it stays
+// content width. Only in the page's centred <main>: elsewhere (the editor's
+// page dialog) the breakout would not line up.
+.has-assurer-vw .assurer-main .assurer-slideshow--width-full {
+  width: var(--assurer-vw);
+  margin-left: calc(50% - var(--assurer-vw) / 2);
+  margin-right: calc(50% - var(--assurer-vw) / 2);
+
+  .assurer-slideshow__track { border-radius: 0; }
+
+  // Slide text lines up with the page content, not the screen edge.
+  .assurer-slideshow__text {
+    padding-left: max(clamp(24px, 6cqi, 64px), (100% - var(--content-max-width)) / 2 + 16px);
+    padding-right: max(clamp(24px, 6cqi, 64px), (100% - var(--content-max-width)) / 2 + 16px);
+  }
+}
+
+// A layout column is narrower than the screen: no breakout, no tall height.
+.has-assurer-vw .assurer-main .layout-widget .assurer-slideshow--width-full {
+  width: auto;
+  margin-left: 0;
+  margin-right: 0;
+
+  .assurer-slideshow__track { border-radius: var(--assurer-radius); }
+  .assurer-slideshow__text { padding-left: clamp(24px, 6cqi, 64px); padding-right: clamp(24px, 6cqi, 64px); }
+}
+
+// Slides share one grid cell, so the track is as tall as its tallest slide
+// and the height option is a minimum. `overflow: clip` (not `hidden`) keeps
+// the aspect ratio's automatic minimum, which lets text grow the track.
+.assurer-slideshow__track {
+  display: grid;
+  aspect-ratio: 16 / 7;
+  border-radius: var(--assurer-radius);
+  background: var(--assurer-color-surface-alt);
+  overflow: clip;
+  touch-action: pan-y;
+}
+
+.assurer-slideshow--height-medium .assurer-slideshow__track { aspect-ratio: 16 / 9; }
+
+.assurer-slideshow--height-tall .assurer-slideshow__track {
+  aspect-ratio: auto;
+  min-height: 75svh;
+}
+
+.layout-widget .assurer-slideshow--height-tall .assurer-slideshow__track {
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+}
+
+.assurer-slideshow__slide {
+  position: relative;
+  display: grid;
+  grid-area: 1 / 1;
+  margin: 0;
+  visibility: hidden;
+  overflow: clip;
+
+  &.is-active { visibility: visible; }
+}
+
+.assurer-slideshow__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+// Fade (default). Transitions start only once the player is ready, so
+// slides never fade at page load (m1-024).
+.assurer-slideshow--transition-fade {
+  .assurer-slideshow__slide { opacity: 0; }
+  .assurer-slideshow__slide.is-active { opacity: 1; }
+
+  &.is-ready .assurer-slideshow__slide {
+    transition: opacity 0.5s ease, visibility 0.5s;
+  }
+}
+
+// Slide: the player sets where a slide comes from or leaves to.
+.assurer-slideshow--transition-slide {
+  .assurer-slideshow__slide { transform: translateX(var(--assurer-slide-from, 100%)); }
+  .assurer-slideshow__slide.is-active { transform: none; }
+
+  &.is-ready .assurer-slideshow__slide {
+    transition: transform 0.6s ease, visibility 0.6s;
+  }
+
+  &.is-ready .assurer-slideshow__slide.is-placing { transition: none; }
+}
+
+// Slow zoom on the shown image, over the time per slide; held while paused.
+.assurer-slideshow--effect-zoom {
+  .is-active .assurer-slideshow__image,
+  .is-leaving .assurer-slideshow__image {
+    animation: assurer-slow-zoom var(--assurer-slide-ms, 6000ms) linear both;
+  }
+
+  &.is-paused .is-active .assurer-slideshow__image,
+  .is-leaving .assurer-slideshow__image { animation-play-state: paused; }
+}
+
+@keyframes assurer-slow-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.06); }
+}
+
+// Banner text over the image.
+.assurer-slideshow__text {
+  position: relative;
+  display: flex;
+  padding: clamp(24px, 6cqi, 64px);
+  color: var(--assurer-color-on-primary);
+
+  &--overlay-dark { background: var(--assurer-overlay-dark); }
+
+  &--overlay-light {
+    background: var(--assurer-overlay-light);
+    color: var(--assurer-color-primary);
+  }
+
+  &--left { justify-content: flex-start; }
+  &--center { justify-content: center; text-align: center; }
+  &--right { justify-content: flex-end; }
+  &--top { align-items: flex-start; }
+  &--middle { align-items: center; }
+  &--bottom { align-items: flex-end; }
+
+  // Room for the caption bar.
+  .assurer-slideshow__slide:has(.assurer-slideshow__caption) & { padding-bottom: 64px; }
+}
+
+.assurer-slideshow__text-inner {
+  max-width: min(640px, 100%);
+
+  @container (max-width: 559px) {
+    max-width: none;
+  }
+}
+
+.assurer-slideshow__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.assurer-slideshow__heading {
+  margin: 0 0 12px;
+  color: inherit;
+  font-size: clamp(1.5rem, 5cqi, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: inherit;
+}
+
+.assurer-slideshow__body {
+  margin: 0;
+  font-size: clamp(1rem, 2cqi, 1.15rem);
+}
+
+.assurer-slideshow__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+
+  .assurer-slideshow__text--center & { justify-content: center; }
+}
+
+.assurer-slideshow__text--overlay-dark .assurer-button--outline,
+.assurer-slideshow__text--overlay-dark .assurer-button--outline:visited {
+  border-color: var(--assurer-color-on-primary);
+  color: var(--assurer-color-on-primary);
+}
+
+// Text entrance: once, when its slide is shown (m1-072).
+.assurer-slideshow--enter-fade .is-active [data-slide-text] {
+  animation: assurer-fade-in 0.7s ease 0.15s both;
+}
+
+.assurer-slideshow--enter-rise .is-active [data-slide-text] {
+  animation: assurer-rise 0.7s ease 0.15s both;
+}
+
+.assurer-slideshow__caption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 12px 16px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.65));
+  color: #fff;
+}
+
+.assurer-slideshow__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+
+  button {
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+}
+
+.assurer-slideshow__pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--assurer-color-primary);
+
+  svg { fill: currentcolor; }
+  .assurer-slideshow__icon-play { display: none; }
+  &.is-play .assurer-slideshow__icon-play { display: block; }
+  &.is-play .assurer-slideshow__icon-pause { display: none; }
+}
+
+.assurer-slideshow__prev,
+.assurer-slideshow__next {
+  padding: 4px 12px;
+  color: var(--assurer-color-primary);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.assurer-slideshow__dots {
+  display: flex;
+  gap: 8px;
+}
+
+.assurer-slideshow__dot {
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--assurer-color-border-strong) !important;
+
+  &.is-active { background: var(--assurer-color-accent) !important; }
+}
+
+// Reduced motion: slides change instantly; no zoom, no text entrance.
+@media (prefers-reduced-motion: reduce) {
+  .assurer-slideshow.is-ready .assurer-slideshow__slide { transition: none; }
+
+  .assurer-slideshow .is-active .assurer-slideshow__image,
+  .assurer-slideshow .is-leaving .assurer-slideshow__image,
+  .assurer-slideshow .is-active [data-slide-text] { animation: none; }
+}

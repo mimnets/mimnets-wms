@@ -6,6 +6,7 @@
 import {
   anchorField, docIds, introField, limitField, loadListed, modeField
 } from '../../lib/listing.js';
+import { entranceStyle } from '../../lib/motion.js';
 
 export default {
   extend: '@apostrophecms/widget-type',
@@ -16,6 +17,11 @@ export default {
   },
   icons: {
     'file-download-icon': 'FileDownload'
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
+    }
   },
   fields: {
     add: {

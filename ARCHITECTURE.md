@@ -21,6 +21,8 @@ Shared configuration objects live in `lib/` and are imported where needed to avo
 | File | Purpose | Use when… |
 |------|---------|-----------|
 | `lib/area.js` | Widget menus (groups) for page, layout-column and nested-column areas | Adding or changing which widgets appear in an area |
+| `lib/banner.js` | `bannerButtons()`: up to two call-to-action buttons (render with `lib/views/BannerButtons.jsx`) | A banner-style widget needs buttons (hero, slideshow slides) |
+| `lib/motion.js` | `entranceStyle`: the "Entrance animation" style (browser side: `modules/asset/ui/src/motion.js`) | A widget that sits directly in an area should offer an entrance animation |
 
 Follow-on additions to `lib/` as the project grows:
 - `lib/link.js` — reusable link-field definitions (linkType + `_linkPage` + `_linkFile`)

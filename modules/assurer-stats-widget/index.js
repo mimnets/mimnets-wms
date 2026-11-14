@@ -5,6 +5,7 @@
 import {
   anchorField, introField
 } from '../../lib/listing.js';
+import { entranceStyle } from '../../lib/motion.js';
 
 export default {
   extend: '@apostrophecms/widget-type',
@@ -15,6 +16,11 @@ export default {
   },
   icons: {
     'chart-box-outline-icon': 'ChartBoxOutline'
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
+    }
   },
   fields: {
     add: {

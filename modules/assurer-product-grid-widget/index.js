@@ -2,6 +2,8 @@
 // `assurer-product-card` widgets. Because the cards are widgets in an area,
 // editors add, remove and drag-reorder them directly on the page.
 
+import { entranceStyle } from '../../lib/motion.js';
+
 export default {
   extend: '@apostrophecms/widget-type',
   options: {
@@ -11,6 +13,11 @@ export default {
   },
   icons: {
     'view-grid-icon': 'ViewGrid'
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
+    }
   },
   fields: {
     add: {

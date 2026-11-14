@@ -5,6 +5,7 @@
 import {
   anchorField, columnsField, docIds, introField, limitField, loadListed, modeField
 } from '../../lib/listing.js';
+import { entranceStyle } from '../../lib/motion.js';
 
 export default {
   extend: '@apostrophecms/widget-type',
@@ -15,6 +16,11 @@ export default {
   },
   icons: {
     'map-marker-multiple-icon': 'MapMarkerMultiple'
+  },
+  styles: {
+    add: {
+      entrance: entranceStyle
+    }
   },
   fields: {
     add: {
