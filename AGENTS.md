@@ -1,7 +1,8 @@
-# AGENTS.md — VCL-ASSURER-GROUP
+# AGENTS.md — mimnets-wms
 
-Assurer World website on ApostropheCMS Community Edition, derived from
-starter-kit-essentials. Project-specific rules come first; the starter kit's
+mimnets-wms (website management system) runs the Assurer World website on
+ApostropheCMS Community Edition, derived from starter-kit-essentials.
+Project-specific rules come first; the starter kit's
 conventions follow and still apply.
 
 ## Engineering rules (binding for humans and AI agents)

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Proposed (`m0-002`). Branch protection is **not** applied (D-GIT-3, accepted risk). The CI section was implemented in `m1-009` (2026-10-20). |
-| **Repository** | `github.com/mimnets/vcl-assurer-group` |
+| **Repository** | `github.com/mimnets/mimnets-wms` |
 
 ## Current state (inspected 2026-10-19)
 
@@ -21,7 +21,7 @@ git init -b main
 git add .
 git status                      # human reviews the list (expect ~91 files; no .env, data/, uploads)
 git commit -m "chore: import milestone 0 foundation"
-git remote add origin https://github.com/mimnets/vcl-assurer-group.git
+git remote add origin https://github.com/mimnets/mimnets-wms.git
 git ls-remote origin            # must still be empty
 git push -u origin main
 ```

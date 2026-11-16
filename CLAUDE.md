@@ -1,4 +1,4 @@
-# CLAUDE.md — VCL-ASSURER-GROUP
+# CLAUDE.md — mimnets-wms
 
 All project rules and conventions for Claude Code live in AGENTS.md, imported
 below so Claude Code loads them automatically. AGENTS.md is the single source

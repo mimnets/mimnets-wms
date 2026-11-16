@@ -8,7 +8,7 @@
 # Guide: docs/runbooks/staging-container.md
 
 x-labels: &labels
-  org.opencontainers.image.source: https://github.com/mimnets/vcl-assurer-group
+  org.opencontainers.image.source: https://github.com/mimnets/mimnets-wms
   org.opencontainers.image.revision: ${APOS_RELEASE_ID:-docker-local}
 
 services:

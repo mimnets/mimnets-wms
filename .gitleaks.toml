@@ -9,7 +9,7 @@
 # giving the reason and the task ID. Never allowlist a real secret: rotate it
 # and tell the owner.
 
-title = "vcl-assurer-group"
+title = "mimnets-wms"
 
 [extend]
 useDefault = true
