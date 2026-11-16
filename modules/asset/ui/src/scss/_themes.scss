@@ -1,0 +1,153 @@
+// Theme presets (m1-074, D-CONTENT-23). An admin picks one in Global Styles
+// ("Theme" tab); core puts its class on <body>. Each block overrides the
+// design tokens from _tokens.scss, then adds the few component rules tokens
+// cannot express. Classic has no class and no rules here.
+//
+// Tokens that _tokens.scss derives from other tokens (focus from accent,
+// section space) are declared again here: a custom property is resolved
+// where it is declared, so the :root value would not follow the override.
+//
+// Contrast for every pair is recorded in docs/content/design-tokens.md.
+
+// ---------------------------------------------------------------------------
+// Quiet: calm and editorial. Near-monochrome, serif headings, more space,
+// square corners, thin rules.
+// ---------------------------------------------------------------------------
+
+body.wms-theme-quiet {
+  --assurer-color-text: #222;
+  --assurer-color-text-muted: #595959;
+  --assurer-color-surface-alt: #f6f6f4;
+  --assurer-color-border: #dcdcd8;
+  --assurer-color-border-subtle: #ececea;
+  --assurer-color-focus: var(--assurer-color-accent);
+  --assurer-font-heading: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --assurer-shadow-raised: 0 8px 16px rgb(0 0 0 / 8%);
+  --assurer-radius: 0;
+  --assurer-radius-small: 0;
+  --assurer-space-section: var(--assurer-space-8);
+
+  @media (min-width: $bp-desktop) {
+    --assurer-space-section: 96px;
+  }
+
+  // Light headings; bold words inside a heading give the two-weight line.
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 400;
+    letter-spacing: -0.01em;
+
+    strong,
+    b {
+      font-weight: 600;
+    }
+  }
+
+  .assurer-hero__eyebrow,
+  .assurer-slideshow__eyebrow {
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .assurer-button {
+    border-radius: 0;
+  }
+
+  .assurer-card {
+    border-color: var(--assurer-color-border-subtle);
+  }
+
+  // Desktop: the logo centred above the menu; the log-in link at the right.
+  @media (min-width: $bp-desktop) {
+    .assurer-header {
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--assurer-color-border-subtle);
+    }
+
+    .assurer-header__login {
+      position: absolute;
+      top: 20px;
+      right: 16px;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Bold: confident. Heavy headings at a larger scale, a navy footer band,
+// large radius, raised cards.
+// ---------------------------------------------------------------------------
+
+$bold-navy: #172152;
+
+body.wms-theme-bold {
+  --assurer-color-text: #1d2433;
+  --assurer-color-text-muted: #4f5868;
+  --assurer-color-surface-alt: #eef1f8;
+  --assurer-color-border: #d3d9e6;
+  --assurer-color-focus: var(--assurer-color-accent);
+  --assurer-font-body: Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --assurer-overlay-dark: rgb(23 33 82 / 72%);
+  --assurer-shadow-raised: 0 16px 32px rgb(23 33 82 / 18%);
+  --assurer-radius: 16px;
+  --assurer-radius-small: 10px;
+  // Scale 1.333 instead of 1.25
+  --assurer-text-h4: 1.333em;
+  --assurer-text-h3: 1.777em;
+  --assurer-text-h2: 2.369em;
+  --assurer-text-h1: 3.157em;
+  --assurer-space-section: var(--assurer-space-8);
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .assurer-card {
+    border-color: transparent;
+    box-shadow: var(--assurer-shadow-raised);
+  }
+
+  .assurer-stats__item {
+    background: var(--assurer-color-surface);
+    box-shadow: var(--assurer-shadow-raised);
+  }
+
+  .assurer-stats__value {
+    color: var(--assurer-color-accent);
+    font-size: 2.5rem;
+    font-weight: 800;
+  }
+
+  // The header call to action as an outlined pill.
+  .assurer-nav__item--cta .assurer-button--primary {
+    background: transparent;
+    color: var(--assurer-color-primary);
+    border-color: var(--assurer-color-primary);
+  }
+
+  // Footer: a full-width navy band without sideways scroll (the shadow
+  // paints the sides; clip-path keeps it to the footer's height).
+  .assurer-footer {
+    --assurer-color-text: #fff;
+    --assurer-color-text-muted: #cfd5e6;
+    --assurer-color-link: #fff;
+    --assurer-color-link-visited: #fff;
+    --assurer-color-focus: #ffb15c;
+
+    margin-top: var(--assurer-space-section);
+    padding-top: var(--assurer-space-7);
+    padding-bottom: var(--assurer-space-7);
+    background: $bold-navy;
+    box-shadow: 0 0 0 100vmax $bold-navy;
+    clip-path: inset(0 -100vmax);
+    color: #fff;
+  }
+}
