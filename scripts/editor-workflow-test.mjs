@@ -199,6 +199,22 @@ await api('POST', `@apostrophecms/page/${page._id}/revert-draft-to-published`, {
 page = await api('GET', `@apostrophecms/page/${page._id}`);
 check('draft reverted to published version', JSON.stringify(page.main).includes(EDITED));
 
+// --- Theme preset (m1-074): saving reaches the public <body> --------------
+// Core Global Styles is `autopublish`: Save publishes at once; the preview
+// before Save is client-side only, in the open panel.
+const bodyClasses = async () => ((await publicHtml('/')).match(/<body class="([^"]*)"/)?.[1] || '').split(/\s+/);
+const stylesList = await api('GET', '@apostrophecms/styles');
+let styles = stylesList._id ? stylesList : stylesList.results?.[0];
+const originalTheme = styles.theme ?? '';
+const testTheme = originalTheme === 'wms-theme-quiet' ? 'wms-theme-bold' : 'wms-theme-quiet';
+styles = await api('PATCH', `@apostrophecms/styles/${styles._id}`, { theme: testTheme });
+check('theme saved', styles.theme === testTheme, styles.theme);
+check('saved theme class on public <body>', (await bodyClasses()).includes(testTheme));
+// Restore the site's theme exactly as it was.
+await api('PATCH', `@apostrophecms/styles/${styles._id}`, { theme: originalTheme });
+const restored = await bodyClasses();
+check('original theme restored', !restored.includes(testTheme) && (!originalTheme || restored.includes(originalTheme)));
+
 await finish();
 
 async function finish() {

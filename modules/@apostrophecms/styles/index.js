@@ -11,6 +11,38 @@ export default {
   styles: {
     add: {
       // ============================================
+      // THEME PRESET (m1-074, D-CONTENT-23)
+      // ============================================
+
+      // Core `class: true`: the value becomes a class on <body> (stored on
+      // the global doc as `stylesClasses`, so visitors get the published
+      // choice). Each class overrides the design tokens in _themes.scss.
+      // Classic is the empty value: no class, today's look, no migration.
+      // Values use the final `wms-` prefix (m1-073) so they never need a
+      // rename. An unknown value has no rules and renders as Classic.
+      theme: {
+        type: 'select',
+        label: 'Theme',
+        help: 'The overall look of the site. The settings in the other tabs apply on top of every theme.',
+        class: true,
+        def: '',
+        choices: [
+          {
+            label: 'Classic',
+            value: ''
+          },
+          {
+            label: 'Quiet: calm and editorial',
+            value: 'wms-theme-quiet'
+          },
+          {
+            label: 'Bold: dark sections and heavy headings',
+            value: 'wms-theme-bold'
+          }
+        ]
+      },
+
+      // ============================================
       // TYPOGRAPHY CONTROLS
       // ============================================
 
@@ -300,6 +332,17 @@ export default {
     // ============================================
 
     group: {
+      // Tab 0: Theme (m1-074)
+      themeTab: {
+        label: 'Theme',
+        group: {
+          preset: {
+            label: 'Theme',
+            fields: [ 'theme' ]
+          }
+        }
+      },
+
       // Tab 1: Typography
       typography: {
         label: 'Typography',
