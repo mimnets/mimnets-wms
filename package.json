@@ -1,8 +1,8 @@
 {
-  "name": "vcl-assurer-group",
+  "name": "mimnets-wms",
   "version": "0.0.1",
   "private": true,
-  "description": "VCL-ASSURER-GROUP — Assurer World corporate website on ApostropheCMS Community Edition (Milestone 0 proof of concept)",
+  "description": "mimnets-wms (website management system): the Assurer World corporate website on ApostropheCMS Community Edition",
   "main": "app.js",
   "type": "module",
   "scripts": {

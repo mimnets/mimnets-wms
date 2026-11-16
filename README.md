@@ -1,6 +1,7 @@
-# VCL-ASSURER-GROUP
+# mimnets-wms
 
-Assurer World corporate website, built on **ApostropheCMS Community Edition** (MIT).
+mimnets-wms (website management system) runs the Assurer World corporate website,
+built on **ApostropheCMS Community Edition** (MIT).
 Started from the official
 [Essentials starter kit](https://github.com/apostrophecms/starter-kit-essentials)
 (commit `adbcab7`, MIT — see `licenses/`).

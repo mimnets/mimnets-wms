@@ -73,7 +73,7 @@ Stop here if a port is taken, or if the Compose plugin is missing.
 ```sh
 mkdir -p /opt/assurer-test
 cd /opt/assurer-test
-git clone --branch main https://github.com/mimnets/vcl-assurer-group.git repo
+git clone --branch main https://github.com/mimnets/mimnets-wms.git repo
 chown -R 1000:1000 repo
 
 umask 077
