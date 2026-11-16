@@ -86,6 +86,26 @@ needs 4.5:1; large text and UI components need 3:1.
 
 The m1-020 placeholder table is in that task's report and in Git history.
 
+### Theme presets (m1-074, D-CONTENT-23)
+
+Quiet and Bold override tokens under `body.wms-theme-quiet` and `body.wms-theme-bold`
+(`modules/asset/ui/src/scss/_themes.scss`). Brand navy, accent and link colours are unchanged, so
+their rows above still hold. New pairs:
+
+| Pair | Ratio | Result |
+|---|---|---|
+| Quiet text `#222` on surface | 15.91 | PASS |
+| Quiet muted `#595959` on surface / on alt `#f6f6f4` | 7.00 / 6.47 | PASS |
+| Quiet link `#1e44a4` on alt `#f6f6f4` | 8.03 | PASS |
+| Quiet accent `#a85a00` on alt `#f6f6f4` | 4.70 | PASS |
+| Bold text `#1d2433` on surface | 15.53 | PASS |
+| Bold muted `#4f5868` on surface / on alt `#eef1f8` | 7.17 / 6.34 | PASS |
+| Bold link `#1e44a4` on alt `#eef1f8` | 7.68 | PASS |
+| Bold key figure (accent) on surface | 5.09 | PASS |
+| Bold header button: navy `#212d68` on surface | 12.81 | PASS |
+| Bold footer: white / muted `#cfd5e6` on navy `#172152` | 15.26 / 10.40 | PASS |
+| Bold footer focus ring `#ffb15c` on navy `#172152` | 8.50 | PASS (3:1) |
+
 ## 4. Type and spacing scale
 
 - Headings: modular scale 1.25 in `em`, so they follow the body size that Global Styles sets
@@ -93,3 +113,6 @@ The m1-020 placeholder table is in that task's report and in Git history.
 - Spacing: 4 px base, `--assurer-space-1` … `-8` = 4, 8, 12, 16, 24, 32, 48, 64 px. The gap
   between sections is `--assurer-space-section` (48 px). Other paddings are still literal
   pixel values; move them onto the scale when the brand layout is set.
+- Theme presets (m1-074): Bold uses scale 1.333 (H1 3.157, H2 2.369, H3 1.777, H4 1.333) and
+  heading weight 800; Quiet uses weight 400 serif headings. Both set the section gap to 64 px
+  (Quiet 96 px from 1024 px).
