@@ -45,7 +45,7 @@ Mark each row **Pass**, **Fail** (with a one-line note) or **N/A**.
 | 1 | Log in at `/login` with your editor account | Admin bar appears; the page shows **Published** | |
 | 2 | **Pages → New Page**: title "Acceptance Test", type Default, parent Home; save | Page opens as a **Draft** | |
 | 3 | Click **Edit**, add a **Rich Text** widget, type a sentence directly on the page | Text editable in place; "Saving…" then saved | |
-| 4 | Add an **Assurer Hero**, then an **Image** widget, using the **+** / "Add Content" menu | Both appear; the menu lists the Assurer widgets and Form | |
+| 4 | Add a **Hero**, then an **Image** widget, using the **+** / "Add Content" menu | Both appear; the menu lists the project widgets and Form | |
 | 5 | **Upload an image** through the Image widget (media manager → upload a JPG/PNG from your computer) | Image shows in the widget | |
 | 6 | **Replace** that image with a different one (edit widget → choose another image) | The new image shows; the old one is gone from the widget | |
 | 7 | **Reorder** widgets: drag, or use the up/down arrows, to move the image above the text | Order changes on the page | |
