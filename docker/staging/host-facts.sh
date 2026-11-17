@@ -3,10 +3,10 @@
 # runbook docs/runbooks/staging-container.md §9.1 B). Changes nothing. Writes
 # the output to the screen and to a file outside the repository, so it cannot
 # be committed by accident. Usage, from the repository root:
-#   bash docker/staging/host-facts.sh [output file]   # default ~/assurer-host-facts.txt
+#   bash docker/staging/host-facts.sh [output file]   # default ~/wms-host-facts.txt
 # Only `ss` needs sudo, to show which process holds each port.
 set -uo pipefail
-out="${1:-$HOME/assurer-host-facts.txt}"
+out="${1:-$HOME/wms-host-facts.txt}"
 
 {
   echo "== kernel and OS"; uname -r; uname -m; head -4 /etc/os-release

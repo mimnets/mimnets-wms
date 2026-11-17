@@ -49,16 +49,16 @@ RUN useradd --system --uid 1002 --no-create-home --shell /usr/sbin/nologin pbm \
 # it (D-SEC-8): gosu (see run-as.sh) and the mongo image's entrypoint with its
 # js-yaml. The project's entrypoints replace them.
 RUN rm -rf /usr/local/bin/gosu /usr/local/bin/docker-entrypoint.sh /opt/js-yaml /js-yaml.js
-COPY docker/staging/mongod.conf /etc/assurer/mongod.conf
-COPY docker/staging/pbm-config.yaml /etc/assurer/pbm-config.yaml
-COPY docker/staging/pbm-env.sh /usr/local/lib/assurer/pbm-env.sh
-COPY --chmod=755 docker/staging/setup.sh /usr/local/bin/assurer-setup
-COPY --chmod=755 docker/staging/mongo-entrypoint.sh /usr/local/bin/assurer-mongo
-COPY --chmod=755 docker/staging/mongo-health.sh /usr/local/bin/assurer-mongo-health
-COPY --chmod=755 docker/staging/pbm-agent.sh /usr/local/bin/assurer-pbm-agent
-COPY --chmod=755 docker/staging/backup-schedule.sh /usr/local/bin/assurer-backup-schedule
+COPY docker/staging/mongod.conf /etc/wms/mongod.conf
+COPY docker/staging/pbm-config.yaml /etc/wms/pbm-config.yaml
+COPY docker/staging/pbm-env.sh /usr/local/lib/wms/pbm-env.sh
+COPY --chmod=755 docker/staging/setup.sh /usr/local/bin/wms-setup
+COPY --chmod=755 docker/staging/mongo-entrypoint.sh /usr/local/bin/wms-mongo
+COPY --chmod=755 docker/staging/mongo-health.sh /usr/local/bin/wms-mongo-health
+COPY --chmod=755 docker/staging/pbm-agent.sh /usr/local/bin/wms-pbm-agent
+COPY --chmod=755 docker/staging/backup-schedule.sh /usr/local/bin/wms-backup-schedule
 COPY --chmod=755 docker/staging/pbmc.sh /usr/local/bin/pbmc
-COPY --chmod=755 docker/staging/run-as.sh /usr/local/bin/assurer-run-as
+COPY --chmod=755 docker/staging/run-as.sh /usr/local/bin/wms-run-as
 
 # One layer, because a file removed above otherwise stays in the base image's
 # layers, where a scanner still finds it (m1-056). Nothing is inherited from
@@ -70,4 +70,4 @@ COPY --from=assembled / /
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     HOME=/data/db \
     GLIBC_TUNABLES=glibc.pthread.rseq=0
-ENTRYPOINT ["assurer-mongo"]
+ENTRYPOINT ["wms-mongo"]

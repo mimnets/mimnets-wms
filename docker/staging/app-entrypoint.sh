@@ -1,7 +1,7 @@
 #!/bin/bash
 # The app service (m1-068, D-DB-20): runs the migrations, creates the first
 # admin account on the first start, then becomes Apostrophe in cluster mode
-# (APOS_CLUSTER_PROCESSES; m1-054). Runs as the assurer user. Compose starts
+# (APOS_CLUSTER_PROCESSES; m1-054). Runs as the wms user. Compose starts
 # it once the mongo service is healthy.
 #
 # ASSURER_CREATE_ADMIN=0 (restore drill): no admin account, because the
@@ -13,10 +13,10 @@ set -euo pipefail
 DATA=/app/data
 
 log() {
-  echo "[assurer] $*"
+  echo "[wms] $*"
 }
 
-. /usr/local/lib/assurer/app-env.sh
+. /usr/local/lib/wms/app-env.sh
 cd /app
 
 node app @apostrophecms/migration:migrate

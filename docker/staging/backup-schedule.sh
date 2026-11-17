@@ -17,7 +17,7 @@ BACKUP_HOURS="${ASSURER_BACKUP_INTERVAL_HOURS:-24}"
 BACKUP_RETENTION="${ASSURER_BACKUP_RETENTION:-8d}"
 
 log() {
-  echo "[assurer] $*"
+  echo "[wms] $*"
 }
 
 if ! [[ "$BACKUP_HOURS" =~ ^[0-9]+$ ]]; then
@@ -32,7 +32,7 @@ if pbmc config --out=json 2> /dev/null | grep -q '"/backups"'; then
 else
   configured=0
   for _ in $(seq 1 30); do
-    if pbmc config --file /etc/assurer/pbm-config.yaml > /dev/null 2>&1; then
+    if pbmc config --file /etc/wms/pbm-config.yaml > /dev/null 2>&1; then
       configured=1
       break
     fi

@@ -5,7 +5,7 @@
 | **Status** | **Draft; built and run on the owner's PC (`amd64`) and on a hosted GitHub runner (`arm64`) only** (`m1-055` to `m1-058`, agent-executed): see §8 for what was run and what was not. **m1-063: started in NPM mode on the owner's OCI server (`arm64`, Ubuntu 22.04, kernel 6.8) with §9.2's script, private (no domain, NPM not joined)**; not yet reached through NPM. **m1-064: the interactive installer (§10), tested locally only.** **m1-065: IP mode (§11), plain HTTP on the public address before go-live.** **m1-068: one container per service (D-DB-20) and images from `ghcr.io` (D-DB-21, §12); built and tested locally on `amd64`, not yet on a server.** Running it on a server needs the owner's approval (D-DB-2, D-DB-3, D-DB-7 and the server task) |
 | **Purpose** | The site's stack (ADR-0004 Decision 2, Amendment 1; D-DB-20): the app, MongoDB 8.0.34 with TLS and member authentication, PBM and its schedule, nginx and certbot, each in its own container; no demo content and no default password |
 | **Not for** | Production as it stands: production needs x.509 member authentication (hardening runbook §12 choice 2), the S3 backup storage (D-DB-12) and `APOS_ALLOW_INDEXING=1` |
-| **Files** | [`docker/staging/`](../../docker/staging/): `compose.yaml`, `compose.build.yaml` (local builds), `compose.npm.yaml` (§9), `compose.ip.yaml` (§11), `app/Dockerfile`, `mongo/Dockerfile`, `setup.sh`, `mongo-entrypoint.sh`, `mongo-health.sh`, `app-entrypoint.sh`, `app-env.sh`, `pbm-agent.sh`, `pbm-env.sh`, `backup-schedule.sh`, `run-as.sh`, `mongod.conf`, `pbm-config.yaml`, `pbmc.sh`, `assurer-task.sh` (§4.1), `deploy.sh` (§12), `host-facts.sh` (§9.1), `npm-setup.sh` (§9.2), `install.sh` (§10), `ip-setup.sh` (§11), `nginx/`, `certbot/` |
+| **Files** | [`docker/staging/`](../../docker/staging/): `compose.yaml`, `compose.build.yaml` (local builds), `compose.npm.yaml` (§9), `compose.ip.yaml` (§11), `app/Dockerfile`, `mongo/Dockerfile`, `setup.sh`, `mongo-entrypoint.sh`, `mongo-health.sh`, `app-entrypoint.sh`, `app-env.sh`, `pbm-agent.sh`, `pbm-env.sh`, `backup-schedule.sh`, `run-as.sh`, `mongod.conf`, `pbm-config.yaml`, `pbmc.sh`, `wms-task.sh` (§4.1), `deploy.sh` (§12), `host-facts.sh` (§9.1), `npm-setup.sh` (§9.2), `install.sh` (§10), `ip-setup.sh` (§11), `nginx/`, `certbot/` |
 | **Related** | [hardening runbook](./server-hardening-and-patching.md) §6–§8 · [PBM runbook](./pbm-backup-and-restore.md) · [HTTP security and HTTPS proxy](./security-configuration.md) · [demo container](./docker-single-container.md) · [m1-054 cluster results](../milestones/m1-054-cluster-mode-results.md) |
 
 > **Setting up a server for the first time? Start at [§11, IP mode](#11-ip-mode-the-site-on-the-public-address-before-go-live-m1-065).**
@@ -22,14 +22,14 @@ Compose project `mimnets-cms` (m1-068; the containers are `mimnets-cms-<service>
 
 | Container | Image | Holds | Host ports |
 |---|---|---|---|
-| `setup` (one-shot, each start) | `assurer-mongo` | writes the missing secrets and the MongoDB TLS files into each service's secrets volume, then exits | none, no network |
-| `mongo` | `assurer-mongo`: official `mongo:8.0.34` (digest pinned) plus PBM 2.17.0 and the project's scripts, without `gosu` and `js-yaml` | MongoDB with `requireTLS`, key-file member authentication, one-member replica set `mongo:27017`; creates its users at each start if missing | **none** |
-| `pbm` | `assurer-mongo` | `pbm-agent`, as the `pbm` user | none |
-| `backup` | `assurer-mongo` | the PBM configuration and the base-backup schedule, as the `pbm` user | none |
-| `app` | `assurer-app`: the root `Dockerfile`'s build on `node:24-bookworm-slim` (digest pinned), without npm | Apostrophe (`APOS_CLUSTER_PROCESSES`, default 2), as the `assurer` user; runs the migrations at start | **none** (IP mode: one port) |
-| `nginx` | `assurer-nginx`: official `nginx:1.30.6-alpine` (digest pinned) plus zlib 1.4, without the xslt and njs modules and `libxml2` | TLS, HTTP redirect, upload limit, rate limit | `80`, `443` |
-| `certbot` | `assurer-certbot`: official `certbot/certbot:v5.9.0` (digest pinned) plus zlib 1.4 | certificate renewal | none |
-| `cert-bootstrap` (one-shot) | `assurer-mongo` | a 30-day self-signed certificate if none exists, so nginx can start | none |
+| `setup` (one-shot, each start) | `wms-mongo` | writes the missing secrets and the MongoDB TLS files into each service's secrets volume, then exits | none, no network |
+| `mongo` | `wms-mongo`: official `mongo:8.0.34` (digest pinned) plus PBM 2.17.0 and the project's scripts, without `gosu` and `js-yaml` | MongoDB with `requireTLS`, key-file member authentication, one-member replica set `mongo:27017`; creates its users at each start if missing | **none** |
+| `pbm` | `wms-mongo` | `pbm-agent`, as the `pbm` user | none |
+| `backup` | `wms-mongo` | the PBM configuration and the base-backup schedule, as the `pbm` user | none |
+| `app` | `wms-app`: the root `Dockerfile`'s build on `node:24-bookworm-slim` (digest pinned), without npm | Apostrophe (`APOS_CLUSTER_PROCESSES`, default 2), as the `wms` user; runs the migrations at start | **none** (IP mode: one port) |
+| `nginx` | `wms-nginx`: official `nginx:1.30.6-alpine` (digest pinned) plus zlib 1.4, without the xslt and njs modules and `libxml2` | TLS, HTTP redirect, upload limit, rate limit | `80`, `443` |
+| `certbot` | `wms-certbot`: official `certbot/certbot:v5.9.0` (digest pinned) plus zlib 1.4 | certificate renewal | none |
+| `cert-bootstrap` (one-shot) | `wms-mongo` | a 30-day self-signed certificate if none exists, so nginx can start | none |
 
 Start order: `setup` completes → `mongo` healthy (writable primary, users checked) → `app` and `pbm`
 → `backup`. nginx waits only for `cert-bootstrap`.
@@ -105,7 +105,7 @@ server and port 80 open:
 ```sh
 $S run --rm --entrypoint certbot certbot certonly --webroot -w /var/www/acme \
   -d "$ASSURER_DOMAIN" --email <ops address> --agree-tos --no-eff-email \
-  --deploy-hook assurer-deploy-hook
+  --deploy-hook wms-deploy-hook
 $S exec nginx nginx -s reload
 ```
 
@@ -130,15 +130,15 @@ certificates for good.
 ### 4.1 Apostrophe tasks (added m1-067)
 
 `node app <task>` needs the database address and the session secret, which only the entrypoint
-builds from the app's secrets volume. `assurer-task` does the same for one command: it reads the
+builds from the app's secrets volume. `wms-task` does the same for one command: it reads the
 secrets, passes them through the environment (never the command line) and runs the task in the
 `app` container, like `pbmc` does for PBM in the `pbm` container.
 
 ```sh
-$S exec app assurer-task assurer-wp-import:run              # WordPress import: dry run, writes nothing
-$S exec app assurer-task assurer-wp-import:run --execute    # writes drafts (docs/content/wordpress-import-design.md)
-$S exec app assurer-task assurer-seo:seed-redirects         # legacy redirects, after publishing
-$S exec app assurer-task @apostrophecms/user:add <name> editor   # asks for the password
+$S exec app wms-task assurer-wp-import:run              # WordPress import: dry run, writes nothing
+$S exec app wms-task assurer-wp-import:run --execute    # writes drafts (docs/content/wordpress-import-design.md)
+$S exec app wms-task assurer-seo:seed-redirects         # legacy redirects, after publishing
+$S exec app wms-task @apostrophecms/user:add <name> editor   # asks for the password
 ```
 
 Use `exec -T` from a script. A task runs next to the live site on the same database; tasks that
@@ -174,7 +174,7 @@ PBM's values into their volumes at each start when they differ.
 ## 7. Known limits
 
 - **MongoDB 8.0 refuses Linux kernels 6.19 to 7.0.13, on any CPU** (m1-058, SERVER-121912): the site
-  `mongo` container restarts in a loop, the log shows `[assurer] MongoDB did not start`, and MongoDB's own line
+  `mongo` container restarts in a loop, the log shows `[wms] MongoDB did not start`, and MongoDB's own line
   says `MongoDB cannot start: Linux kernel versions 6.19 and newer ...`. The kernel belongs to the host,
   so check `uname -r` before starting, and after any kernel or Docker Desktop update. MongoDB's fix is
   kernel 7.0.14 or later, but Ubuntu reports its 7.0 kernels as `7.0.0-<ABI>`, and the exemption for
@@ -339,7 +339,7 @@ git pull                                 # gets the script if the clone is older
 bash docker/staging/host-facts.sh        # sudo may ask for a password
 ```
 
-It prints the facts and saves a copy to `~/assurer-host-facts.txt`, in the home folder, outside the
+It prints the facts and saves a copy to `~/wms-host-facts.txt`, in the home folder, outside the
 clone, so it cannot be committed. Send the output with anything sensitive replaced (for example the
 public address as `x.x.x.x`). The file is server output: never add it to the repository.
 
@@ -411,7 +411,7 @@ S="docker compose -f docker/staging/compose.yaml -f docker/staging/compose.npm.y
 # 1. Look first: what will go
 $S ps -a
 docker volume ls --format '{{.Name}}' | grep -E '^(assurer-staging|mimnets-cms|assurer)_'
-docker image ls --format '{{.Repository}}:{{.Tag}}  {{.Size}}' | grep -E '^(ghcr.io/mimnets/)?assurer-'
+docker image ls --format '{{.Repository}}:{{.Tag}}  {{.Size}}' | grep -E '^(ghcr.io/mimnets/)?(assurer|wms)-'
 
 # 2. The test stack: containers, its networks and volumes
 $S down -v --remove-orphans
@@ -420,7 +420,7 @@ docker compose down -v
 # 4. The shared network (only after the stack is down; NPM must not be joined to it)
 docker network rm assurer-npm
 # 5. The images (frees several GB) and the settings file
-docker image rm $(docker image ls --format '{{.Repository}}:{{.Tag}}' | grep -E '^(ghcr.io/mimnets/)?assurer-')
+docker image rm $(docker image ls --format '{{.Repository}}:{{.Tag}}' | grep -E '^(ghcr.io/mimnets/)?(assurer|wms)-')
 rm -f docker/staging/.env
 
 # 6. Check: no output from these three
@@ -457,7 +457,7 @@ bash docker/staging/install.sh --check      # the final checks only (also withou
 
 At each prompt: `[r]un` (a command on the stack), `[d]one` (the owner made the shown change), `[s]kip`,
 `[t]ry` a failed check again, or `[q]uit`. `Ctrl-D` also quits. Every quit prints the summary so far.
-Everything on screen also goes to `~/assurer-install-<date>-<time>.log` (mode `0600`, outside the
+Everything on screen also goes to `~/wms-install-<date>-<time>.log` (mode `0600`, outside the
 clone). Keep the log off the repository; it holds the host name and the public address.
 
 **Running it again is safe.** It keeps no state file. A route already in `.env` is kept (settings
@@ -561,7 +561,7 @@ $S ps           # app and mongo running (healthy)
 $S logs app     # the app's log
 $S restart app
 $S stop         # stops the stack; data stays in the volumes
-$S exec app assurer-task assurer-wp-import:run   # any Apostrophe task (§4.1); this one is a dry run
+$S exec app wms-task assurer-wp-import:run   # any Apostrophe task (§4.1); this one is a dry run
 ```
 
 Never run `$S down -v`: it deletes the database, media, secrets and backups (§9.3).
@@ -657,8 +657,8 @@ The commands below are for IP mode (§11), the route of the owner's OCI server. 
 4. The WordPress import again (§4.1): read the dry run's report first, then write the drafts.
 
    ```sh
-   $S exec app assurer-task assurer-wp-import:run              # dry run, writes nothing
-   $S exec app assurer-task assurer-wp-import:run --execute    # writes drafts
+   $S exec app wms-task assurer-wp-import:run              # dry run, writes nothing
+   $S exec app wms-task assurer-wp-import:run --execute    # writes drafts
    ```
 
 5. Check: `$S ps` shows `app` and `mongo` healthy; `$S exec pbm pbmc status` shows the agent OK.
@@ -672,3 +672,21 @@ The commands below are for IP mode (§11), the route of the owner's OCI server. 
 
 6. The old volumes (`assurer-staging_*`) stay as the fallback. Removing them is a later step with
    its own approval, after the new site is checked.
+
+### 12.4 The first release with the `wms-*` images (once per server; m1-075)
+
+Rename stage 2 ([design](../milestones/m1-075-rename-stage-2-design.md)) renames the images from
+`ghcr.io/mimnets/assurer-*` to `ghcr.io/mimnets/wms-*`, and the commands inside them (`assurer-task`
+becomes `wms-task`). The deploy is the usual `deploy.sh <sha>`. It is different once:
+
+- **Every service is recreated, MongoDB included**, because every image name changes. Expect a few
+  minutes of downtime; choose a quiet time. `deploy.sh` takes its base backup first, as always.
+- `deploy.sh` may restart MongoDB, the app and PBM a second time ("new MongoDB certificate"). The
+  running copy of `deploy.sh` is the old one, and it looks for the certificate marker under its old
+  name. Nothing is wrong. A rollback across this release does the same.
+- The pull token (§12.1) must be able to read the new packages. A classic token with
+  `read:packages` can. If the pull fails, `deploy.sh` stops before it changes anything.
+- Certificates issued before this release keep `assurer-deploy-hook` in their renewal file. The
+  certbot image keeps that name as a link to `wms-deploy-hook` until stage 5, so renewals still
+  reach nginx.
+- Rollback (§12.2) to a release before m1-075 pulls the old image names, which stay on `ghcr.io`.

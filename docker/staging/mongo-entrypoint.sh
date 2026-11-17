@@ -18,10 +18,10 @@ MEMBER=mongo:27017
 CACHE_GB="${ASSURER_MONGO_CACHE_GB:-1}"
 # Removed at every start; written when the checks below are done. The health
 # check needs it, so the app and PBM start only after their users exist.
-READY=/tmp/assurer-mongo-ready
+READY=/tmp/wms-mongo-ready
 
 log() {
-  echo "[assurer] $*"
+  echo "[wms] $*"
 }
 
 mongosh_local() {
@@ -33,7 +33,7 @@ mongosh_local() {
 # private and removed at once; they never go into the arguments.
 run_js() {
   local file status=0
-  file="$(umask 077; mktemp /tmp/assurer-XXXXXX.js)"
+  file="$(umask 077; mktemp /tmp/wms-XXXXXX.js)"
   cat > "$file"
   mongosh_local --file "$file" > /dev/null || status=$?
   rm -f "$file"
@@ -65,7 +65,7 @@ const admin = db.getSiblingDB("admin");
 let known = false;
 try { known = admin.auth("siteAdmin", "$(cat "$SECRETS/mongo-admin-password")").ok === 1; } catch (e) {}
 if (!known) {
-  print("[assurer] Creating the user administrator");
+  print("[wms] Creating the user administrator");
   admin.createUser({
     user: "siteAdmin",
     pwd: "$(cat "$SECRETS/mongo-admin-password")",
@@ -133,7 +133,7 @@ done
 rm -f "$READY"
 chown -R mongodb:mongodb /data/db
 
-assurer-run-as mongodb mongod --config /etc/assurer/mongod.conf --wiredTigerCacheSizeGB "$CACHE_GB" &
+wms-run-as mongodb mongod --config /etc/wms/mongod.conf --wiredTigerCacheSizeGB "$CACHE_GB" &
 mongod_pid=$!
 
 until mongosh_local --eval 'db.hello().ok' > /dev/null 2>&1; do
@@ -147,7 +147,7 @@ if [ "${ASSURER_RESTORE:-0}" != 1 ]; then
 fi
 ensure_pbm_user
 # The certificate MongoDB loaded at this start, for deploy.sh (setup.sh).
-cp "$TLS/serial" /tmp/assurer-tls-serial 2> /dev/null || true
+cp "$TLS/serial" /tmp/wms-tls-serial 2> /dev/null || true
 touch "$READY"
 if [ "${ASSURER_RESTORE:-0}" = 1 ]; then
   log "MongoDB ready for a restore (cache ${CACHE_GB} GB); no app user"

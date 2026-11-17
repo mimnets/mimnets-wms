@@ -5,7 +5,7 @@
 # server: the certificate is self-signed and the stack is thrown away.
 #
 # - No repository secrets are used, and nothing is pushed. The stack makes its
-#   own secrets per run. Only the "[assurer]" log lines are printed.
+#   own secrets per run. Only the "[wms]" log lines are printed.
 # - Each check is its own step, so its result can be read from the public API.
 # - The actions are pinned as in ci.yml. Updating a pin needs approval (AGENTS.md).
 # - m1-060 adds an accepted upload, a PITR restore drill and the images as a
@@ -65,7 +65,7 @@ jobs:
 
       - name: All images are linux/arm64
         run: |
-          for image in ghcr.io/mimnets/assurer-{app,mongo,nginx,certbot}:ci; do
+          for image in ghcr.io/mimnets/wms-{app,mongo,nginx,certbot}:ci; do
             arch="$(docker image inspect -f '{{.Architecture}}' "$image")"
             echo "$image $arch"
             test "$arch" = arm64
@@ -78,7 +78,7 @@ jobs:
         run: |
           mkdir images
           for name in app mongo nginx certbot; do
-            docker save -o "images/assurer-$name.tar" "ghcr.io/mimnets/assurer-$name:ci"
+            docker save -o "images/wms-$name.tar" "ghcr.io/mimnets/wms-$name:ci"
           done
           ls -l images
 
@@ -137,10 +137,10 @@ jobs:
       - name: First base backup finishes and PBM is running
         run: |
           for _ in $(seq 1 60); do
-            $S logs backup | grep -q '\[assurer\] Base backup finished' && break
+            $S logs backup | grep -q '\[wms\] Base backup finished' && break
             sleep 5
           done
-          $S logs backup | grep -q '\[assurer\] Base backup finished'
+          $S logs backup | grep -q '\[wms\] Base backup finished'
           $S exec -T pbm pbmc status | tee pbm.txt
           grep -q 'pbm-agent \[v2.17.0\] OK' pbm.txt
 
@@ -183,7 +183,7 @@ jobs:
           set -o pipefail
           count=0
           for _ in $(seq 1 60); do
-            count="$($S logs backup | grep -cF '[assurer] Base backup finished' || true)"
+            count="$($S logs backup | grep -cF '[wms] Base backup finished' || true)"
             [ "$count" -ge 2 ] && break
             sleep 5
           done
@@ -263,7 +263,7 @@ jobs:
 
       - name: Startup log lines
         if: always()
-        run: $S logs | grep -F '[assurer' || true
+        run: $S logs | grep -F '[wms' || true
 
       # MongoDB's own log lines hold no passwords, only user and host names.
       # Also after a cancel (job timeout), with time limits on the PBM calls.
@@ -274,8 +274,8 @@ jobs:
           getconf PAGESIZE
           grep -m1 -i '^features' /proc/cpuinfo || true
           $S ps -a
-          docker run --rm --entrypoint mongod ghcr.io/mimnets/assurer-mongo:ci --version || echo "mongod --version exit $?"
-          $S logs --tail 60 mongo app | grep -vF '[assurer]' | cut -c1-600 || true
+          docker run --rm --entrypoint mongod ghcr.io/mimnets/wms-mongo:ci --version || echo "mongod --version exit $?"
+          $S logs --tail 60 mongo app | grep -vF '[wms]' | cut -c1-600 || true
           $RS ps -a || true
           $RS logs --tail 60 restore-mongo restore-pbm restore-pbm-config restore-app | cut -c1-600 || true
           timeout 60 $R exec -T restore-pbm pbmc status || true

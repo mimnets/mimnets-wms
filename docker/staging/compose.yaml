@@ -10,15 +10,15 @@
 # Guide: docs/runbooks/staging-container.md
 name: mimnets-cms
 
-x-app-image: &app-image ${ASSURER_REGISTRY:-ghcr.io/mimnets}/assurer-app:${ASSURER_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
-x-mongo-image: &mongo-image ${ASSURER_REGISTRY:-ghcr.io/mimnets}/assurer-mongo:${ASSURER_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
+x-app-image: &app-image ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-app:${ASSURER_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
+x-mongo-image: &mongo-image ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-mongo:${ASSURER_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
 
 services:
   # Writes the missing secrets and the MongoDB TLS files at each start, then
   # exits (setup.sh). Each service below mounts only its own secrets volume.
   setup:
     image: *mongo-image
-    entrypoint: ["assurer-setup"]
+    entrypoint: ["wms-setup"]
     volumes:
       - mongo-secrets:/secrets/mongo
       - app-secrets:/secrets/app
@@ -41,7 +41,7 @@ services:
     networks:
       - db
     healthcheck:
-      test: ["CMD", "assurer-mongo-health"]
+      test: ["CMD", "wms-mongo-health"]
       interval: 10s
       timeout: 10s
       start_period: 120s
@@ -52,7 +52,7 @@ services:
   pbm:
     image: *mongo-image
     user: pbm
-    entrypoint: ["assurer-pbm-agent"]
+    entrypoint: ["wms-pbm-agent"]
     restart: unless-stopped
     depends_on:
       mongo:
@@ -68,7 +68,7 @@ services:
   backup:
     image: *mongo-image
     user: pbm
-    entrypoint: ["assurer-backup-schedule"]
+    entrypoint: ["wms-backup-schedule"]
     restart: unless-stopped
     depends_on:
       pbm:
@@ -133,7 +133,7 @@ services:
     network_mode: none
 
   nginx:
-    image: ${ASSURER_REGISTRY:-ghcr.io/mimnets}/assurer-nginx:${ASSURER_IMAGE_TAG:?set the release}
+    image: ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-nginx:${ASSURER_IMAGE_TAG:?set the release}
     restart: unless-stopped
     init: true
     depends_on:
@@ -159,7 +159,7 @@ services:
   # Renews the certificate twice a day when it is due. The first certificate is
   # requested by hand (docs/runbooks/staging-container.md).
   certbot:
-    image: ${ASSURER_REGISTRY:-ghcr.io/mimnets}/assurer-certbot:${ASSURER_IMAGE_TAG:?set the release}
+    image: ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-certbot:${ASSURER_IMAGE_TAG:?set the release}
     restart: unless-stopped
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -219,7 +219,7 @@ services:
       restore-db:
         aliases: [mongo]
     healthcheck:
-      test: ["CMD", "assurer-mongo-health"]
+      test: ["CMD", "wms-mongo-health"]
       interval: 10s
       timeout: 10s
       start_period: 120s
@@ -229,7 +229,7 @@ services:
     image: *mongo-image
     profiles: [restore]
     user: pbm
-    entrypoint: ["assurer-pbm-agent"]
+    entrypoint: ["wms-pbm-agent"]
     depends_on:
       restore-mongo:
         condition: service_healthy
@@ -244,7 +244,7 @@ services:
     image: *mongo-image
     profiles: [restore]
     user: pbm
-    entrypoint: ["assurer-backup-schedule"]
+    entrypoint: ["wms-backup-schedule"]
     depends_on:
       restore-pbm:
         condition: service_started

@@ -17,13 +17,13 @@ MONGO=/secrets/mongo
 APP=/secrets/app
 PBM=/secrets/pbm
 TLS="$MONGO/tls"
-# Owners: mongodb from the base image; assurer (app image) and pbm (this image).
+# Owners: mongodb from the base image; wms (app image) and pbm (this image).
 MONGO_UID=999
 APP_UID=1001
 PBM_UID=1002
 
 log() {
-  echo "[assurer-setup] $*"
+  echo "[wms-setup] $*"
 }
 
 # Writes a random secret once. The value is hex, so it is safe in a URI and in
@@ -60,7 +60,7 @@ ensure_tls() {
   mkdir -p "$TLS"
   (
     umask 077
-    openssl req -x509 -newkey rsa:3072 -nodes -days 3650 -subj "/CN=assurer-mongodb-ca" \
+    openssl req -x509 -newkey rsa:3072 -nodes -days 3650 -subj "/CN=wms-mongodb-ca" \
       -keyout "$work/ca.key" -out "$work/ca.pem" 2> /dev/null
     openssl req -newkey rsa:3072 -nodes -subj "/CN=mongo" \
       -keyout "$work/server.key" -out "$work/server.csr" 2> /dev/null

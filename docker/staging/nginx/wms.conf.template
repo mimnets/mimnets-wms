@@ -48,7 +48,7 @@ server {
   ssl_certificate /etc/nginx/certs/current/fullchain.pem;
   ssl_certificate_key /etc/nginx/certs/current/privkey.pem;
   ssl_protocols TLSv1.2 TLSv1.3;
-  ssl_session_cache shared:assurer_tls:10m;
+  ssl_session_cache shared:wms_tls:10m;
   ssl_session_timeout 1d;
   ssl_session_tickets off;
 
@@ -58,8 +58,8 @@ server {
   location / {
     limit_req zone=assurer_req burst=${ASSURER_RATE_BURST} nodelay;
 
-    set $assurer_site http://app:3000;
-    proxy_pass $assurer_site;
+    set $wms_site http://app:3000;
+    proxy_pass $wms_site;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     # nginx is the first hop, so it replaces anything the client sent. The app
