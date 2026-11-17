@@ -1,13 +1,13 @@
 // Contact form configuration (@apostrophecms/form, MIT).
 export default {
   options: {
-    // CSS hook for project styles: `assurer-form__input`, etc.
-    classPrefix: 'assurer-form',
+    // CSS hook for project styles: `wms-form__input`, etc.
+    classPrefix: 'wms-form',
     // Submissions are stored in the `aposFormSubmissions` collection.
     saveSubmissions: true,
     // Upstream per-form recipient lists stay off: notifications go only to
     // the operator-configured company mailbox (APOS_FORM_NOTIFY_TO), sent by
-    // modules/assurer-forms (m1-012).
+    // modules/wms-forms (m1-012).
     emailSubmissions: false,
     // Text fields carry up to 1MB by default; a contact form needs far less.
     uploadLimits: {

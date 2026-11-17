@@ -1,12 +1,12 @@
 // Unit tests for the m1-037 test-contributor guard
-// (`assurer-test:ensure-contributor`, D-CONTENT-11).
+// (`wms-test:ensure-contributor`, D-CONTENT-11).
 // Run: npm run test:unit
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
-import { contributorRefuseReason } from '../modules/assurer-test/lib/guard.js';
+import { contributorRefuseReason } from '../modules/wms-test/lib/guard.js';
 
 const tmp = mkdtempSync(path.join(os.tmpdir(), 'publishing-workflow-test-'));
 const opts = { tmpDirs: [ tmp ] };

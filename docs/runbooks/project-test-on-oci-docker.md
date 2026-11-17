@@ -215,7 +215,7 @@ If `listDatabases` works without a login, access control is off. Run `docker com
 cd /opt/assurer-test
 docker compose run --rm app npm ci
 docker compose run --rm app node app @apostrophecms/migration:migrate
-docker compose run --rm app node app assurer-demo:seed
+docker compose run --rm app node app wms-demo:seed
 
 # The password goes through standard input, as in m1-033.
 cat test-admin-password.txt | docker compose run --rm -T app \

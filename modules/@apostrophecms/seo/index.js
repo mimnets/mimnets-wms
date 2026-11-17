@@ -1,8 +1,8 @@
 // @apostrophecms/seo (MIT, D-CONTENT-10). The module's head tags are
-// adjusted by modules/assurer-seo/lib/head.js: own-page descriptions only,
+// adjusted by modules/wms-seo/lib/head.js: own-page descriptions only,
 // self-canonicals, Open Graph, site-wide noindex outside production, and no
 // search action in JSON-LD. Analytics options are left unset (out of scope).
-import { adjustHead } from '../../assurer-seo/lib/head.js';
+import { adjustHead } from '../../wms-seo/lib/head.js';
 
 export default {
   extendMethods(self) {
@@ -19,7 +19,7 @@ export default {
           }
           : null;
         return adjustHead(_super(req), data, {
-          indexing: self.apos.modules['assurer-seo'].options.indexing,
+          indexing: self.apos.modules['wms-seo'].options.indexing,
           notFound: Boolean(req.notFound),
           absoluteUrl,
           image

@@ -16,7 +16,7 @@ export default function BannerButtons({ items, className }) {
     <div className={className}>
       {buttons.map(item => (
         <a
-          className={`assurer-button assurer-button--${item.style || 'primary'}`}
+          className={`wms-button wms-button--${item.style || 'primary'}`}
           href={item.href}
         >
           {item.linkText}

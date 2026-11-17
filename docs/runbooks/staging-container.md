@@ -135,9 +135,9 @@ secrets, passes them through the environment (never the command line) and runs t
 `app` container, like `pbmc` does for PBM in the `pbm` container.
 
 ```sh
-$S exec app wms-task assurer-wp-import:run              # WordPress import: dry run, writes nothing
-$S exec app wms-task assurer-wp-import:run --execute    # writes drafts (docs/content/wordpress-import-design.md)
-$S exec app wms-task assurer-seo:seed-redirects         # legacy redirects, after publishing
+$S exec app wms-task wms-wp-import:run              # WordPress import: dry run, writes nothing
+$S exec app wms-task wms-wp-import:run --execute    # writes drafts (docs/content/wordpress-import-design.md)
+$S exec app wms-task wms-seo:seed-redirects         # legacy redirects, after publishing
 $S exec app wms-task @apostrophecms/user:add <name> editor   # asks for the password
 ```
 
@@ -561,7 +561,7 @@ $S ps           # app and mongo running (healthy)
 $S logs app     # the app's log
 $S restart app
 $S stop         # stops the stack; data stays in the volumes
-$S exec app wms-task assurer-wp-import:run   # any Apostrophe task (§4.1); this one is a dry run
+$S exec app wms-task wms-wp-import:run   # any Apostrophe task (§4.1); this one is a dry run
 ```
 
 Never run `$S down -v`: it deletes the database, media, secrets and backups (§9.3).
@@ -657,8 +657,8 @@ The commands below are for IP mode (§11), the route of the owner's OCI server. 
 4. The WordPress import again (§4.1): read the dry run's report first, then write the drafts.
 
    ```sh
-   $S exec app wms-task assurer-wp-import:run              # dry run, writes nothing
-   $S exec app wms-task assurer-wp-import:run --execute    # writes drafts
+   $S exec app wms-task wms-wp-import:run              # dry run, writes nothing
+   $S exec app wms-task wms-wp-import:run --execute    # writes drafts
    ```
 
 5. Check: `$S ps` shows `app` and `mongo` healthy; `$S exec pbm pbmc status` shows the agent OK.
@@ -690,3 +690,25 @@ becomes `wms-task`). The deploy is the usual `deploy.sh <sha>`. It is different 
   certbot image keeps that name as a link to `wms-deploy-hook` until stage 5, so renewals still
   reach nginx.
 - Rollback (§12.2) to a release before m1-075 pulls the old image names, which stay on `ghcr.io`.
+
+### 12.5 The first release with the `wms-*` modules (once per server; m1-076)
+
+Rename stage 3 ([design](../milestones/m1-076-rename-stage-3-design.md)) renames the project
+modules from `assurer-*` to `wms-*`, and the type names stored in the content with them. The
+deploy is the usual `deploy.sh <sha>`, outside business hours. It is different once:
+
+- The app runs the migration `wms-rename-stage-3` before it starts (`docker compose … logs app`
+  shows "Running database migration: wms-rename-stage-3"). It rewrites the stored piece, page and
+  widget type names, the entrance-animation values and the same names inside saved versions.
+  Media are not touched. The base backup `deploy.sh` takes first is the point to return to.
+- Tasks have new names: `wms-task wms-wp-import:run`, `wms-task wms-seo:seed-redirects` and so on.
+- A form page opened before the release and sent after it is refused once; a reload fixes it.
+  Form rate-limit counters start empty. Editors reload the admin UI once.
+- Check, before anyone edits: the home page, a page with each kind of widget, a product, and the
+  data dashboard with its Health tab.
+- **Rollback is a restore.** Code from before m1-076 cannot read the new names (its widgets and
+  pieces would disappear). Restore the database to the base backup of this release (PBM runbook
+  §4), then `deploy.sh <previous tag> --rollback` (§12.2). Edits made after the release are lost.
+- Export archives (`@apostrophecms/import-export`) made before this release hold the old type names
+  and do not import afterwards; export again. A database backup from before the release can be
+  restored at any time: the migration runs again at the next start.

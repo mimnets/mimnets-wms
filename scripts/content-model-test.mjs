@@ -99,7 +99,7 @@ const page = async (p) => {
     html: await res.text()
   };
 };
-const nav = (html) => html.match(/<nav class="assurer-nav"[\s\S]*?<\/nav>/)?.[0] || '';
+const nav = (html) => html.match(/<nav class="wms-nav"[\s\S]*?<\/nav>/)?.[0] || '';
 const footer = (html) => html.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '';
 const findOne = async (token, type, title) => (await api(token, 'GET',
   `${type}?title=${encodeURIComponent(title)}&archived=any`)).results?.find(d => d.title === title);
@@ -124,10 +124,10 @@ if (VERIFY_ONLY) {
 
 // --- Demo seed ran twice without duplicates ------------------------------
 for (const [ type, title ] of [
-  [ 'assurer-product', 'Demo Knitted Top' ],
-  [ 'assurer-organization', 'Demo Holding Group (fictional)' ],
-  [ 'assurer-person', 'Alex Example (Demo)' ],
-  [ 'assurer-location', 'Demo Head Office' ]
+  [ 'wms-product', 'Demo Knitted Top' ],
+  [ 'wms-organization', 'Demo Holding Group (fictional)' ],
+  [ 'wms-person', 'Alex Example (Demo)' ],
+  [ 'wms-location', 'Demo Head Office' ]
 ]) {
   const list = (await api(tokens.admin, 'GET', `${type}?archived=any&perPage=100`)).results || [];
   check(`demo seed is duplicate-free: ${title}`, list.filter(d => d.title === title).length === 1);
@@ -142,12 +142,12 @@ check('demo seed is duplicate-free: /demo-style page',
 }
 
 // --- Anonymous and editor authorization ----------------------------------
-for (const type of [ 'assurer-product', 'assurer-organization', 'assurer-person', 'assurer-location' ]) {
+for (const type of [ 'wms-product', 'wms-organization', 'wms-person', 'wms-location' ]) {
   const r = await call(null, 'GET', type, null, { draft: false });
   check(`anonymous cannot list ${type} through the REST API`, r.status !== 200, String(r.status));
 }
 {
-  const r = await call(null, 'POST', 'assurer-product', { title: `${P} anonymous` });
+  const r = await call(null, 'POST', 'wms-product', { title: `${P} anonymous` });
   check('anonymous cannot create a product', [ 401, 403 ].includes(r.status), String(r.status));
   const g = await api(tokens.admin, 'GET', '@apostrophecms/global');
   const globalId = g._id || g.results?.[0]?._id;
@@ -200,7 +200,7 @@ check('editor uploads images with alt text', Boolean(imgA?.attachment?._id && im
 
 // --- Editor: organizations and URL validation -----------------------------
 const ed = (method, url, body) => call(tokens.editor, method, url, body);
-let r = await ed('POST', 'assurer-organization', {
+let r = await ed('POST', 'wms-organization', {
   title: `${P} org`,
   shortDescription: 'Test organization.',
   websiteUrl: 'https://example.com/test',
@@ -208,31 +208,31 @@ let r = await ed('POST', 'assurer-organization', {
 });
 check('editor creates an organization (https website, logo)', r.status === 200 && r.json.websiteUrl === 'https://example.com/test', String(r.status));
 const org = r.json;
-r = await ed('POST', 'assurer-organization', {
+r = await ed('POST', 'wms-organization', {
   title: `${P} org js`,
   websiteUrl: 'javascript:alert(1)'
 });
 check('javascript: website is never stored', r.status >= 400 || !String(r.json.websiteUrl || '').toLowerCase().includes('javascript'),
   `${r.status} ${r.json?.websiteUrl ?? ''}`);
 for (const bad of [ 'mailto:info@example.com', 'ftp://example.com/file', 'tel:+15550100' ]) {
-  r = await ed('POST', 'assurer-organization', {
+  r = await ed('POST', 'wms-organization', {
     title: `${P} org bad url`,
     websiteUrl: bad
   });
   check(`non-web website rejected: ${bad.split(':')[0]}`, r.status === 400, String(r.status));
 }
-r = await ed('PATCH', `assurer-organization/${org._id}`, { _parentOrganization: [ org ] });
+r = await ed('PATCH', `wms-organization/${org._id}`, { _parentOrganization: [ org ] });
 check('organization cannot be part of itself', r.status === 400, String(r.status));
 // Core enforces `max` on text fields by truncating server-side (the editor
 // UI blocks longer input before saving).
 const capped = (res, field, max) => res.status === 400 ||
   (res.status === 200 && res.json[field].length === max);
-r = await ed('POST', 'assurer-organization', {
+r = await ed('POST', 'wms-organization', {
   title: `${P} org long`,
   shortDescription: 'x'.repeat(5000)
 });
 check('organization description capped at 300 characters', capped(r, 'shortDescription', 300), `${r.status} ${r.json?.shortDescription?.length}`);
-r = await ed('POST', 'assurer-organization', {
+r = await ed('POST', 'wms-organization', {
   title: `${P} org draft`,
   shortDescription: 'Unpublished organization.'
 });
@@ -252,37 +252,37 @@ const location = {
   publicPhone: '+1 555 0100',
   publicEmail: 'office@example.com'
 };
-r = await ed('POST', 'assurer-location', {
+r = await ed('POST', 'wms-location', {
   ...location,
   city: ''
 });
 check('location without a city rejected', r.status === 400, String(r.status));
-r = await ed('POST', 'assurer-location', {
+r = await ed('POST', 'wms-location', {
   ...location,
   publicEmail: 'not-an-email'
 });
 check('location with an invalid email rejected', r.status === 400, String(r.status));
-r = await ed('POST', 'assurer-location', {
+r = await ed('POST', 'wms-location', {
   ...location,
   publicPhone: 'call me <script>'
 });
 check('location with an invalid phone rejected', r.status === 400, String(r.status));
-r = await ed('POST', 'assurer-location', location);
+r = await ed('POST', 'wms-location', location);
 check('editor creates a location linked to an organization',
   r.status === 200 && r.json.organizationIds?.includes(org.aposDocId) && r.json.address?.line1 === '1 Test Street', String(r.status));
 const loc = r.json;
 {
-  const fresh = await api(tokens.editor, 'GET', `assurer-organization/${org._id}`);
+  const fresh = await api(tokens.editor, 'GET', `wms-organization/${org._id}`);
   check('organization shows its locations (reverse relationship)', (fresh._locations || []).some(l => l.aposDocId === loc.aposDocId));
 }
 
 // --- Editor: people (privacy) ----------------------------------------------
-r = await ed('POST', 'assurer-person', {
+r = await ed('POST', 'wms-person', {
   title: `${P} person long`,
   bio: 'x'.repeat(5000)
 });
 check('person biography capped at 600 characters', capped(r, 'bio', 600), `${r.status} ${r.json?.bio?.length}`);
-r = await ed('POST', 'assurer-person', {
+r = await ed('POST', 'wms-person', {
   title: `${P} person`,
   jobTitle: 'Test position',
   bio: 'Test biography.',
@@ -310,11 +310,11 @@ async function ensurePage(type, title, slug, parentId) {
     _position: 'lastChild'
   });
 }
-const division = await ensurePage('assurer-division-page', `${P} division`, SLUGS.division, '_home');
-check('editor creates a division page (draft)', division?.type === 'assurer-division-page');
-const catA = await ensurePage('assurer-product-category-page', `${P} category A`, SLUGS.categoryA, division._id);
-const catB = await ensurePage('assurer-product-category-page', `${P} category B`, SLUGS.categoryB, division._id);
-check('editor creates product category pages (draft)', catA?.type === 'assurer-product-category-page' && catB?.type === 'assurer-product-category-page');
+const division = await ensurePage('wms-division-page', `${P} division`, SLUGS.division, '_home');
+check('editor creates a division page (draft)', division?.type === 'wms-division-page');
+const catA = await ensurePage('wms-product-category-page', `${P} category A`, SLUGS.categoryA, division._id);
+const catB = await ensurePage('wms-product-category-page', `${P} category B`, SLUGS.categoryB, division._id);
+check('editor creates product category pages (draft)', catA?.type === 'wms-product-category-page' && catB?.type === 'wms-product-category-page');
 r = await ed('PATCH', `@apostrophecms/page/${catA._id}`, {
   summary: 'Category A summary.',
   _heroImage: [ imgA ]
@@ -344,22 +344,22 @@ const product = {
     ]
   }
 };
-r = await ed('POST', 'assurer-product', {
+r = await ed('POST', 'wms-product', {
   ...product,
   title: ''
 });
 check('product without a title rejected', r.status === 400, String(r.status));
-r = await ed('POST', 'assurer-product', {
+r = await ed('POST', 'wms-product', {
   title: `${P} product long`,
   summary: 'x'.repeat(5000)
 });
 check('product summary capped at 300 characters', capped(r, 'summary', 300), `${r.status} ${r.json?.summary?.length}`);
-r = await ed('POST', 'assurer-product', {
+r = await ed('POST', 'wms-product', {
   ...product,
   displayOrder: 'abc'
 });
 check('non-numeric display order rejected', r.status === 400, String(r.status));
-r = await ed('POST', 'assurer-product', product);
+r = await ed('POST', 'wms-product', product);
 check('editor creates a product with category, image and gallery',
   r.status === 200 && r.json.categoriesIds?.length === 1 &&
   r.json.galleryIds?.length === 2,
@@ -367,7 +367,7 @@ check('editor creates a product with category, image and gallery',
 const prod = r.json;
 const html0 = JSON.stringify(prod.description || {});
 check('rich text is sanitized (no script, no javascript: link)', html0.includes('Safe text') && !html0.includes('<script') && !html0.includes('javascript:'));
-r = await ed('POST', 'assurer-product', {
+r = await ed('POST', 'wms-product', {
   ...product,
   title: `${P} product second`,
   displayTitle: '',
@@ -376,14 +376,14 @@ r = await ed('POST', 'assurer-product', {
 });
 check('display order is limited to 9999', r.status === 200 && r.json.displayOrder === 9999, `${r.status} ${r.json?.displayOrder}`);
 const prod2 = r.json;
-r = await ed('POST', 'assurer-product', {
+r = await ed('POST', 'wms-product', {
   ...product,
   title: `${P} product draft only`,
   displayTitle: '',
   summary: 'Draft-only test product.',
   displayOrder: 1
 });
-r = await ed('POST', 'assurer-product', {
+r = await ed('POST', 'wms-product', {
   title: `${P} product broken relationship`,
   _categories: [ { _id: 'doesnotexist:en:draft' } ]
 });
@@ -398,8 +398,8 @@ for (const p of [ division, catA, catB ]) {
 for (const doc of [ org, loc, person ]) {
   await publish(doc.type, doc);
 }
-await publish('assurer-product', prod);
-await publish('assurer-product', prod2);
+await publish('wms-product', prod);
+await publish('wms-product', prod2);
 check('editor publishes pages and records', true);
 
 let pub = await page(SLUGS.categoryA);
@@ -415,11 +415,11 @@ check('division page shows the published organization only', div.html.includes(`
 check('organization website link rendered', div.html.includes('href="https://example.com/test"'));
 
 // --- Unpublished edits stay private ---------------------------------------------
-await api(tokens.editor, 'PATCH', `assurer-product/${prod._id}`, { summary: 'Unpublished summary change.' });
+await api(tokens.editor, 'PATCH', `wms-product/${prod._id}`, { summary: 'Unpublished summary change.' });
 pub = await page(SLUGS.categoryA);
 check('unpublished product edit hidden; published version still shown',
   !pub.html.includes('Unpublished summary change.') && pub.html.includes('Published test product.'));
-await api(tokens.editor, 'POST', `assurer-product/${prod._id}/revert-draft-to-published`, {});
+await api(tokens.editor, 'POST', `wms-product/${prod._id}/revert-draft-to-published`, {});
 
 // --- Navigation ------------------------------------------------------------------
 let home = await page('/');
@@ -427,7 +427,7 @@ let menu = nav(home.html);
 // Page links are absolute when core `baseUrl` is set (m1-018).
 const linksTo = (html, slug) => html.includes(`href="${slug}"`) || html.includes(`href="${BASE}${slug}"`);
 check('menu shows the division with a submenu of its categories',
-  linksTo(menu, SLUGS.division) && linksTo(menu, SLUGS.categoryA) && menu.includes('assurer-nav__submenu'));
+  linksTo(menu, SLUGS.division) && linksTo(menu, SLUGS.categoryA) && menu.includes('wms-nav__submenu'));
 const draftPage = await ensurePage('default-page', `${P} draft-only page`, SLUGS.draftPage, division._id);
 home = await page('/');
 check('unpublished page not in the public menu', Boolean(draftPage) && !nav(home.html).includes(SLUGS.draftPage));
@@ -446,23 +446,23 @@ check('hidden page still reachable by URL', (await page(SLUGS.categoryB)).status
 check('aria-current marks the current page', nav((await page(SLUGS.categoryA)).html).includes('aria-current="page"'));
 
 // --- Archive and restore ------------------------------------------------------------
-r = await ed('PATCH', `assurer-product/${prod2._id}`, { archived: true });
+r = await ed('PATCH', `wms-product/${prod2._id}`, { archived: true });
 pub = await page(SLUGS.categoryA);
 check('archived product disappears from the public page', r.status === 200 && pub.status === 200 && !pub.html.includes('Second test product.'), String(r.status));
-r = await ed('PATCH', `assurer-product/${prod2._id}`, { archived: false });
-await publish('assurer-product', r.json);
+r = await ed('PATCH', `wms-product/${prod2._id}`, { archived: false });
+await publish('wms-product', r.json);
 pub = await page(SLUGS.categoryA);
 check('restored and republished product reappears', pub.html.includes('Second test product.'));
-r = await ed('PATCH', `assurer-organization/${org._id}`, { archived: true });
+r = await ed('PATCH', `wms-organization/${org._id}`, { archived: true });
 check('editor archives an organization in use', r.status === 200, String(r.status));
-const personAfter = await call(tokens.editor, 'GET', `assurer-person/${person._id}`);
+const personAfter = await call(tokens.editor, 'GET', `wms-person/${person._id}`);
 check('person still loads after its organization is archived; link not shown',
   personAfter.status === 200 && !(personAfter.json._organization || []).length,
   String(personAfter.status));
 div = await page(SLUGS.division);
 check('division page still renders without the archived organization', div.status === 200 && !div.html.includes(`${P} org<`));
-r = await ed('PATCH', `assurer-organization/${org._id}`, { archived: false });
-await publish('assurer-organization', r.json);
+r = await ed('PATCH', `wms-organization/${org._id}`, { archived: false });
+await publish('wms-organization', r.json);
 check('archived organization restored and republished', (await page(SLUGS.division)).html.includes(`${P} org`));
 
 // --- Global Content -----------------------------------------------------------------
@@ -507,7 +507,7 @@ await sectionWidgets();
 
 // --- Existing content unaffected ---------------------------------------------
 home = await page('/');
-check('home page still renders the M0 widgets', home.status === 200 && home.html.includes('assurer-hero') && home.html.includes('data-apos-form-form'));
+check('home page still renders the M0 widgets', home.status === 200 && home.html.includes('wms-hero') && home.html.includes('data-apos-form-form'));
 
 await finish();
 
@@ -551,14 +551,14 @@ async function sectionWidgets() {
       return api(tokens.editor, 'POST', '@apostrophecms/attachment/upload', f, { draft: false });
     })()
   });
-  const draftProduct = await findOne(tokens.editor, 'assurer-product', `${P} product draft only`);
-  const draftOrgDoc = await findOne(tokens.editor, 'assurer-organization', `${P} org draft`);
+  const draftProduct = await findOne(tokens.editor, 'wms-product', `${P} product draft only`);
+  const draftOrgDoc = await findOne(tokens.editor, 'wms-organization', `${P} org draft`);
 
   const widgetsPage = await ensurePage('default-page', `${P2} widgets`, SLUGS.widgets, '_home');
   check('editor creates a page for the section widgets (draft)', widgetsPage?.type === 'default-page');
 
   // Validation and limits.
-  const features = n => widget('assurer-feature-grid', {
+  const features = n => widget('wms-feature-grid', {
     columns: '3',
     items: Array.from({ length: n }, (x, i) => item({
       title: `Feature ${i}`,
@@ -567,21 +567,21 @@ async function sectionWidgets() {
   });
   r = await patchMain(widgetsPage, features(13));
   check('feature grid refuses more than 12 items', r.status === 400, String(r.status));
-  r = await patchMain(widgetsPage, widget('assurer-stats', {
+  r = await patchMain(widgetsPage, widget('wms-stats', {
     items: Array.from({ length: 7 }, (x, i) => item({
       value: String(i),
       label: `Figure ${i}`
     }))
   }));
   check('key figures refuse more than 6 items', r.status === 400, String(r.status));
-  r = await patchMain(widgetsPage, widget('assurer-gallery', {
+  r = await patchMain(widgetsPage, widget('wms-gallery', {
     _images: [ imgA, noAlt ],
     captionSource: 'none'
   }));
   // Core's area handling keeps only the field path in this response; the
   // widget editor shows the full message (browser checklist).
   check('gallery refuses an image without alt text', r.status === 400 && JSON.stringify(r.json).includes('0._images'), String(r.status));
-  r = await patchMain(widgetsPage, widget('assurer-feature-grid', {
+  r = await patchMain(widgetsPage, widget('wms-feature-grid', {
     items: [ item({
       title: 'Feature',
       _image: [ noAlt ],
@@ -589,18 +589,18 @@ async function sectionWidgets() {
     }) ]
   }));
   check('feature grid refuses an image without alt text', r.status === 400, String(r.status));
-  r = await patchMain(widgetsPage, widget('assurer-product-grid', {
-    cards: area(widget('assurer-product-card', {
+  r = await patchMain(widgetsPage, widget('wms-product-grid', {
+    cards: area(widget('wms-product-card', {
       title: 'Card',
       _image: [ noAlt ]
     }))
   }));
   check('product card refuses an image without alt text', r.status === 400, String(r.status));
-  r = await patchMain(widgetsPage, widget('assurer-slideshow', {
+  r = await patchMain(widgetsPage, widget('wms-slideshow', {
     slides: [ item({ _image: [ noAlt ] }) ]
   }));
   check('slideshow refuses an image without alt text', r.status === 400, String(r.status));
-  r = await patchMain(widgetsPage, widget('assurer-slideshow', {
+  r = await patchMain(widgetsPage, widget('wms-slideshow', {
     slides: [ 1, 2 ].map(n => item({
       _image: [ imgA ],
       heading: `H1 slide ${n}`,
@@ -608,13 +608,13 @@ async function sectionWidgets() {
     }))
   }));
   check('slideshow refuses two H1 slides (m1-072)', r.status === 400, String(r.status));
-  r = await patchMain(widgetsPage, widget('assurer-organizations', {
+  r = await patchMain(widgetsPage, widget('wms-organizations', {
     mode: 'all',
     limit: 5000
   }));
   check('listing limit capped at 48', r.status === 400 || (r.status === 200 && r.json.main.items[0].limit === 48),
     `${r.status} ${r.json?.main?.items?.[0]?.limit}`);
-  r = await patchMain(widgetsPage, widget('assurer-stats', {
+  r = await patchMain(widgetsPage, widget('wms-stats', {
     items: [ item({
       value: 'x'.repeat(500),
       label: 'Long'
@@ -629,7 +629,7 @@ async function sectionWidgets() {
   const FEATURE_OK = 'https://example.com/feature-link';
   const SLIDE_OK = 'https://example.com/slide-link';
   r = await patchMain(widgetsPage,
-    widget('assurer-feature-grid', {
+    widget('wms-feature-grid', {
       columns: '2',
       items: [
         item({
@@ -650,51 +650,51 @@ async function sectionWidgets() {
         })
       ]
     }),
-    widget('assurer-stats', {
+    widget('wms-stats', {
       items: [ item({
         value: '1,700+',
         label: `${P2} figure`,
         note: 'Test note'
       }) ]
     }),
-    widget('assurer-product-list', {
+    widget('wms-product-list', {
       mode: 'category',
       _category: [ catA ],
       limit: 12
     }),
-    widget('assurer-product-list', {
+    widget('wms-product-list', {
       mode: 'pick',
       _products: [ prod2, draftProduct ]
     }),
-    widget('assurer-organizations', {
+    widget('wms-organizations', {
       mode: 'all',
       layout: 'list',
       limit: 48
     }),
-    widget('assurer-organizations', {
+    widget('wms-organizations', {
       mode: 'pick',
       _organizations: [ draftOrgDoc ]
     }),
-    widget('assurer-people', {
+    widget('wms-people', {
       mode: 'organization',
       _organization: [ org ]
     }),
-    widget('assurer-locations', {
+    widget('wms-locations', {
       mode: 'organization',
       _organization: [ org ],
       showAddress: false
     }),
-    widget('assurer-downloads', {
+    widget('wms-downloads', {
       mode: 'tag',
       _tags: [ tag ]
     }),
-    widget('assurer-gallery', {
+    widget('wms-gallery', {
       _images: [ imgB, imgA ],
       captionSource: 'title',
       columns: '3'
     }),
     // m1-072: a banner slide and an image-only slide, with chosen options.
-    widget('assurer-slideshow', {
+    widget('wms-slideshow', {
       autoplay: true,
       interval: 5,
       height: 'medium',
@@ -723,7 +723,7 @@ async function sectionWidgets() {
       ]
     }),
     // Stored as before m1-072: no display options, so the defaults apply.
-    widget('assurer-slideshow', {
+    widget('wms-slideshow', {
       autoplay: false,
       slides: [ item({ _image: [ imgA ] }), item({ _image: [ imgB ] }) ]
     })
@@ -754,24 +754,24 @@ async function sectionWidgets() {
     html.includes(`${P} location`) && html.includes('href="tel:+15550100"') && !html.includes('1 Test Street'));
   check('downloads (by tag): title, type and size from the attachment',
     html.includes(`${P2} file`) && /\(PDF, \d+ B\)/.test(html));
-  const galleryAt = html.indexOf('data-assurer-gallery');
+  const galleryAt = html.indexOf('data-wms-gallery');
   check('gallery: ordered images link to the full image, with alt text and captions',
     galleryAt > -1 && html.indexOf(`${P} image B alt text`, galleryAt) < html.indexOf(`${P} image A alt text`, galleryAt) &&
     html.includes('data-gallery-link') && html.includes(`>${P} image B</figcaption>`));
-  const slideshows = html.split('data-assurer-slideshow').slice(1);
+  const slideshows = html.split('data-wms-slideshow').slice(1);
   const banner = slideshows[0] || '';
   const old = slideshows[1] || '';
   check('slideshow: banner slide renders heading level, text, eyebrow and button (m1-072)',
-    banner.includes(`<h3 class="assurer-slideshow__heading">${P2} banner heading</h3>`) &&
+    banner.includes(`<h3 class="wms-slideshow__heading">${P2} banner heading</h3>`) &&
     banner.includes('Banner slide text.') && banner.includes(`${P2} eyebrow`) &&
-    banner.includes(`href="${SLIDE_OK}"`) && banner.includes('assurer-button--outline'));
+    banner.includes(`href="${SLIDE_OK}"`) && banner.includes('wms-button--outline'));
   check('slideshow: chosen options become classes; pause button with autoplay; dots only',
-    /assurer-slideshow--height-medium[^"]*--transition-slide[^"]*--effect-zoom[^"]*--enter-fade/.test(html) &&
+    /wms-slideshow--height-medium[^"]*--transition-slide[^"]*--effect-zoom[^"]*--enter-fade/.test(html) &&
     banner.includes('data-pause') && banner.includes('data-dot=') && !banner.includes('data-next') &&
-    banner.includes('assurer-slideshow__text--center') && banner.includes('assurer-slideshow__text--overlay-light'));
+    banner.includes('wms-slideshow__text--center') && banner.includes('wms-slideshow__text--overlay-light'));
   check('slideshow: image-only slide has no text block', (banner.match(/data-slide-text/g) || []).length === 1);
   check('slideshow stored before m1-072 renders with the defaults, no pause button without autoplay',
-    /assurer-slideshow--height-short[^"]*--width-content[^"]*--transition-fade[^"]*--effect-none[^"]*--enter-rise/.test(html) &&
+    /wms-slideshow--height-short[^"]*--width-content[^"]*--transition-fade[^"]*--effect-none[^"]*--enter-rise/.test(html) &&
     !old.includes('data-pause') && old.includes('data-prev') && old.includes('data-dot='));
 
   // Unpublished edits stay private; anonymous visitors cannot ask for drafts.
@@ -785,13 +785,13 @@ async function sectionWidgets() {
   await api(tokens.editor, 'POST', `@apostrophecms/page/${widgetsPage._id}/revert-draft-to-published`, {});
 
   // Archived records drop out of every listing.
-  await ed('PATCH', `assurer-location/${loc._id}`, { archived: true });
+  await ed('PATCH', `wms-location/${loc._id}`, { archived: true });
   await ed('PATCH', `@apostrophecms/file/${file._id}`, { archived: true });
   w = await page(SLUGS.widgets);
   check('archived location and file disappear from the listings',
     !w.html.includes(`${P} location`) && !w.html.includes(`${P2} file`));
-  r = await ed('PATCH', `assurer-location/${loc._id}`, { archived: false });
-  await publish('assurer-location', r.json);
+  r = await ed('PATCH', `wms-location/${loc._id}`, { archived: false });
+  await publish('wms-location', r.json);
   await ed('PATCH', `@apostrophecms/file/${file._id}`, { archived: false });
   w = await page(SLUGS.widgets);
   check('restored location and file reappear', w.html.includes(`${P} location`) && w.html.includes(`${P2} file`));
@@ -801,14 +801,14 @@ async function verifyAfterRestart() {
   const widgets = await page(SLUGS.widgets);
   check('after restart: section widgets page persisted',
     widgets.status === 200 && widgets.html.includes(`${P2} feature good link`) &&
-    widgets.html.includes('data-assurer-gallery') && widgets.html.includes(`${P2} file`));
+    widgets.html.includes('data-wms-gallery') && widgets.html.includes(`${P2} file`));
   const cat = await page(SLUGS.categoryA);
   check('after restart: category page and published product persisted',
     cat.status === 200 && cat.html.includes(`${P} product public name`) && cat.html.includes('Second test product.'));
   check('after restart: draft-only product still hidden', !cat.html.includes('Draft-only test product'));
   const menu = nav((await page('/')).html);
   check('after restart: menu order and hidden page persisted', menu.includes(SLUGS.categoryA) && !menu.includes(SLUGS.categoryB));
-  const loc = await findOne(tokens.editor, 'assurer-location', `${P} location`);
+  const loc = await findOne(tokens.editor, 'wms-location', `${P} location`);
   check('after restart: location keeps its organization link', (loc?.organizationIds || []).length === 1);
 }
 

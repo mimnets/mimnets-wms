@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import {
   checkSanitizeArgs,
   SANITIZE_TARGETS
-} from '../modules/assurer-security/lib/sanitize.js';
+} from '../modules/wms-security/lib/sanitize.js';
 
 test('dry run by default, with or without a matching --database', () => {
   assert.deepEqual(checkSanitizeArgs({}, 'site'), { execute: false });
@@ -46,7 +46,7 @@ test('targets: authentication state only', () => {
   const pattern = new RegExp(cache.filter.namespace.$regex);
   assert.ok(pattern.test('@apostrophecms/loginAttempt'));
   assert.ok(pattern.test('@apostrophecms/loginAttempt/AposTotp'));
-  assert.ok(!pattern.test('assurer-form-rate-limit'));
+  assert.ok(!pattern.test('wms-form-rate-limit'));
   assert.ok(!pattern.test('@apostrophecms/loginAttempts-other'));
   const safe = SANITIZE_TARGETS.find(target => target.collection === 'aposUsersSafe');
   assert.equal(safe.action, 'unset');

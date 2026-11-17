@@ -3,11 +3,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { pageTitle } from '../lib/seo-title.js';
-import { defaultBaseUrl, readSeoEnv } from '../modules/assurer-seo/lib/config.js';
-import { adjustHead } from '../modules/assurer-seo/lib/head.js';
-import { LEGACY_REDIRECTS, REDIRECT_SLUG_PATTERN } from '../modules/assurer-seo/lib/legacy-redirects.js';
-import { robotsTxt } from '../modules/assurer-seo/lib/robots.js';
-import { withoutTrailingSlash } from '../modules/assurer-seo/lib/trailing-slash.js';
+import { defaultBaseUrl, readSeoEnv } from '../modules/wms-seo/lib/config.js';
+import { adjustHead } from '../modules/wms-seo/lib/head.js';
+import { LEGACY_REDIRECTS, REDIRECT_SLUG_PATTERN } from '../modules/wms-seo/lib/legacy-redirects.js';
+import { robotsTxt } from '../modules/wms-seo/lib/robots.js';
+import { withoutTrailingSlash } from '../modules/wms-seo/lib/trailing-slash.js';
 
 test('config: indexing off by default; base URL optional', () => {
   assert.deepEqual(readSeoEnv({}), {

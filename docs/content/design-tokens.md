@@ -11,7 +11,7 @@
 ## 1. How the theme is set up
 
 - All colour, type, spacing and shape values live in `_tokens.scss` as CSS custom properties on
-  `:root`. Project styles (`_assurer.scss`, `_corporate.scss`, `_sections.scss`, `_type.scss`,
+  `:root`. Project styles (`_wms.scss`, `_corporate.scss`, `_sections.scss`, `_type.scss`,
   `_layout.scss`) use only these properties. Two exceptions stay literal on purpose: the gallery
   lightbox (a dark media viewer) and the slideshow caption gradient (text over photographs).
 - Breakpoints are Sass variables (`$bp-tablet: 768px`, `$bp-desktop: 1024px`), because media
@@ -27,12 +27,12 @@
 
 | Supplied asset | Change | Token or file |
 |---|---|---|
-| Primary colour | Header text, hero background, stats values, skip link | `--assurer-color-primary`, `--assurer-color-on-primary`, `--assurer-overlay-dark` and `--assurer-shadow-raised` (both use the primary's RGB) |
-| Accent colour | Buttons, card links, badges, focus ring | `--assurer-color-accent`, `--assurer-color-on-accent`, `--assurer-color-focus` |
-| Neutrals | Text, muted text, surfaces, borders | `--assurer-color-text`, `-text-muted`, `-surface`, `-surface-alt`, `-border`, `-border-subtle`, `-border-strong` |
-| Link colours | Links in content | `--assurer-color-link`, `--assurer-color-link-visited` |
-| Body font (self-hosted files) | `@font-face` in `_fonts.scss`, files under `public/fonts/` (absolute `/fonts/…` URLs: the dev build does not rewrite relative `url()` in Sass partials) | `--assurer-font-body`. Global Styles no longer has a body font control (m1-021) |
-| Heading font | Define the token (headings inherit the body font until then) | `--assurer-font-heading` |
+| Primary colour | Header text, hero background, stats values, skip link | `--wms-color-primary`, `--wms-color-on-primary`, `--wms-overlay-dark` and `--wms-shadow-raised` (both use the primary's RGB) |
+| Accent colour | Buttons, card links, badges, focus ring | `--wms-color-accent`, `--wms-color-on-accent`, `--wms-color-focus` |
+| Neutrals | Text, muted text, surfaces, borders | `--wms-color-text`, `-text-muted`, `-surface`, `-surface-alt`, `-border`, `-border-subtle`, `-border-strong` |
+| Link colours | Links in content | `--wms-color-link`, `--wms-color-link-visited` |
+| Body font (self-hosted files) | `@font-face` in `_fonts.scss`, files under `public/fonts/` (absolute `/fonts/…` URLs: the dev build does not rewrite relative `url()` in Sass partials) | `--wms-font-body`. Global Styles no longer has a body font control (m1-021) |
+| Heading font | Define the token (headings inherit the body font until then) | `--wms-font-heading` |
 | Vector logo | Point `LOGO` at the SVG; keep the link to `/` and the alternative text | `views/layout.jsx` |
 | Favicon | Replace the three PNGs, or derive them from the vector logo | `public/images/brand/`, `FaviconLinks` |
 
@@ -110,8 +110,8 @@ their rows above still hold. New pairs:
 
 - Headings: modular scale 1.25 in `em`, so they follow the body size that Global Styles sets
   per breakpoint. H1 2.441, H2 1.953, H3 1.563, H4 1.25, small 0.875.
-- Spacing: 4 px base, `--assurer-space-1` … `-8` = 4, 8, 12, 16, 24, 32, 48, 64 px. The gap
-  between sections is `--assurer-space-section` (48 px). Other paddings are still literal
+- Spacing: 4 px base, `--wms-space-1` … `-8` = 4, 8, 12, 16, 24, 32, 48, 64 px. The gap
+  between sections is `--wms-space-section` (48 px). Other paddings are still literal
   pixel values; move them onto the scale when the brand layout is set.
 - Theme presets (m1-074): Bold uses scale 1.333 (H1 3.157, H2 2.369, H3 1.777, H4 1.333) and
   heading weight 800; Quiet uses weight 400 serif headings. Both set the section gap to 64 px

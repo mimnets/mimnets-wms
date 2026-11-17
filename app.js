@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import apostrophe from 'apostrophe';
-import { defaultBaseUrl } from './modules/assurer-seo/lib/config.js';
+import { defaultBaseUrl } from './modules/wms-seo/lib/config.js';
 import { readDemoSite } from './lib/demo-site.js';
 
 // Stop at startup on an invalid APOS_DEMO_SITE (m1-029); views/layout.jsx
@@ -14,7 +14,7 @@ apostrophe({
   shortName: 'vcl-assurer-group',
   // Public site address for absolute URLs (canonicals, sitemap, JSON-LD).
   // Core replaces it with APOS_BASE_URL when that is set (m1-018; see
-  // modules/assurer-seo/lib/config.js).
+  // modules/wms-seo/lib/config.js).
   baseUrl: defaultBaseUrl(process.env),
   modules: {
     // Apostrophe module configuration
@@ -59,7 +59,7 @@ apostrophe({
     // HTTP security headers (official module, MIT) and project security
     // controls: X-Powered-By removal and contact-form rate limiting (m1-011).
     '@apostrophecms/security-headers': {},
-    'assurer-security': {},
+    'wms-security': {},
 
     // Contact forms: @apostrophecms/form (MIT, Community Edition).
     // `@apostrophecms/form` must be registered before its widgets.
@@ -73,49 +73,49 @@ apostrophe({
     // Form operations (m1-012): notification email, administrator review
     // and CSV export, retention task. Registered after @apostrophecms/form so
     // its submission handler runs after the submission is stored.
-    'assurer-forms': {},
+    'wms-forms': {},
 
-    // Assurer project modules. All project-specific modules use the
-    // `assurer-` prefix so they are distinguishable from core and starter
-    // modules at a glance.
-    'assurer-hero-widget': {},
-    'assurer-slideshow-widget': {},
-    'assurer-product-grid-widget': {},
-    'assurer-product-card-widget': {},
+    // Project modules. All project-specific modules use the `wms-` prefix
+    // (`assurer-` until m1-076) so they are distinguishable from core and
+    // starter modules at a glance.
+    'wms-hero-widget': {},
+    'wms-slideshow-widget': {},
+    'wms-product-grid-widget': {},
+    'wms-product-card-widget': {},
     // Corporate content model (ADR-0003, m1-014): reusable records and the
     // division and product category page types.
-    'assurer-product': {},
-    'assurer-organization': {},
-    'assurer-person': {},
-    'assurer-location': {},
-    'assurer-division-page': {},
-    'assurer-product-category-page': {},
+    'wms-product': {},
+    'wms-organization': {},
+    'wms-person': {},
+    'wms-location': {},
+    'wms-division-page': {},
+    'wms-product-category-page': {},
     // Section and listing widgets (m1-015, CA-2).
-    'assurer-feature-grid-widget': {},
-    'assurer-stats-widget': {},
-    'assurer-product-list-widget': {},
-    'assurer-organizations-widget': {},
-    'assurer-people-widget': {},
-    'assurer-locations-widget': {},
-    'assurer-downloads-widget': {},
-    'assurer-gallery-widget': {},
+    'wms-feature-grid-widget': {},
+    'wms-stats-widget': {},
+    'wms-product-list-widget': {},
+    'wms-organizations-widget': {},
+    'wms-people-widget': {},
+    'wms-locations-widget': {},
+    'wms-downloads-widget': {},
+    'wms-gallery-widget': {},
     // SEO (m1-018, CA-3; D-CONTENT-10): official SEO fields and JSON-LD,
     // /sitemap.xml, editor-managed redirects, and the project's robots.txt,
-    // noindex and trailing-slash rules (assurer-seo).
+    // noindex and trailing-slash rules (wms-seo).
     '@apostrophecms/seo': {},
     '@apostrophecms/sitemap': {},
     '@apostrophecms/redirect': {},
-    'assurer-seo': {},
-    'assurer-demo': {},
+    'wms-seo': {},
+    'wms-demo': {},
     // WordPress import into drafts (m1-067, D-CONTENT-17).
-    'assurer-wp-import': {},
+    'wms-wp-import': {},
     // Database dashboard, layer 1 (m1-070, D-DB-24): export and import of
     // content (official module, MIT), for site administrators only, and the
     // admin-only dashboard.
     '@apostrophecms/import-export': {},
-    'assurer-data-dashboard': {},
+    'wms-data-dashboard': {},
     // Test-only tasks (CI admin bootstrap); refuse to run outside a
     // temporary SQLite database.
-    'assurer-test': {}
+    'wms-test': {}
   }
 });

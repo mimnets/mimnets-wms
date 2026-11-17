@@ -3,7 +3,7 @@
 // changes Global Content, so it refuses to run unless SEO_TEST_DISPOSABLE=1.
 //
 //   node scripts/seo-test.mjs              (main run, as the test editor)
-//   node scripts/seo-test.mjs --redirects  (after assurer-seo:seed-redirects)
+//   node scripts/seo-test.mjs --redirects  (after wms-seo:seed-redirects)
 //
 // Main run: robots.txt and X-Robots-Tag outside production; SEO fields edited
 // by an editor and published; <title> suffix; description, absolute

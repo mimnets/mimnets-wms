@@ -9,7 +9,7 @@
 
 > **Safety rules**
 > - **Demo data only.** No real content (D-CONTENT-16), no production copy, no personal data.
->   Use `node app assurer-demo:seed` and a disposable test user.
+>   Use `node app wms-demo:seed` and a disposable test user.
 > - **Connection strings and API keys are secrets.** Paste them only into the git-ignored `.env`,
 >   never into chat, docs, commit messages or reports.
 > - **No Neon code in the app.** Apostrophe connects through `@apostrophecms/db-connect` and its
@@ -63,7 +63,7 @@ name and database name, which it needs for the test flags.
 
 ```sh
 node app @apostrophecms/migration:migrate
-node app assurer-demo:seed
+node app wms-demo:seed
 node app @apostrophecms/user:add <disposable admin name> admin
 npm run dev
 ```
@@ -119,8 +119,8 @@ but a drop of all connections or a server restart crashes both instances, so the
 until the supervisor restarts them (m1-034 run 2: 17 s and 20 s).
 
 Then run the sanitize task against the same database (D-DB-6):
-`node app assurer-security:sanitize-after-restore` (dry run), then
-`node app assurer-security:sanitize-after-restore --execute --database=<database>`.
+`node app wms-security:sanitize-after-restore` (dry run), then
+`node app wms-security:sanitize-after-restore --execute --database=<database>`.
 
 What this covers:
 - **Covered:** proposal §4 steps 2 and 4 (and step 3 with the API flags) against PostgreSQL 16 on

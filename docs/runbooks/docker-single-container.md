@@ -23,10 +23,10 @@ under a minute after the build. It creates:
 
 - the database secrets, in the `secrets` volume (random values, never in the image);
 - a one-member replica set with access control and the `assurerApp` database user;
-- the demo content (`assurer-demo:seed`) and the `admin` account.
+- the demo content (`wms-demo:seed`) and the `admin` account.
 
 Later starts reuse them and run the migrations. The corporate demo records are not loaded, because
-`assurer-demo:seed-corporate` refuses to run with `NODE_ENV=production`.
+`wms-demo:seed-corporate` refuses to run with `NODE_ENV=production`.
 
 ## 2. Everyday commands
 

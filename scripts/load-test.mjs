@@ -165,14 +165,14 @@ async function seed() {
   };
   const sections = [];
   for (let s = 0; s < SIZE.sections; s++) {
-    const type = s < 2 ? 'assurer-division-page' : 'default-page';
+    const type = s < 2 ? 'wms-division-page' : 'default-page';
     sections.push(await insertPage('_home', type, `${PREFIX} section ${s + 1}`, s));
   }
   const children = [];
   for (const [ s, section ] of sections.entries()) {
     for (let c = 0; c < SIZE.childrenPerSection; c++) {
-      const type = s < 2 ? 'assurer-product-category-page' : 'default-page';
-      const extra = type === 'assurer-product-category-page' ? { _heroImage: [ pick(c) ] } : {};
+      const type = s < 2 ? 'wms-product-category-page' : 'default-page';
+      const extra = type === 'wms-product-category-page' ? { _heroImage: [ pick(c) ] } : {};
       children.push(await insertPage(section._id, type, `${PREFIX} page ${s + 1}.${c + 1}`, c, extra));
     }
   }
@@ -188,7 +188,7 @@ async function seed() {
   log(`${versioned.length} pages`);
 
   // Pieces, published.
-  const categories = children.filter(p => p.type === 'assurer-product-category-page');
+  const categories = children.filter(p => p.type === 'wms-product-category-page');
   const insertPiece = async (module, input) => {
     const doc = await api('POST', module, input);
     await api('POST', `${module}/${doc._id}/publish`, {});
@@ -201,25 +201,25 @@ async function seed() {
   };
   const orgs = [];
   for (let i = 0; i < SIZE.organizations; i++) {
-    orgs.push(await insertPiece('assurer-organization', {
+    orgs.push(await insertPiece('wms-organization', {
       title: `${PREFIX} organization ${i + 1}`,
       shortDescription: 'Synthetic organization for the load test.',
       _logo: [ pick(i) ]
     }));
   }
-  await pool([ ...Array(SIZE.locations).keys() ], 4, (i) => insertPiece('assurer-location', {
+  await pool([ ...Array(SIZE.locations).keys() ], 4, (i) => insertPiece('wms-location', {
     title: `${PREFIX} location ${i + 1}`,
     city: `Test city ${i + 1}`,
     country: 'Test country',
     _organization: [ orgs[i % orgs.length] ]
   }));
-  await pool([ ...Array(SIZE.people).keys() ], 4, (i) => insertPiece('assurer-person', {
+  await pool([ ...Array(SIZE.people).keys() ], 4, (i) => insertPiece('wms-person', {
     title: `${PREFIX} person ${i + 1}`,
     jobTitle: 'Test role',
     _organization: [ orgs[i % orgs.length] ],
     _photo: [ pick(i) ]
   }));
-  await pool([ ...Array(SIZE.products).keys() ], 4, (i) => insertPiece('assurer-product', {
+  await pool([ ...Array(SIZE.products).keys() ], 4, (i) => insertPiece('wms-product', {
     title: `${PREFIX} product ${i + 1}`,
     summary: 'Synthetic product for the load test.',
     description: area(richText(text(1))),
@@ -339,7 +339,7 @@ async function run() {
 
   // Single requests, no load: five of each kind, after one warm-up.
   const deep = published.filter(p => p.title.startsWith(`${PREFIX} deep`))[0];
-  const category = published.find(p => p.type === 'assurer-product-category-page' && p.title.startsWith(PREFIX));
+  const category = published.find(p => p.type === 'wms-product-category-page' && p.title.startsWith(PREFIX));
   const single = {};
   for (const [ name, url ] of Object.entries({
     home: `${BASE}/`,

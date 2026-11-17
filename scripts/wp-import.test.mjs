@@ -4,13 +4,13 @@
 // Run: npm run test:unit
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { IMPORT_USER, stateOf } from '../modules/assurer-wp-import/lib/apply.js';
-import { decodeTitle, extractWidgets } from '../modules/assurer-wp-import/lib/extract.js';
+import { IMPORT_USER, stateOf } from '../modules/wms-wp-import/lib/apply.js';
+import { decodeTitle, extractWidgets } from '../modules/wms-wp-import/lib/extract.js';
 import {
   createImageRegistry, createMediaIndex, slugify, tidyCase
-} from '../modules/assurer-wp-import/lib/media.js';
-import { buildPlan, pagePath } from '../modules/assurer-wp-import/lib/plan.js';
-import { checkBaseUrl } from '../modules/assurer-wp-import/lib/source.js';
+} from '../modules/wms-wp-import/lib/media.js';
+import { buildPlan, pagePath } from '../modules/wms-wp-import/lib/plan.js';
+import { checkBaseUrl } from '../modules/wms-wp-import/lib/source.js';
 
 const SITE = 'https://wp.example.test';
 const up = (path) => `${SITE}/wp-content/uploads/${path}`;
@@ -142,7 +142,7 @@ test('plan: a category page becomes products, files and a redirect', () => {
     file: 'wordpress:media:23'
   } ]);
   const categoryPage = plan.pages.find(p => p.path === '/style/activewear-accessories');
-  assert.equal(categoryPage.type, 'assurer-product-category-page');
+  assert.equal(categoryPage.type, 'wms-product-category-page');
   assert.equal(categoryPage.parentPath, '/style');
   assert.deepEqual(categoryPage.main.map(b => b.kind), [ 'downloads' ]);
   assert.ok(plan.skipped.includes('page /presentation: not migrated (D-CONTENT-3)'));

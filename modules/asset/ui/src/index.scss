@@ -1,13 +1,13 @@
 @import url('normalize.css');
 // `.bp-` classes are the starter kit's base styles (core widget classNames
-// set in app.js); `.assurer-` classes are this project's.
+// set in app.js); `.wms-` classes are this project's.
 @import './scss/_settings';
 @import './scss/_tokens';
 @import './scss/_fonts';
 @import './scss/_type';
 @import './scss/_layout';
 @import './scss/_widgets';
-@import './scss/_assurer';
+@import './scss/_wms';
 @import './scss/_corporate';
 @import './scss/_sections';
 @import './scss/_slideshow';

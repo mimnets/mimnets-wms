@@ -1,68 +1,68 @@
-// Slideshow (m1-072). Markup: modules/assurer-slideshow-widget/views/widget.jsx;
+// Slideshow (m1-072). Markup: modules/wms-slideshow-widget/views/widget.jsx;
 // state classes (is-active, is-leaving, is-ready, is-paused, is-placing) come
 // from its player, ui/src/index.js.
 
-.assurer-slideshow {
+.wms-slideshow {
   position: relative;
-  margin: 0 0 var(--assurer-space-section);
+  margin: 0 0 var(--wms-space-section);
   // Text and controls size to the slideshow, so it also fits a layout column.
   container-type: inline-size;
 }
 
-// Edge to edge on full-width pages. `--assurer-vw` is the page width without
+// Edge to edge on full-width pages. `--wms-vw` is the page width without
 // the scrollbar (set by modules/asset/ui/src/page-width.js); `100vw` would
 // include it and scroll the page sideways. Without the script it stays
 // content width. Only in the page's centred <main>: elsewhere (the editor's
 // page dialog) the breakout would not line up.
-.has-assurer-vw .assurer-main .assurer-slideshow--width-full {
-  width: var(--assurer-vw);
-  margin-left: calc(50% - var(--assurer-vw) / 2);
-  margin-right: calc(50% - var(--assurer-vw) / 2);
+.has-wms-vw .wms-main .wms-slideshow--width-full {
+  width: var(--wms-vw);
+  margin-left: calc(50% - var(--wms-vw) / 2);
+  margin-right: calc(50% - var(--wms-vw) / 2);
 
-  .assurer-slideshow__track { border-radius: 0; }
+  .wms-slideshow__track { border-radius: 0; }
 
   // Slide text lines up with the page content, not the screen edge.
-  .assurer-slideshow__text {
+  .wms-slideshow__text {
     padding-left: max(clamp(24px, 6cqi, 64px), (100% - var(--content-max-width)) / 2 + 16px);
     padding-right: max(clamp(24px, 6cqi, 64px), (100% - var(--content-max-width)) / 2 + 16px);
   }
 }
 
 // A layout column is narrower than the screen: no breakout, no tall height.
-.has-assurer-vw .assurer-main .layout-widget .assurer-slideshow--width-full {
+.has-wms-vw .wms-main .layout-widget .wms-slideshow--width-full {
   width: auto;
   margin-left: 0;
   margin-right: 0;
 
-  .assurer-slideshow__track { border-radius: var(--assurer-radius); }
-  .assurer-slideshow__text { padding-left: clamp(24px, 6cqi, 64px); padding-right: clamp(24px, 6cqi, 64px); }
+  .wms-slideshow__track { border-radius: var(--wms-radius); }
+  .wms-slideshow__text { padding-left: clamp(24px, 6cqi, 64px); padding-right: clamp(24px, 6cqi, 64px); }
 }
 
 // Slides share one grid cell, so the track is as tall as its tallest slide
 // and the height option is a minimum. `overflow: clip` (not `hidden`) keeps
 // the aspect ratio's automatic minimum, which lets text grow the track.
-.assurer-slideshow__track {
+.wms-slideshow__track {
   display: grid;
   aspect-ratio: 16 / 7;
-  border-radius: var(--assurer-radius);
-  background: var(--assurer-color-surface-alt);
+  border-radius: var(--wms-radius);
+  background: var(--wms-color-surface-alt);
   overflow: clip;
   touch-action: pan-y;
 }
 
-.assurer-slideshow--height-medium .assurer-slideshow__track { aspect-ratio: 16 / 9; }
+.wms-slideshow--height-medium .wms-slideshow__track { aspect-ratio: 16 / 9; }
 
-.assurer-slideshow--height-tall .assurer-slideshow__track {
+.wms-slideshow--height-tall .wms-slideshow__track {
   aspect-ratio: auto;
   min-height: 75svh;
 }
 
-.layout-widget .assurer-slideshow--height-tall .assurer-slideshow__track {
+.layout-widget .wms-slideshow--height-tall .wms-slideshow__track {
   aspect-ratio: 16 / 9;
   min-height: 0;
 }
 
-.assurer-slideshow__slide {
+.wms-slideshow__slide {
   position: relative;
   display: grid;
   grid-area: 1 / 1;
@@ -73,7 +73,7 @@
   &.is-active { visibility: visible; }
 }
 
-.assurer-slideshow__image {
+.wms-slideshow__image {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -83,55 +83,55 @@
 
 // Fade (default). Transitions start only once the player is ready, so
 // slides never fade at page load (m1-024).
-.assurer-slideshow--transition-fade {
-  .assurer-slideshow__slide { opacity: 0; }
-  .assurer-slideshow__slide.is-active { opacity: 1; }
+.wms-slideshow--transition-fade {
+  .wms-slideshow__slide { opacity: 0; }
+  .wms-slideshow__slide.is-active { opacity: 1; }
 
-  &.is-ready .assurer-slideshow__slide {
+  &.is-ready .wms-slideshow__slide {
     transition: opacity 0.5s ease, visibility 0.5s;
   }
 }
 
 // Slide: the player sets where a slide comes from or leaves to.
-.assurer-slideshow--transition-slide {
-  .assurer-slideshow__slide { transform: translateX(var(--assurer-slide-from, 100%)); }
-  .assurer-slideshow__slide.is-active { transform: none; }
+.wms-slideshow--transition-slide {
+  .wms-slideshow__slide { transform: translateX(var(--wms-slide-from, 100%)); }
+  .wms-slideshow__slide.is-active { transform: none; }
 
-  &.is-ready .assurer-slideshow__slide {
+  &.is-ready .wms-slideshow__slide {
     transition: transform 0.6s ease, visibility 0.6s;
   }
 
-  &.is-ready .assurer-slideshow__slide.is-placing { transition: none; }
+  &.is-ready .wms-slideshow__slide.is-placing { transition: none; }
 }
 
 // Slow zoom on the shown image, over the time per slide; held while paused.
-.assurer-slideshow--effect-zoom {
-  .is-active .assurer-slideshow__image,
-  .is-leaving .assurer-slideshow__image {
-    animation: assurer-slow-zoom var(--assurer-slide-ms, 6000ms) linear both;
+.wms-slideshow--effect-zoom {
+  .is-active .wms-slideshow__image,
+  .is-leaving .wms-slideshow__image {
+    animation: wms-slow-zoom var(--wms-slide-ms, 6000ms) linear both;
   }
 
-  &.is-paused .is-active .assurer-slideshow__image,
-  .is-leaving .assurer-slideshow__image { animation-play-state: paused; }
+  &.is-paused .is-active .wms-slideshow__image,
+  .is-leaving .wms-slideshow__image { animation-play-state: paused; }
 }
 
-@keyframes assurer-slow-zoom {
+@keyframes wms-slow-zoom {
   from { transform: scale(1); }
   to { transform: scale(1.06); }
 }
 
 // Banner text over the image.
-.assurer-slideshow__text {
+.wms-slideshow__text {
   position: relative;
   display: flex;
   padding: clamp(24px, 6cqi, 64px);
-  color: var(--assurer-color-on-primary);
+  color: var(--wms-color-on-primary);
 
-  &--overlay-dark { background: var(--assurer-overlay-dark); }
+  &--overlay-dark { background: var(--wms-overlay-dark); }
 
   &--overlay-light {
-    background: var(--assurer-overlay-light);
-    color: var(--assurer-color-primary);
+    background: var(--wms-overlay-light);
+    color: var(--wms-color-primary);
   }
 
   &--left { justify-content: flex-start; }
@@ -142,10 +142,10 @@
   &--bottom { align-items: flex-end; }
 
   // Room for the caption bar.
-  .assurer-slideshow__slide:has(.assurer-slideshow__caption) & { padding-bottom: 64px; }
+  .wms-slideshow__slide:has(.wms-slideshow__caption) & { padding-bottom: 64px; }
 }
 
-.assurer-slideshow__text-inner {
+.wms-slideshow__text-inner {
   max-width: min(640px, 100%);
 
   @container (max-width: 559px) {
@@ -153,7 +153,7 @@
   }
 }
 
-.assurer-slideshow__eyebrow {
+.wms-slideshow__eyebrow {
   margin: 0 0 8px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -161,7 +161,7 @@
   text-transform: uppercase;
 }
 
-.assurer-slideshow__heading {
+.wms-slideshow__heading {
   margin: 0 0 12px;
   color: inherit;
   font-size: clamp(1.5rem, 5cqi, 3rem);
@@ -170,36 +170,36 @@
   text-align: inherit;
 }
 
-.assurer-slideshow__body {
+.wms-slideshow__body {
   margin: 0;
   font-size: clamp(1rem, 2cqi, 1.15rem);
 }
 
-.assurer-slideshow__buttons {
+.wms-slideshow__buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 20px;
 
-  .assurer-slideshow__text--center & { justify-content: center; }
+  .wms-slideshow__text--center & { justify-content: center; }
 }
 
-.assurer-slideshow__text--overlay-dark .assurer-button--outline,
-.assurer-slideshow__text--overlay-dark .assurer-button--outline:visited {
-  border-color: var(--assurer-color-on-primary);
-  color: var(--assurer-color-on-primary);
+.wms-slideshow__text--overlay-dark .wms-button--outline,
+.wms-slideshow__text--overlay-dark .wms-button--outline:visited {
+  border-color: var(--wms-color-on-primary);
+  color: var(--wms-color-on-primary);
 }
 
 // Text entrance: once, when its slide is shown (m1-072).
-.assurer-slideshow--enter-fade .is-active [data-slide-text] {
-  animation: assurer-fade-in 0.7s ease 0.15s both;
+.wms-slideshow--enter-fade .is-active [data-slide-text] {
+  animation: wms-fade-in 0.7s ease 0.15s both;
 }
 
-.assurer-slideshow--enter-rise .is-active [data-slide-text] {
-  animation: assurer-rise 0.7s ease 0.15s both;
+.wms-slideshow--enter-rise .is-active [data-slide-text] {
+  animation: wms-rise 0.7s ease 0.15s both;
 }
 
-.assurer-slideshow__caption {
+.wms-slideshow__caption {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -209,7 +209,7 @@
   color: #fff;
 }
 
-.assurer-slideshow__controls {
+.wms-slideshow__controls {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -223,49 +223,49 @@
   }
 }
 
-.assurer-slideshow__pause {
+.wms-slideshow__pause {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
   padding: 0;
-  color: var(--assurer-color-primary);
+  color: var(--wms-color-primary);
 
   svg { fill: currentcolor; }
-  .assurer-slideshow__icon-play { display: none; }
-  &.is-play .assurer-slideshow__icon-play { display: block; }
-  &.is-play .assurer-slideshow__icon-pause { display: none; }
+  .wms-slideshow__icon-play { display: none; }
+  &.is-play .wms-slideshow__icon-play { display: block; }
+  &.is-play .wms-slideshow__icon-pause { display: none; }
 }
 
-.assurer-slideshow__prev,
-.assurer-slideshow__next {
+.wms-slideshow__prev,
+.wms-slideshow__next {
   padding: 4px 12px;
-  color: var(--assurer-color-primary);
+  color: var(--wms-color-primary);
   font-size: 1.75rem;
   line-height: 1;
 }
 
-.assurer-slideshow__dots {
+.wms-slideshow__dots {
   display: flex;
   gap: 8px;
 }
 
-.assurer-slideshow__dot {
+.wms-slideshow__dot {
   width: 12px;
   height: 12px;
   padding: 0;
   border-radius: 50%;
-  background: var(--assurer-color-border-strong) !important;
+  background: var(--wms-color-border-strong) !important;
 
-  &.is-active { background: var(--assurer-color-accent) !important; }
+  &.is-active { background: var(--wms-color-accent) !important; }
 }
 
 // Reduced motion: slides change instantly; no zoom, no text entrance.
 @media (prefers-reduced-motion: reduce) {
-  .assurer-slideshow.is-ready .assurer-slideshow__slide { transition: none; }
+  .wms-slideshow.is-ready .wms-slideshow__slide { transition: none; }
 
-  .assurer-slideshow .is-active .assurer-slideshow__image,
-  .assurer-slideshow .is-leaving .assurer-slideshow__image,
-  .assurer-slideshow .is-active [data-slide-text] { animation: none; }
+  .wms-slideshow .is-active .wms-slideshow__image,
+  .wms-slideshow .is-leaving .wms-slideshow__image,
+  .wms-slideshow .is-active [data-slide-text] { animation: none; }
 }

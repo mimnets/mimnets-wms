@@ -46,7 +46,7 @@
 
 - **Trailing slash:** `/x/` → `/x`, one 301, query string kept. No records needed.
 - **Changed slugs:** core soft redirects, 301, from URLs that visitors have opened before.
-- **Legacy WordPress URLs** (SEO plan §2): `node app assurer-seo:seed-redirects`.
+- **Legacy WordPress URLs** (SEO plan §2): `node app wms-seo:seed-redirects`.
   - Adds a redirect record only when its target page is published; run it again after content
     migration (CA-5) publishes more pages. `--strict` fails while any is missing.
   - Never changes or removes records. Editors may edit or archive seeded redirects; the task then
@@ -70,5 +70,5 @@
 2. `curl -sI https://www.assurerworld.com/` has no `X-Robots-Tag`; `/robots.txt` has no
    `Disallow: /`.
 3. Staging still sends `noindex` and `Disallow: /`.
-4. `node app assurer-seo:seed-redirects --strict` succeeds on production content.
+4. `node app wms-seo:seed-redirects --strict` succeeds on production content.
 5. Submit the sitemap in Search Console (owner, after launch only).

@@ -104,7 +104,7 @@ suites and browser checks:
    when it already has one source of truth (for example `aria-expanded`, a native `<dialog>`, a
    stored and documented status field).
 3. **Make it observable** where tests or agents need it: an ARIA attribute or a
-   `data-assurer-*-state` attribute, not only a CSS class.
+   `data-wms-*-state` attribute, not only a CSS class.
 4. **Do not break anything**: same messages, markup contracts and server contracts unless the
    task says otherwise; run the suites and browser checks again after the change.
 5. **Stay in scope**: the review covers the code the task touched. Implicit state found

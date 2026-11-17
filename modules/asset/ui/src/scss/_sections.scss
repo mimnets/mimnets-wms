@@ -1,9 +1,9 @@
 // Section and listing widgets (m1-015, CA-2). Placeholder theme only; values
-// come from the design tokens in _tokens.scss (m1-020). Builds on `.assurer-grid`,
-// `.assurer-card` and `.assurer-org` from _assurer.scss and _corporate.scss.
+// come from the design tokens in _tokens.scss (m1-020). Builds on `.wms-grid`,
+// `.wms-card` and `.wms-org` from _wms.scss and _corporate.scss.
 
-.assurer-section {
-  margin: var(--assurer-space-section) 0;
+.wms-section {
+  margin: var(--wms-space-section) 0;
 }
 
 // Size containers (m1-071): the grids choose their columns from the width of
@@ -11,43 +11,43 @@
 // layout columns. Kept on these elements, not on <main> or the layout columns,
 // so Apostrophe's editing controls stay outside the containment.
 // Container widths: 1 per row below 560 px, 2 from 560, 3 from 720, 4 from 900.
-.assurer-section,
-.assurer-products,
-.assurer-hero,
-.assurer-cq {
+.wms-section,
+.wms-products,
+.wms-hero,
+.wms-cq {
   container-type: inline-size;
 }
 
 // A hero inside a layout column is narrower; less vertical padding.
-.layout-widget .assurer-hero {
+.layout-widget .wms-hero {
   padding-top: 48px;
   padding-bottom: 48px;
 }
 
-// Centred, like the product grid's intro (`.assurer-products__intro`).
-.assurer-section__intro {
+// Centred, like the product grid's intro (`.wms-products__intro`).
+.wms-section__intro {
   max-width: 760px;
   margin: 0 auto;
   text-align: center;
 }
 
 // Editor-chosen column counts in wide containers. One per row in narrow ones,
-// two from 560 px, as `.assurer-grid` already does.
+// two from 560 px, as `.wms-grid` already does.
 @container (min-width: 720px) {
-  .assurer-grid--cols-3,
-  .assurer-grid--cols-4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .wms-grid--cols-3,
+  .wms-grid--cols-4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @container (min-width: 900px) {
-  .assurer-grid--cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .wms-grid--cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-.assurer-grid > li {
+.wms-grid > li {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.assurer-feature .assurer-card__link {
+.wms-feature .wms-card__link {
   align-self: flex-start;
 }
 
@@ -55,7 +55,7 @@
 // Key figures
 // ---------------------------------------------------------------------------
 
-.assurer-stats__list {
+.wms-stats__list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
   gap: 24px;
@@ -65,27 +65,27 @@
   text-align: center;
 }
 
-.assurer-stats__item {
+.wms-stats__item {
   padding: 24px 16px;
-  border-radius: var(--assurer-radius);
-  background: var(--assurer-color-surface-alt);
+  border-radius: var(--wms-radius);
+  background: var(--wms-color-surface-alt);
   overflow-wrap: anywhere;
 }
 
-.assurer-stats__value {
+.wms-stats__value {
   margin: 0;
-  color: var(--assurer-color-primary);
+  color: var(--wms-color-primary);
   font-size: 2rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
-.assurer-stats__label {
+.wms-stats__label {
   margin: 8px 0 0;
   font-weight: 600;
 }
 
-.assurer-stats__note {
+.wms-stats__note {
   margin: 8px 0 0;
   font-size: 0.875rem;
 }
@@ -94,7 +94,7 @@
 // Organizations (compact list), people, locations
 // ---------------------------------------------------------------------------
 
-.assurer-compact-list {
+.wms-compact-list {
   margin: 16px 0 0;
   padding: 0;
   list-style: none;
@@ -105,25 +105,25 @@
     gap: 4px 16px;
     align-items: baseline;
     padding: 12px 0;
-    border-bottom: 1px solid var(--assurer-color-border);
+    border-bottom: 1px solid var(--wms-color-border);
   }
 }
 
-.assurer-compact-list__name {
+.wms-compact-list__name {
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-.assurer-org__website {
+.wms-org__website {
   display: inline-block;
   padding: 10px 0;
 }
 
-.assurer-person {
+.wms-person {
   text-align: center;
 }
 
-.assurer-person__photo {
+.wms-person__photo {
   display: block;
   width: 160px;
   max-width: 100%;
@@ -133,42 +133,42 @@
   object-fit: cover;
 }
 
-.assurer-person__name,
-.assurer-location__name {
+.wms-person__name,
+.wms-location__name {
   margin: 0 0 4px;
 }
 
-.assurer-person__job,
-.assurer-person__org,
-.assurer-location__org {
+.wms-person__job,
+.wms-person__org,
+.wms-location__org {
   margin: 0 0 4px;
   font-weight: 600;
 }
 
-.assurer-person__bio {
+.wms-person__bio {
   margin: 8px 0 0;
   text-align: left;
 }
 
-.assurer-location {
+.wms-location {
   padding: 20px;
-  border: 1px solid var(--assurer-color-border);
-  border-radius: var(--assurer-radius);
+  border: 1px solid var(--wms-color-border);
+  border-radius: var(--wms-radius);
 }
 
-.assurer-location__name {
+.wms-location__name {
   text-align: left;
 }
 
-.assurer-location__address {
+.wms-location__address {
   font-style: normal;
 }
 
-.assurer-location__line {
+.wms-location__line {
   display: block;
 }
 
-.assurer-location__contact {
+.wms-location__contact {
   margin: 12px 0 0;
   padding: 0;
   list-style: none;
@@ -184,29 +184,29 @@
 // Downloads
 // ---------------------------------------------------------------------------
 
-.assurer-download-list {
+.wms-download-list {
   margin: 16px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.assurer-download {
+.wms-download {
   padding: 12px 0;
-  border-bottom: 1px solid var(--assurer-color-border);
+  border-bottom: 1px solid var(--wms-color-border);
   overflow-wrap: anywhere;
 }
 
-.assurer-download__link {
+.wms-download__link {
   display: inline-block;
   padding: 8px 0;
   font-weight: 600;
 }
 
-.assurer-download__meta {
+.wms-download__meta {
   font-weight: 400;
 }
 
-.assurer-download__description {
+.wms-download__description {
   margin: 0;
 }
 
@@ -214,7 +214,7 @@
 // Gallery and lightbox
 // ---------------------------------------------------------------------------
 
-.assurer-gallery__grid {
+.wms-gallery__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -224,25 +224,25 @@
 }
 
 @container (min-width: 720px) {
-  .assurer-gallery__grid--cols-3,
-  .assurer-gallery__grid--cols-4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .wms-gallery__grid--cols-3,
+  .wms-gallery__grid--cols-4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @container (min-width: 900px) {
-  .assurer-gallery__grid--cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .wms-gallery__grid--cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-.assurer-gallery__figure {
+.wms-gallery__figure {
   margin: 0;
 }
 
-.assurer-gallery__link {
+.wms-gallery__link {
   display: block;
   border-radius: 6px;
   overflow: hidden;
 
   &:focus-visible {
-    outline: 3px solid var(--assurer-color-focus);
+    outline: 3px solid var(--wms-color-focus);
     outline-offset: 2px;
   }
 
@@ -254,19 +254,19 @@
   }
 }
 
-.assurer-gallery__caption {
+.wms-gallery__caption {
   margin-top: 4px;
   font-size: 0.875rem;
   overflow-wrap: anywhere;
 }
 
-.assurer-lightbox {
+.wms-lightbox {
   width: min(100vw - 32px, 1200px);
   max-width: none;
   max-height: calc(100vh - 32px);
   padding: 16px;
   border: 0;
-  border-radius: var(--assurer-radius);
+  border-radius: var(--wms-radius);
   background: #111;
   color: #fff;
 
@@ -275,12 +275,12 @@
   }
 }
 
-.assurer-lightbox__figure {
+.wms-lightbox__figure {
   margin: 0;
   text-align: center;
 }
 
-.assurer-lightbox__image {
+.wms-lightbox__image {
   display: block;
   max-width: 100%;
   max-height: calc(100vh - 200px);
@@ -288,16 +288,16 @@
   object-fit: contain;
 }
 
-.assurer-lightbox__caption {
+.wms-lightbox__caption {
   margin-top: 8px;
 }
 
-.assurer-lightbox__counter {
+.wms-lightbox__counter {
   margin: 8px 0 0;
   text-align: center;
 }
 
-.assurer-lightbox__controls {
+.wms-lightbox__controls {
   display: flex;
   justify-content: center;
   gap: 12px;

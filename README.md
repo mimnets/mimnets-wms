@@ -65,7 +65,7 @@ audit check on every pull request. See [git-and-ci.md](./docs/engineering/git-an
   workflows/            # CI (ci.yml)
 lib/                    # shared field config and helpers (area.js, link.js, listing.js, ...)
   views/                # shared JSX components
-modules/                # assurer-* project modules; @apostrophecms/* core overrides
+modules/                # wms-* project modules; @apostrophecms/* core overrides
   asset/
     ui/
       src/              # client-side source (Vite): index.js, index.scss, scss/
@@ -91,12 +91,12 @@ code conventions are in [ARCHITECTURE.md](./ARCHITECTURE.md) and [AGENTS.md](./A
 
 | Module | Purpose |
 |--------|---------|
-| `assurer-hero-widget` | Hero banner: in-place editable headline/text, background image, buttons |
-| `assurer-slideshow-widget` | Image slideshow with captions, autoplay, keyboard and dot navigation |
-| `assurer-product-grid-widget` | Product section; cards are widgets in an area (add / reorder in place) |
-| `assurer-product-card-widget` | Single product card |
-| `assurer-demo` | `assurer-demo:seed` task for demonstration content |
-| `assurer-test` | `assurer-test:ensure-admin`: creates the CI test admin; refuses anything but a temporary SQLite database |
+| `wms-hero-widget` | Hero banner: in-place editable headline/text, background image, buttons |
+| `wms-slideshow-widget` | Image slideshow with captions, autoplay, keyboard and dot navigation |
+| `wms-product-grid-widget` | Product section; cards are widgets in an area (add / reorder in place) |
+| `wms-product-card-widget` | Single product card |
+| `wms-demo` | `wms-demo:seed` task for demonstration content |
+| `wms-test` | `wms-test:ensure-admin`: creates the CI test admin; refuses anything but a temporary SQLite database |
 | `@apostrophecms/form` (+ field widgets) | Contact forms (Community, MIT) |
 
 See [AGENTS.md](./AGENTS.md) for template and code conventions.

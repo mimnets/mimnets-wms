@@ -11,7 +11,7 @@
     "build": "cross-env NODE_ENV=production node app @apostrophecms/asset:build",
     "serve": "cross-env NODE_ENV=production node app",
     "release": "npm install && npm run build && node app @apostrophecms/migration:migrate",
-    "seed:demo": "node app assurer-demo:seed",
+    "seed:demo": "node app wms-demo:seed",
     "test:smoke": "node scripts/smoke-test.mjs",
     "lint": "eslint .",
     "test:workflow": "node --env-file=.env scripts/editor-workflow-test.mjs",

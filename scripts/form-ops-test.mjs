@@ -159,16 +159,16 @@ let sink = null;
 if (SMTP_PORT) {
   sink = await startSmtpSink({ port: SMTP_PORT });
 }
-await task([ 'assurer-security:clear-form-rate-limit' ]);
+await task([ 'wms-security:clear-form-rate-limit' ]);
 
 const home = await fetch(`${BASE}/`);
 const homeHtml = await home.text();
 const visitor = cookiesOf(home);
 const formId = homeHtml.match(/data-apos-form-form="([^"]+)"/)?.[1];
 check('home page renders the contact form', home.status === 200 && Boolean(formId));
-// Spam guard (m1-019, modules/assurer-forms/lib/guard.js): every submission
+// Spam guard (m1-019, modules/wms-forms/lib/guard.js): every submission
 // carries the page's fill token, sent after the minimum fill time.
-const fillToken = homeHtml.match(/value="([^"]+)" data-assurer-form-fill/)?.[1];
+const fillToken = homeHtml.match(/value="([^"]+)" data-wms-form-fill/)?.[1];
 check('form carries a fill token', Boolean(fillToken));
 
 const valid = (marker, extra = {}) => ({
@@ -187,12 +187,12 @@ async function submit(data, {
   const body = new FormData();
   body.append('data', raw ?? JSON.stringify({
     _id: formId,
-    _assurerFill: fillToken,
+    _wmsFill: fillToken,
     ...data
   }));
   const headers = withCookie ? { cookie: cookieHeader(visitor) } : {};
   if (key) {
-    headers['x-assurer-submission-key'] = key;
+    headers['x-wms-submission-key'] = key;
   }
   const res = await fetch(`${BASE}${SUBMIT}`, {
     method: 'POST',
@@ -208,7 +208,7 @@ async function submit(data, {
   }
   return {
     status: res.status,
-    stored: res.headers.get('x-assurer-submission') === 'stored',
+    stored: res.headers.get('x-wms-submission') === 'stored',
     json,
     text
   };
@@ -291,18 +291,18 @@ const guardCount = await countRows();
 let r = await submit(valid(`fast-${run}`));
 check('submission within the minimum fill time → 400, not stored', r.status === 400 && !r.stored, String(r.status));
 await sleep(3200);
-r = await submit(valid(`notoken-${run}`, { _assurerFill: undefined }));
+r = await submit(valid(`notoken-${run}`, { _wmsFill: undefined }));
 check('submission without a fill token → 400', r.status === 400 && !r.stored, String(r.status));
-r = await submit(valid(`forged-${run}`, { _assurerFill: `${Date.now() - 60000}.${'A'.repeat(43)}` }));
+r = await submit(valid(`forged-${run}`, { _wmsFill: `${Date.now() - 60000}.${'A'.repeat(43)}` }));
 check('submission with a forged fill token → 400', r.status === 400 && !r.stored, String(r.status));
-r = await submit(valid(`trap-${run}`, { _assurerWebsite: 'https://spam.example' }));
+r = await submit(valid(`trap-${run}`, { _wmsWebsite: 'https://spam.example' }));
 check('submission with the honeypot filled → 400 with a visible message', r.status === 400 &&
   r.json?.data?.formErrors?.[0]?.global === true, String(r.status));
 check('guard rejections stored nothing', await countRows() === guardCount);
-r = await submit({ _assurerWebsite: 'x' });
+r = await submit({ _wmsWebsite: 'x' });
 check('missing fields are reported before the spam guard', r.status === 400 &&
   r.json?.data?.formErrors?.some(e => e.field === 'email'), String(r.status));
-await task([ 'assurer-security:clear-form-rate-limit' ]);
+await task([ 'wms-security:clear-form-rate-limit' ]);
 
 // ---- valid submission and notification -----------------------------------
 
@@ -310,7 +310,7 @@ const before = await countRows();
 const key1 = `test-${randomBytes(12).toString('hex')}`;
 const marker1 = `m1-${run}`;
 r = await submit(valid(marker1), { key: key1 });
-check('valid submission accepted (200 with X-Assurer-Submission: stored)', r.status === 200 && r.stored, String(r.status));
+check('valid submission accepted (200 with X-Wms-Submission: stored)', r.status === 200 && r.stored, String(r.status));
 check('valid submission stored once', await countRows() === before + 1);
 const row1 = await findRow(marker1);
 check('stored submission has an ID and UTC time in the export', Boolean(row1?.submission_id) && /Z$/.test(row1?.received_utc || ''));
@@ -361,7 +361,7 @@ for (let i = 0; i <= max && limited?.status !== 429; i++) {
 check('rate limit reached for this client', limited.status === 429, String(limited.status));
 r = await submit(valid(marker1), { key: key1 });
 check('accepted submission replays as stored while rate-limited', r.status === 200 && r.stored, String(r.status));
-await task([ 'assurer-security:clear-form-rate-limit' ]);
+await task([ 'wms-security:clear-form-rate-limit' ]);
 
 // ---- invalid, CSRF, 500 --------------------------------------------------
 
@@ -492,7 +492,7 @@ if (sink) {
   check('notification recorded as failed when the server is unreachable', Boolean(failedConnection));
 
   sink = await startSmtpSink({ port: SMTP_PORT });
-  const retry = await task([ 'assurer-forms:retry-notifications' ]);
+  const retry = await task([ 'wms-forms:retry-notifications' ]);
   check('retry task succeeds', retry.code === 0 && /Notifications retried: \d+; sent: \d+/.test(retry.output), retry.output.trim().split('\n').at(-1));
   const resent = await waitFor(async () => {
     const a = await findRow(marker3);
@@ -525,24 +525,24 @@ if (sink) {
 // ---- retention -------------------------------------------------------------
 
 count = await countRows();
-let ret = await task([ 'assurer-forms:retention', '--days=30' ], { APOS_FORM_RETENTION_DAYS: '' });
+let ret = await task([ 'wms-forms:retention', '--days=30' ], { APOS_FORM_RETENTION_DAYS: '' });
 check('retention dry run reports counts', ret.code === 0 && /Dry run: .*retention 30 days/.test(ret.output) && /Matching: \d+ of \d+ stored submissions/.test(ret.output),
   (ret.output.match(/Matching: .*/) || [ ret.output.trim().split('\n').at(-1) ])[0]);
 check('dry run deleted nothing', await countRows() === count);
-ret = await task([ 'assurer-forms:retention', '--execute' ], { APOS_FORM_RETENTION_DAYS: '' });
+ret = await task([ 'wms-forms:retention', '--execute' ], { APOS_FORM_RETENTION_DAYS: '' });
 check('deletion refused without the approved APOS_FORM_RETENTION_DAYS', ret.code !== 0 && /APOS_FORM_RETENTION_DAYS/.test(ret.output));
-ret = await task([ 'assurer-forms:retention', '--days=7' ], { APOS_FORM_RETENTION_DAYS: '' });
+ret = await task([ 'wms-forms:retention', '--days=7' ], { APOS_FORM_RETENTION_DAYS: '' });
 check('retention below 30 days refused', ret.code !== 0 && /30 to 3650/.test(ret.output));
 check('refused runs deleted nothing', await countRows() === count);
 
 if (DISPOSABLE) {
-  const back = await task([ 'assurer-test:backdate-submissions', '--days=400', '--count=2' ]);
+  const back = await task([ 'wms-test:backdate-submissions', '--days=400', '--count=2' ]);
   check('test task backdated two submissions', back.code === 0 && /Backdated 2 submissions/.test(back.output));
-  ret = await task([ 'assurer-forms:retention', '--days=365' ], { APOS_FORM_RETENTION_DAYS: '' });
+  ret = await task([ 'wms-forms:retention', '--days=365' ], { APOS_FORM_RETENTION_DAYS: '' });
   check('dry run finds exactly the two old submissions', /Matching: 2 of /.test(ret.output), (ret.output.match(/Matching: .*/) || [ '' ])[0]);
-  ret = await task([ 'assurer-forms:retention', '--execute', '--days=200' ], { APOS_FORM_RETENTION_DAYS: '365' });
+  ret = await task([ 'wms-forms:retention', '--execute', '--days=200' ], { APOS_FORM_RETENTION_DAYS: '365' });
   check('deletion refused when --days differs from the approved period', ret.code !== 0 && /differs/.test(ret.output));
-  ret = await task([ 'assurer-forms:retention', '--execute' ], { APOS_FORM_RETENTION_DAYS: '365' });
+  ret = await task([ 'wms-forms:retention', '--execute' ], { APOS_FORM_RETENTION_DAYS: '365' });
   check('deletion with the approved period removes the two old submissions', ret.code === 0 && /Deleted: 2\./.test(ret.output), (ret.output.match(/Deleted: .*/) || [ '' ])[0]);
   check('newer submissions kept', await countRows() === count - 2);
   const after = await fetch(`${BASE}/`);
@@ -564,7 +564,7 @@ await fetch(`${BASE}/api/v1/@apostrophecms/login/logout`, {
   body: '{}'
 });
 await sink?.close();
-await task([ 'assurer-security:clear-form-rate-limit' ]);
+await task([ 'wms-security:clear-form-rate-limit' ]);
 
 const failed = results.filter(x => !x.ok).length;
 const skipped = results.filter(x => x.skipped).length;

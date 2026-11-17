@@ -10,10 +10,10 @@ export default {
       {
         label: 'project:adminBarContent',
         items: [
-          'assurer-product',
-          'assurer-organization',
-          'assurer-person',
-          'assurer-location'
+          'wms-product',
+          'wms-organization',
+          'wms-person',
+          'wms-location'
         ]
       },
       {
@@ -34,7 +34,7 @@ export default {
         items: [
           '@apostrophecms/user',
           '@apostrophecms/redirect',
-          'assurer-data-dashboard'
+          'wms-data-dashboard'
         ]
       }
     ]

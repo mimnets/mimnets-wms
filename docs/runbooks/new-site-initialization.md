@@ -24,7 +24,7 @@ hashes, sessions, API tokens, form submissions and version history.
    global document and the indexes.
 6. **First admin:** `node app @apostrophecms/user:add <username> admin` (interactive password
    prompt). Store the credentials in the password manager, not in files or tickets.
-7. **Starter content (optional):** run the site's seed task (pattern: `assurer-demo:seed`).
+7. **Starter content (optional):** run the site's seed task (pattern: `wms-demo:seed`).
    Content comes from code, not from copying data.
 8. **Verify:** run `npm run test:smoke` and `scripts/editor-workflow-test.mjs`; take the first
    backup (database backup runbook, §A or §C).

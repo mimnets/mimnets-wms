@@ -10,7 +10,7 @@
 // - "Import all documents as drafts" is on by default, so an import does not
 //   change the public site until someone publishes.
 // - Every export, import and duplicate replacement is recorded in the data
-//   dashboard's activity log (modules/assurer-data-dashboard). The package
+//   dashboard's activity log (modules/wms-data-dashboard). The package
 //   emits no events, so its entry methods are extended.
 //
 // Users are never imported or exported: the package's own
@@ -66,12 +66,12 @@ export default {
           draftsOnly: self.apos.launder.boolean(req.body?.importDraftsOnly)
         };
         await refuseNonAdmin(req, 'import', details);
-        req.assurerImportCounts = null;
+        req.wmsImportCounts = null;
         try {
           const result = await _super(req, moduleName, artifacts);
           await record(req, 'import', {
             ...details,
-            ...req.assurerImportCounts,
+            ...req.wmsImportCounts,
             duplicates: result?.duplicatedDocs?.length || 0,
             outcome: importOutcome(result)
           });
@@ -88,7 +88,7 @@ export default {
       // Counts for the activity entry of the current import.
       async insertDocs(_super, req, args) {
         const result = await _super(req, args);
-        req.assurerImportCounts = {
+        req.wmsImportCounts = {
           documents: args.docs?.length || 0,
           failed: new Set(args.failedIds || []).size
         };
@@ -141,7 +141,7 @@ export default {
     }
 
     function record(req, kind, details) {
-      return self.apos.modules['assurer-data-dashboard'].recordActivity(req, kind, details);
+      return self.apos.modules['wms-data-dashboard'].recordActivity(req, kind, details);
     }
 
     // What the package's import returned: finished, or waiting for the
