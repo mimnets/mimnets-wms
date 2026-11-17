@@ -116,7 +116,7 @@ main() {
   fi
 
   # 7. A new MongoDB certificate (setup.sh) needs MongoDB and its clients restarted.
-  if ! "${S[@]}" exec -T mongo cmp -s /secrets/tls/serial /tmp/assurer-tls-serial; then
+  if ! "${S[@]}" exec -T mongo cmp -s /secrets/tls/serial /tmp/wms-tls-serial; then
     say "new MongoDB certificate: restarting MongoDB, then the app and PBM"
     "${S[@]}" restart mongo
     "${S[@]}" restart app pbm backup
@@ -145,7 +145,7 @@ main() {
   local svc
   for svc in app mongo nginx certbot; do
     docker image inspect -f "  $svc {{index .RepoDigests 0}}" \
-      "${ASSURER_REGISTRY:-ghcr.io/mimnets}/assurer-$svc:$sha" 2> /dev/null || true
+      "${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-$svc:$sha" 2> /dev/null || true
   done
   cat <<EOF
 

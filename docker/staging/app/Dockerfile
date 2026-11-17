@@ -21,12 +21,12 @@ RUN rm -rf /usr/local/lib/node_modules /opt/yarn-* \
 
 # The app runs as this user. The directories are copied into new volumes with
 # this owner.
-RUN useradd --system --uid 1001 --no-create-home --shell /usr/sbin/nologin assurer \
+RUN useradd --system --uid 1001 --no-create-home --shell /usr/sbin/nologin wms \
   && mkdir -p /app/data /app/public/uploads \
-  && chown -R assurer:assurer /app/data /app/public/uploads
-COPY docker/staging/app-env.sh /usr/local/lib/assurer/app-env.sh
-COPY --chmod=755 docker/staging/app-entrypoint.sh /usr/local/bin/assurer-app
-COPY --chmod=755 docker/staging/assurer-task.sh /usr/local/bin/assurer-task
+  && chown -R wms:wms /app/data /app/public/uploads
+COPY docker/staging/app-env.sh /usr/local/lib/wms/app-env.sh
+COPY --chmod=755 docker/staging/app-entrypoint.sh /usr/local/bin/wms-app
+COPY --chmod=755 docker/staging/wms-task.sh /usr/local/bin/wms-task
 
 # One layer, so the removed files are not left in the base image's layers
 # (m1-056). Every setting the image needs is declared here.
@@ -42,8 +42,8 @@ ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     APOS_CLUSTER_PROCESSES=2 \
     PORT=3000 \
     ADDRESS=0.0.0.0
-USER assurer
+USER wms
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.status === 200 ? 0 : 1), () => process.exit(1))"
-ENTRYPOINT ["assurer-app"]
+ENTRYPOINT ["wms-app"]

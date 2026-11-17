@@ -8,12 +8,12 @@ RUN apk add --no-cache --upgrade 'zlib>=1.4-r0' \
   && apk del --no-cache nginx-module-xslt nginx-module-njs libxslt libxml2 \
   && ! apk info -e libxml2 \
   && rm /etc/nginx/conf.d/default.conf
-COPY nginx/assurer.conf.template /etc/nginx/templates/assurer.conf.template
-COPY --chmod=755 nginx/40-assurer-reload.sh /docker-entrypoint.d/40-assurer-reload.sh
+COPY nginx/wms.conf.template /etc/nginx/templates/wms.conf.template
+COPY --chmod=755 nginx/40-wms-reload.sh /docker-entrypoint.d/40-wms-reload.sh
 # NPM mode (m1-062): outside templates/, so it is rendered only when
-# 35-assurer-npm.sh finds ASSURER_UPSTREAM_PROXY_IP set.
-COPY nginx/assurer-npm.conf.template /etc/nginx/assurer-npm/assurer-npm.conf.template
-COPY --chmod=755 nginx/35-assurer-npm.sh /docker-entrypoint.d/35-assurer-npm.sh
+# 35-wms-npm.sh finds ASSURER_UPSTREAM_PROXY_IP set.
+COPY nginx/wms-npm.conf.template /etc/nginx/wms-npm/wms-npm.conf.template
+COPY --chmod=755 nginx/35-wms-npm.sh /docker-entrypoint.d/35-wms-npm.sh
 
 # One layer of our own (m1-068): ghcr.io refused to take the official image's
 # layers ("unknown blob") on the first release push, while the one-layer app

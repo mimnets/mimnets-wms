@@ -180,8 +180,8 @@ jobs:
       - name: The images are linux/${{ matrix.arch }}
         run: |
           for name in app mongo nginx certbot; do
-            arch="$(docker image inspect -f '{{.Architecture}}' "$ASSURER_REGISTRY/assurer-$name:$ASSURER_IMAGE_TAG")"
-            echo "assurer-$name $arch"
+            arch="$(docker image inspect -f '{{.Architecture}}' "$ASSURER_REGISTRY/wms-$name:$ASSURER_IMAGE_TAG")"
+            echo "wms-$name $arch"
             test "$arch" = "${{ matrix.arch }}"
           done
 
@@ -219,7 +219,7 @@ jobs:
         if: failure()
         run: |
           $S ps -a
-          $S logs --tail 80 | grep -F '[assurer' || true
+          $S logs --tail 80 | grep -F '[wms' || true
 
       - name: Remove the stack
         if: always()
@@ -234,7 +234,7 @@ jobs:
           # Up to 3 tries per image: ghcr.io sometimes answers a push with a
           # passing error (m1-068).
           for name in app mongo nginx certbot; do
-            image="$ASSURER_REGISTRY/assurer-$name:$ASSURER_IMAGE_TAG"
+            image="$ASSURER_REGISTRY/wms-$name:$ASSURER_IMAGE_TAG"
             for try in 1 2 3; do
               docker push --quiet "$image" && break
               [ "$try" = 3 ] && exit 1
@@ -263,7 +263,7 @@ jobs:
         run: |
           printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
           for name in app mongo nginx certbot; do
-            image="$ASSURER_REGISTRY/assurer-$name"
+            image="$ASSURER_REGISTRY/wms-$name"
             docker buildx imagetools create -t "$image:$SHA" "$image:$SHA-amd64" "$image:$SHA-arm64"
             docker buildx imagetools inspect "$image:$SHA" | grep -E 'Name:|Platform:'
           done

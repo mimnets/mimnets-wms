@@ -1,5 +1,5 @@
 # NPM mode (m1-062, D-DB-17 option B; design: docs/milestones/m1-061-npm-proxy-design.md
-# §4). Rendered by 35-assurer-npm.sh only when ${ASSURER_UPSTREAM_PROXY_IP} is set
+# §4). Rendered by 35-wms-npm.sh only when ${ASSURER_UPSTREAM_PROXY_IP} is set
 # (compose.npm.yaml). Nginx Proxy Manager (NPM) terminates TLS and forwards plain
 # HTTP to port 8080 over the assurer-npm network. This port is never published.
 
@@ -23,12 +23,12 @@ server {
   # Apostrophe sets no limit of its own on uploads (m1-055 report).
   client_max_body_size ${ASSURER_MAX_BODY};
 
-  # Keep in step with the 443 block of assurer.conf.template.
+  # Keep in step with the 443 block of wms.conf.template.
   location / {
     limit_req zone=assurer_req burst=${ASSURER_RATE_BURST} nodelay;
 
-    set $assurer_site http://app:3000;
-    proxy_pass $assurer_site;
+    set $wms_site http://app:3000;
+    proxy_pass $wms_site;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     # Replaces anything NPM passed on. NPM forces HTTPS, so the visitor's

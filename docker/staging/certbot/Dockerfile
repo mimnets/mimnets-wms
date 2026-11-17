@@ -3,7 +3,10 @@
 # (critical; v5.9.0 ships zlib 1.3.2). Build context: docker/staging.
 FROM certbot/certbot:v5.9.0@sha256:bc93cb710b413e6b456d622f9b0133b3e109c0a78c2ed9976af43d209b0a1805 AS assembled
 RUN apk add --no-cache --upgrade 'zlib>=1.4-r0'
-COPY --chmod=755 certbot/deploy-hook.sh /usr/local/bin/assurer-deploy-hook
+COPY --chmod=755 certbot/deploy-hook.sh /usr/local/bin/wms-deploy-hook
+# Certificates issued before m1-075 store the hook as assurer-deploy-hook in
+# their renewal file on the certs volume; keep that name until stage 5.
+RUN ln -s wms-deploy-hook /usr/local/bin/assurer-deploy-hook
 
 # One layer of our own, for the same reason as nginx/Dockerfile (m1-068). The
 # base image's settings, declared again; update them with the pinned digest.

@@ -2,5 +2,5 @@
 # Runs the pbm CLI with the pbm user's credentials (m1-055), for docker exec
 # into the pbm service: `$S exec pbm pbmc status` (m1-068).
 set -euo pipefail
-. /usr/local/lib/assurer/pbm-env.sh
+. /usr/local/lib/wms/pbm-env.sh
 exec pbm "$@"

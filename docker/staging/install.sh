@@ -35,7 +35,7 @@ esac
 
 # Everything on screen also goes to a private log outside the clone. The
 # admin password is never read, so it never reaches the log.
-LOG="$HOME/assurer-install-$(date +%Y%m%d-%H%M%S).log"
+LOG="$HOME/wms-install-$(date +%Y%m%d-%H%M%S).log"
 (umask 077; : > "$LOG")
 exec > >(tee -a "$LOG") 2>&1
 
@@ -423,12 +423,12 @@ step7a() {
   cert_real && { say "a real certificate is already in place: $MSG"; record "7 certificate" PASS "$MSG"; return; }
   local email base
   while :; do email=$(ask "E-mail address for Let's Encrypt notices" ""); [[ "$email" == ?*@?*.?* ]] && break; done
-  base="${S[*]} run --rm --entrypoint certbot certbot certonly --non-interactive --webroot -w /var/www/acme -d $DOMAIN --email $email --agree-tos --no-eff-email --deploy-hook assurer-deploy-hook"
+  base="${S[*]} run --rm --entrypoint certbot certbot certonly --non-interactive --webroot -w /var/www/acme -d $DOMAIN --email $email --agree-tos --no-eff-email --deploy-hook wms-deploy-hook"
   show "First a test certificate from Let's Encrypt's staging service (higher rate limits):" \
     "$base --test-cert" "${S[*]} exec nginx nginx -s reload"
   if [ "$(choose "[r]un, [s]kip to the real certificate, or [q]uit?" rsq)" = r ]; then
     "${S[@]}" run --rm -T --entrypoint certbot certbot certonly --non-interactive --webroot -w /var/www/acme \
-      -d "$DOMAIN" --email "$email" --agree-tos --no-eff-email --deploy-hook assurer-deploy-hook --test-cert \
+      -d "$DOMAIN" --email "$email" --agree-tos --no-eff-email --deploy-hook wms-deploy-hook --test-cert \
       && "${S[@]}" exec -T nginx nginx -s reload
     check_loop "7 test certificate" cert_staging || return
   fi
@@ -436,7 +436,7 @@ step7a() {
     "$base --force-renewal" "${S[*]} exec nginx nginx -s reload"
   [ "$(choose "[r]un, [s]kip or [q]uit?" rsq)" = r ] || { record "7 certificate" SKIPPED "no real certificate"; return; }
   "${S[@]}" run --rm -T --entrypoint certbot certbot certonly --non-interactive --webroot -w /var/www/acme \
-    -d "$DOMAIN" --email "$email" --agree-tos --no-eff-email --deploy-hook assurer-deploy-hook --force-renewal \
+    -d "$DOMAIN" --email "$email" --agree-tos --no-eff-email --deploy-hook wms-deploy-hook --force-renewal \
     && "${S[@]}" exec -T nginx nginx -s reload
   check_loop "7 certificate" cert_real
 }
@@ -550,10 +550,10 @@ step8() {
   c=$(head -c 35651584 /dev/zero | dcurl 443 -o /dev/null -w '%{http_code}' -X POST \
     -H 'Expect:' -H 'Content-Type: application/octet-stream' --data-binary @- "https://$DOMAIN/")
   [ "$c" = 413 ] && record "8 34 MB refused" PASS "413" || record "8 34 MB refused" FAIL "$c"
-  if "${S[@]}" exec -T pbm pbmc status > /tmp/assurer-pbm.$$ 2>&1; then
-    grep -iE 'pitr|agent' /tmp/assurer-pbm.$$ | head -5 | sed 's/^/    /'; record "8 PBM status" PASS ""
+  if "${S[@]}" exec -T pbm pbmc status > /tmp/wms-pbm.$$ 2>&1; then
+    grep -iE 'pitr|agent' /tmp/wms-pbm.$$ | head -5 | sed 's/^/    /'; record "8 PBM status" PASS ""
   else record "8 PBM status" FAIL "pbmc status failed"; fi
-  rm -f /tmp/assurer-pbm.$$
+  rm -f /tmp/wms-pbm.$$
 
   if [ "$TTY" -eq 0 ]; then
     record "8 visitor address (PC)" "NOT TESTED" "no terminal"; return

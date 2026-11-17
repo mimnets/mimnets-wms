@@ -22,7 +22,7 @@ services:
       target: build
       args:
         APOS_RELEASE_ID: ${APOS_RELEASE_ID:-docker-local}
-    image: assurer-app-build:${ASSURER_IMAGE_TAG:?set the image tag}
+    image: wms-app-build:${ASSURER_IMAGE_TAG:?set the image tag}
     scale: 0
     # Compose does not pass DOCKER_DEFAULT_PLATFORM on to a service used only
     # as a build context.
