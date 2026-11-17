@@ -45,7 +45,7 @@ export default {
         type: 'relationship',
         label: 'Locations listed in the footer',
         help: 'Optional, in the order shown. Only published locations appear.',
-        withType: 'assurer-location',
+        withType: 'wms-location',
         max: 12,
         builders: {
           project: {
@@ -138,7 +138,7 @@ export default {
         max: 1
       }
     },
-    // robots.txt comes from the environment (modules/assurer-seo), and the
+    // robots.txt comes from the environment (modules/wms-seo), and the
     // site has no search page, so these seo module settings would have no
     // effect.
     remove: [ 'robotsTxtSelection', 'robotsAISelective', 'robotsCustomText', 'seoSearchQueryParam' ],
@@ -190,7 +190,7 @@ export default {
       },
       // @apostrophecms/form adds Google reCAPTCHA settings here under the same
       // handler name. reCAPTCHA sends visitor data to Google, so it is not
-      // offered (m1-019, D-FORM-3); the spam guard is in modules/assurer-forms.
+      // offered (m1-019, D-FORM-3); the spam guard is in modules/wms-forms.
       'apostrophe:modulesRegistered': {
         addFormRecaptchaFields() {}
       }

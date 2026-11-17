@@ -1,4 +1,4 @@
-import { readSecurityEnv, securityHeaderOptions } from '../../assurer-security/lib/config.js';
+import { readSecurityEnv, securityHeaderOptions } from '../../wms-security/lib/config.js';
 
 // Security headers for files served from public/, including /uploads (m1-011).
 // The same values @apostrophecms/security-headers sends on other responses.

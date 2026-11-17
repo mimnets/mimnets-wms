@@ -8,7 +8,7 @@ import {
   parseTrustProxy,
   readSecurityEnv,
   securityHeaderOptions
-} from '../modules/assurer-security/lib/config.js';
+} from '../modules/wms-security/lib/config.js';
 
 test('defaults: plain HTTP, no proxy trusted, no HSTS, default form limit', () => {
   assert.deepEqual(readSecurityEnv({}), {

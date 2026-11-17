@@ -1,7 +1,7 @@
 // WordPress import test (m1-067). Starts a small fake WordPress (public REST
 // API and uploads, synthetic content, the repository's demo images and PDF)
 // on a free loopback port, then:
-//   default        runs `assurer-wp-import:run --execute` twice: the first
+//   default        runs `wms-wp-import:run --execute` twice: the first
 //                  run creates drafts, the second must change nothing
 //   --verify-only  with the site running: the imported pages stay private
 //                  and the PDF redirect points at the new file
@@ -121,7 +121,7 @@ async function startFixture() {
 function runImport(origin) {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [
-      'app', 'assurer-wp-import:run', '--execute', `--source=${origin}`
+      'app', 'wms-wp-import:run', '--execute', `--source=${origin}`
     ], {
       cwd: root,
       env: process.env,
@@ -189,7 +189,7 @@ if (VERIFY_ONLY) {
     const visitor = await fetch(`${BASE_URL}${page.slug}`, { redirect: 'manual' });
     check(visitor.status === 404, `logged out, imported draft ${page.slug} is not public (${visitor.status})`);
   }
-  const products = imported((await api('assurer-product?aposMode=published&perPage=100')).results);
+  const products = imported((await api('wms-product?aposMode=published&perPage=100')).results);
   check(products.length === 0, `no imported product has a published version (${products.length})`);
   const res = await fetch(`${BASE_URL}${PDF_PATH}`, { redirect: 'manual' });
   const location = res.headers.get('location') || '';

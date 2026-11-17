@@ -11,11 +11,11 @@ export default {
         label: 'Default'
       },
       {
-        name: 'assurer-division-page',
+        name: 'wms-division-page',
         label: 'Division / overview'
       },
       {
-        name: 'assurer-product-category-page',
+        name: 'wms-product-category-page',
         label: 'Product category'
       },
       {

@@ -33,9 +33,9 @@ test('every place uses groups in the same order', () => {
 test('page main areas keep every widget they had and gain the starters', () => {
   const page = types(pageArea);
   for (const type of [
-    'assurer-hero', 'assurer-slideshow', 'assurer-product-grid', 'assurer-feature-grid',
-    'assurer-stats', 'assurer-product-list', 'assurer-organizations', 'assurer-people',
-    'assurer-locations', 'assurer-downloads', 'assurer-gallery', '@apostrophecms/form',
+    'wms-hero', 'wms-slideshow', 'wms-product-grid', 'wms-feature-grid',
+    'wms-stats', 'wms-product-list', 'wms-organizations', 'wms-people',
+    'wms-locations', 'wms-downloads', 'wms-gallery', '@apostrophecms/form',
     '@apostrophecms/layout', '@apostrophecms/rich-text', '@apostrophecms/image',
     '@apostrophecms/video', 'layout-3', 'layout-4', 'layout-6'
   ]) {
@@ -46,9 +46,9 @@ test('page main areas keep every widget they had and gain the starters', () => {
 
 test('a layout column offers the hero, slideshow and grids, no layout starter', () => {
   const column = types(columnArea);
-  assert.ok(column.includes('assurer-hero'));
-  assert.ok(column.includes('assurer-slideshow'));
-  assert.ok(column.includes('assurer-feature-grid'));
+  assert.ok(column.includes('wms-hero'));
+  assert.ok(column.includes('wms-slideshow'));
+  assert.ok(column.includes('wms-feature-grid'));
   assert.ok(column.includes('nested-layout'));
   for (const type of [ '@apostrophecms/layout', 'layout-3', 'layout-4', 'layout-6' ]) {
     assert.ok(!column.includes(type), type);
@@ -57,10 +57,10 @@ test('a layout column offers the hero, slideshow and grids, no layout starter', 
 
 test('a nested column offers the simple set and grids, no hero and no layout', () => {
   const nested = types(nestedColumnArea);
-  for (const type of [ '@apostrophecms/rich-text', 'assurer-stats', 'assurer-gallery', 'assurer-people' ]) {
+  for (const type of [ '@apostrophecms/rich-text', 'wms-stats', 'wms-gallery', 'wms-people' ]) {
     assert.ok(nested.includes(type), type);
   }
-  for (const type of [ 'assurer-hero', 'assurer-slideshow', 'nested-layout', '@apostrophecms/layout' ]) {
+  for (const type of [ 'wms-hero', 'wms-slideshow', 'nested-layout', '@apostrophecms/layout' ]) {
     assert.ok(!nested.includes(type), type);
   }
 });

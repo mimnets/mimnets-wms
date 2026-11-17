@@ -7,13 +7,13 @@ import test from 'node:test';
 
 import {
   isValidAddress, parseRetentionDays, readNotificationEnv, readRetentionEnv
-} from '../modules/assurer-forms/lib/config.js';
+} from '../modules/wms-forms/lib/config.js';
 import {
   buildNotification, csvCell, csvRow, headerText
-} from '../modules/assurer-forms/lib/format.js';
+} from '../modules/wms-forms/lib/format.js';
 import {
   HONEYPOT_FIELD, MIN_FILL_MS, TOKEN_FIELD, checkSubmission, issueFillToken
-} from '../modules/assurer-forms/lib/guard.js';
+} from '../modules/wms-forms/lib/guard.js';
 
 const SMTP = {
   APOS_SMTP_HOST: 'smtp.example.com',

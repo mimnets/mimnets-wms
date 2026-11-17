@@ -8,7 +8,7 @@ export default {
   },
   // "Style" in the link dialog (m1-071): a link can look like a button.
   // Core writes the value as an HTML attribute and allows it in the
-  // sanitizer; the CSS is in _assurer.scss.
+  // sanitizer; the CSS is in _wms.scss.
   linkFields: {
     add: {
       linkStyle: {

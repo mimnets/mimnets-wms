@@ -10,9 +10,9 @@ import { after, test } from 'node:test';
 import { byDisplayOrder } from '../lib/display-order.js';
 import { PHONE_PATTERN } from '../lib/contact.js';
 import { invalidWebUrls, isWebUrl } from '../lib/web-url.js';
-import { DEMO } from '../modules/assurer-demo/lib/corporate.js';
-import { CONFIRM_FLAG, seedRefuseReason } from '../modules/assurer-demo/lib/guard.js';
-import { editorRefuseReason } from '../modules/assurer-test/lib/guard.js';
+import { DEMO } from '../modules/wms-demo/lib/corporate.js';
+import { CONFIRM_FLAG, seedRefuseReason } from '../modules/wms-demo/lib/guard.js';
+import { editorRefuseReason } from '../modules/wms-test/lib/guard.js';
 
 const tmp = mkdtempSync(path.join(os.tmpdir(), 'content-model-test-'));
 const opts = { tmpDirs: [ tmp ] };

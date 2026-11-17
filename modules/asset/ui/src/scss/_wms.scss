@@ -1,0 +1,357 @@
+// Assurer project styles (placeholder theme). Colours, spacing and shape
+// come from the design tokens in _tokens.scss (m1-020).
+
+body {
+  // Undoes the development-only guard in views/layout.jsx (m1-024).
+  visibility: visible;
+  color: var(--wms-color-text);
+}
+
+// Signed in only (m1-026). Core mounts the admin bar into this empty element
+// after the first paint, and its spacer then moved the page down. Reserve the
+// bar's height until it mounts: 56 px for the top row (55 px and a 1 px
+// border), 111 px with the context bar (views/layout.jsx adds the class).
+// Values measured with TheAposAdminBar.vue in Apostrophe 4.34.0; check them
+// again after an Apostrophe upgrade.
+#apos-admin-bar:empty {
+  height: 56px;
+}
+
+.wms-has-context-bar #apos-admin-bar:empty {
+  height: 111px;
+}
+
+.wms-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.wms-demo-notice {
+  padding: 6px 16px;
+  background: var(--wms-color-notice-bg);
+  color: var(--wms-color-notice-text);
+  font-size: 13px;
+  text-align: center;
+}
+
+.wms-header,
+.wms-main,
+.wms-footer {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.wms-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 16px;
+}
+
+.wms-header__brand {
+  color: var(--wms-color-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+
+  span { color: var(--wms-color-accent); }
+  &:visited { color: var(--wms-color-primary); }
+}
+
+.wms-header__logo {
+  display: block;
+  width: auto;
+  height: 56px;
+}
+
+.wms-main {
+  flex-grow: 1;
+}
+
+.wms-footer {
+  padding: 32px 16px;
+  color: var(--wms-color-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.wms-hint {
+  padding: 16px;
+  border: 1px dashed var(--wms-color-accent);
+  border-radius: var(--wms-radius);
+  background: var(--wms-color-surface-alt);
+}
+
+// Buttons
+.wms-button {
+  display: inline-block;
+  padding: 12px 24px;
+  border: 2px solid var(--wms-color-accent);
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+
+  &--primary,
+  &--primary:visited {
+    background: var(--wms-color-accent);
+    color: var(--wms-color-on-accent);
+  }
+
+  &--outline,
+  &--outline:visited {
+    background: transparent;
+    color: var(--wms-color-accent);
+  }
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    filter: brightness(1.1);
+  }
+}
+
+// Rich Text links styled as buttons (m1-071): "Style" in the link dialog
+// writes `data-link-style`.
+a[data-link-style='button'],
+a[data-link-style='button-outline'] {
+  @extend .wms-button;
+}
+
+a[data-link-style='button'] {
+  @extend .wms-button--primary;
+}
+
+a[data-link-style='button-outline'] {
+  @extend .wms-button--outline;
+}
+
+// Hero
+.wms-hero {
+  position: relative;
+  margin: 0 0 var(--wms-space-section);
+  padding: 96px 24px;
+  border-radius: var(--wms-radius);
+  background-color: var(--wms-color-primary);
+  background-position: center;
+  background-size: cover;
+  color: var(--wms-color-on-primary);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &--overlay-dark::before { background: var(--wms-overlay-dark); }
+  &--overlay-light::before { background: var(--wms-overlay-light); }
+  &--overlay-light { color: var(--wms-color-primary); }
+
+  h1, h2 {
+    margin: 0 0 16px;
+    // `cqi`: the hero's own width, so it also fits in a layout column (m1-071).
+    font-size: clamp(2rem, 5cqi, 3.5rem);
+    font-weight: 700;
+    text-align: left;
+  }
+
+  p { font-size: 1.15rem; }
+}
+
+.wms-hero__inner {
+  position: relative;
+  max-width: 720px;
+}
+
+.wms-hero__eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.wms-hero__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.wms-hero--overlay-dark .wms-button--outline,
+.wms-hero--overlay-dark .wms-button--outline:visited,
+.wms-hero--overlay-none .wms-button--outline,
+.wms-hero--overlay-none .wms-button--outline:visited {
+  border-color: var(--wms-color-on-primary);
+  color: var(--wms-color-on-primary);
+}
+
+// Slideshow: _slideshow.scss (m1-072)
+
+// Product cards
+.wms-products {
+  margin: 0 0 var(--wms-space-section);
+}
+
+.wms-products__intro {
+  max-width: 720px;
+  margin: 0 auto 24px;
+  text-align: center;
+}
+
+// The cards area renders Apostrophe's area wrapper; lay out its children.
+.wms-products__grid > [data-apos-area],
+.wms-products__grid > .apos-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+// Columns follow the width of `.wms-products` (a size container, see
+// _sections.scss), so the grid also fits in a layout column (m1-071).
+@container (min-width: 560px) {
+  .wms-products__grid > [data-apos-area],
+  .wms-products__grid > .apos-area {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 720px) {
+  .wms-products__grid--cols-3 > [data-apos-area],
+  .wms-products__grid--cols-3 > .apos-area,
+  .wms-products__grid--cols-4 > [data-apos-area],
+  .wms-products__grid--cols-4 > .apos-area {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@container (min-width: 900px) {
+  .wms-products__grid--cols-4 > [data-apos-area],
+  .wms-products__grid--cols-4 > .apos-area {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.wms-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--wms-color-border);
+  border-radius: var(--wms-radius);
+  background: var(--wms-color-surface);
+  overflow: hidden;
+}
+
+.wms-card__media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.wms-card__body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.wms-card__badge {
+  align-self: flex-start;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--wms-color-surface-alt);
+  color: var(--wms-color-accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.wms-card__title {
+  margin: 0 0 8px;
+  text-align: left;
+}
+
+.wms-card__link {
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--wms-color-accent);
+  font-weight: 600;
+}
+
+// Contact form (@apostrophecms/form with classPrefix `wms-form`)
+.apos-form,
+[data-apos-form-form] {
+  max-width: 640px;
+  margin: 0 auto var(--wms-space-section);
+}
+
+.wms-form__label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.wms-form__input,
+.wms-form__textarea,
+.wms-form__select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--wms-color-border-strong);
+  border-radius: var(--wms-radius-small);
+  font: inherit;
+}
+
+.wms-form__error {
+  color: var(--wms-color-danger);
+  font-size: 14px;
+}
+
+// Spam-guard honeypot (views/widget.jsx of form-widget): off screen rather
+// than display: none, which some bots skip; aria-hidden and tabindex="-1"
+// keep it away from people.
+.wms-form__trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.wms-form__privacy {
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+.wms-form__submit {
+  margin-top: 16px;
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--wms-color-accent);
+  color: var(--wms-color-on-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    filter: brightness(1.1);
+  }
+}
+
+.wms-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  vertical-align: middle;
+}

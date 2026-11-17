@@ -145,19 +145,19 @@ if (VERIFY_ONLY) {
 const co = (method, url, body) => call(tokens.contributor, method, url, body);
 
 // --- Pieces: draft, refused publish, submit, editor publishes --------------
-let r = await co('POST', 'assurer-product', {
+let r = await co('POST', 'wms-product', {
   title: TITLES.approved,
   summary: 'Contributor draft.'
 });
 check('contributor creates a product draft', r.status === 200 && r.json.aposMode === 'draft', String(r.status));
 const approved = r.json;
-check('the new draft is not published', !(await published('assurer-product', approved)));
+check('the new draft is not published', !(await published('wms-product', approved)));
 
-r = await co('POST', `assurer-product/${approved._id}/publish`, {});
+r = await co('POST', `wms-product/${approved._id}/publish`, {});
 check('contributor cannot publish (refused by the server)', refused(r), String(r.status));
-check('still not published after the attempt', !(await published('assurer-product', approved)));
+check('still not published after the attempt', !(await published('wms-product', approved)));
 
-r = await co('POST', `assurer-product/${approved._id}/submit`, {});
+r = await co('POST', `wms-product/${approved._id}/submit`, {});
 check('contributor submits the draft for review',
   r.status === 200 && r.json.byId === contributorUser?._id && Boolean(r.json.at),
   String(r.status));
@@ -165,70 +165,70 @@ check('contributor submits the draft for review',
 let tray = await submittedList(tokens.editor);
 const item = tray.find(d => d.aposDocId === approved.aposDocId);
 check('editor sees the draft in Submitted drafts, with the submitter',
-  item?.type === 'assurer-product' && item?.submitted?.byId === contributorUser?._id);
-check('submitted draft is still not public', !(await published('assurer-product', approved)));
+  item?.type === 'wms-product' && item?.submitted?.byId === contributorUser?._id);
+check('submitted draft is still not public', !(await published('wms-product', approved)));
 
-r = await call(tokens.editor, 'PATCH', `assurer-product/${approved._id}`, { summary: 'Checked by the editor.' });
+r = await call(tokens.editor, 'PATCH', `wms-product/${approved._id}`, { summary: 'Checked by the editor.' });
 check('editor can change the submitted draft before publishing', r.status === 200, String(r.status));
-r = await call(tokens.editor, 'POST', `assurer-product/${approved._id}/publish`, {});
+r = await call(tokens.editor, 'POST', `wms-product/${approved._id}/publish`, {});
 check('editor publishes the submitted draft', r.status === 200, String(r.status));
-const approvedLive = await published('assurer-product', approved);
+const approvedLive = await published('wms-product', approved);
 check('published version has the editor\'s text', approvedLive?.summary === 'Checked by the editor.');
 tray = await submittedList(tokens.editor);
 check('publishing clears the submission', !tray.some(d => d.aposDocId === approved.aposDocId));
 
 // Editing a published piece makes a draft only.
-r = await co('PATCH', `assurer-product/${approved._id}`, { summary: 'Unreviewed change.' });
+r = await co('PATCH', `wms-product/${approved._id}`, { summary: 'Unreviewed change.' });
 check('contributor edits a published product (draft only)', r.status === 200, String(r.status));
 check('published product unchanged by the contributor edit',
-  (await published('assurer-product', approved))?.summary === 'Checked by the editor.');
-r = await call(tokens.contributor, 'PATCH', `assurer-product/${approved.aposDocId}:en:published`,
+  (await published('wms-product', approved))?.summary === 'Checked by the editor.');
+r = await call(tokens.contributor, 'PATCH', `wms-product/${approved.aposDocId}:en:published`,
   { summary: 'Direct write to the published version.' }, { draft: false });
 check('contributor cannot write the published version directly', refused(r), String(r.status));
 check('published product still unchanged',
-  (await published('assurer-product', approved))?.summary === 'Checked by the editor.');
+  (await published('wms-product', approved))?.summary === 'Checked by the editor.');
 
 // Archive, delete and unpublish of published content need publish rights.
-r = await co('POST', `assurer-product/${approved._id}/unpublish`, {});
+r = await co('POST', `wms-product/${approved._id}/unpublish`, {});
 check('contributor cannot unpublish', refused(r), String(r.status));
-r = await co('DELETE', `assurer-product/${approved._id}`);
+r = await co('DELETE', `wms-product/${approved._id}`);
 check('contributor cannot delete a published product', refused(r), String(r.status));
 // Core deletes the draft before refusing the published copy; the project
 // guard (modules/@apostrophecms/doc) refuses first, so nothing is lost.
-check('the draft survives the refused delete', Boolean(await draftOf('assurer-product', approved)));
-r = await co('PATCH', `assurer-product/${approved._id}`, { archived: true });
+check('the draft survives the refused delete', Boolean(await draftOf('wms-product', approved)));
+r = await co('PATCH', `wms-product/${approved._id}`, { archived: true });
 check('contributor cannot archive a published product', r.status !== 200, String(r.status));
-const afterArchive = await published('assurer-product', approved);
+const afterArchive = await published('wms-product', approved);
 check('published product still live and not archived', afterArchive && !afterArchive.archived);
-await api(tokens.editor, 'POST', `assurer-product/${approved._id}/revert-draft-to-published`, {});
+await api(tokens.editor, 'POST', `wms-product/${approved._id}/revert-draft-to-published`, {});
 
 // --- Dismiss (editor) and withdraw (contributor) -------------------------
-r = await co('POST', 'assurer-product', {
+r = await co('POST', 'wms-product', {
   title: TITLES.dismissed,
   summary: 'Will be dismissed.'
 });
 const dismissed = r.json;
-await api(tokens.contributor, 'POST', `assurer-product/${dismissed._id}/submit`, {});
-r = await call(tokens.editor, 'POST', `assurer-product/${dismissed._id}/dismiss-submission`, {});
+await api(tokens.contributor, 'POST', `wms-product/${dismissed._id}/submit`, {});
+r = await call(tokens.editor, 'POST', `wms-product/${dismissed._id}/dismiss-submission`, {});
 check('editor dismisses a submission', r.status === 200, String(r.status));
 tray = await submittedList(tokens.editor);
-const dismissedDraft = await findOne(tokens.contributor, 'assurer-product', TITLES.dismissed);
+const dismissedDraft = await findOne(tokens.contributor, 'wms-product', TITLES.dismissed);
 check('dismissed: off the list, draft kept, not published',
   !tray.some(d => d.aposDocId === dismissed.aposDocId) && dismissedDraft?.summary === 'Will be dismissed.' &&
-  !(await published('assurer-product', dismissed)));
+  !(await published('wms-product', dismissed)));
 
-r = await co('POST', 'assurer-product', {
+r = await co('POST', 'wms-product', {
   title: TITLES.pending,
   summary: 'Left waiting for review.'
 });
 const pending = r.json;
-await api(tokens.contributor, 'POST', `assurer-product/${pending._id}/submit`, {});
-r = await co('POST', `assurer-product/${pending._id}/dismiss-submission`, {});
+await api(tokens.contributor, 'POST', `wms-product/${pending._id}/submit`, {});
+r = await co('POST', `wms-product/${pending._id}/dismiss-submission`, {});
 check('contributor withdraws their own submission', r.status === 200, String(r.status));
 check('withdrawn submission leaves the list',
   !(await submittedList(tokens.editor)).some(d => d.aposDocId === pending.aposDocId));
 // Submit again and leave it waiting for the restart check.
-await api(tokens.contributor, 'POST', `assurer-product/${pending._id}/submit`, {});
+await api(tokens.contributor, 'POST', `wms-product/${pending._id}/submit`, {});
 const ownList = await submittedList(tokens.contributor);
 check('contributor\'s Submitted drafts list shows only their own',
   ownList.length > 0 && ownList.every(d => d.submitted?.byId === contributorUser?._id));
@@ -285,18 +285,18 @@ check('contributor cannot delete the published page; page and draft kept',
   Boolean(await pageBySlug(tokens.admin, SLUGS.proposed)), String(r.status));
 
 // The guard leaves never-published drafts and editors alone.
-r = await co('POST', 'assurer-product', { title: `${P} throwaway draft` });
+r = await co('POST', 'wms-product', { title: `${P} throwaway draft` });
 const throwaway = r.json;
-r = await co('DELETE', `assurer-product/${throwaway._id}`);
+r = await co('DELETE', `wms-product/${throwaway._id}`);
 check('contributor can still delete their own never-published draft',
-  r.status === 200 && !(await draftOf('assurer-product', throwaway)), String(r.status));
-r = await call(tokens.editor, 'POST', 'assurer-product', { title: `${P} editor delete` });
+  r.status === 200 && !(await draftOf('wms-product', throwaway)), String(r.status));
+r = await call(tokens.editor, 'POST', 'wms-product', { title: `${P} editor delete` });
 const editorDoc = r.json;
-await api(tokens.editor, 'POST', `assurer-product/${editorDoc._id}/publish`, {});
-r = await call(tokens.editor, 'DELETE', `assurer-product/${editorDoc._id}`);
+await api(tokens.editor, 'POST', `wms-product/${editorDoc._id}/publish`, {});
+r = await call(tokens.editor, 'DELETE', `wms-product/${editorDoc._id}`);
 check('editor can still delete published content (draft and published copy)',
-  r.status === 200 && !(await draftOf('assurer-product', editorDoc)) &&
-  !(await published('assurer-product', editorDoc)), String(r.status));
+  r.status === 200 && !(await draftOf('wms-product', editorDoc)) &&
+  !(await published('wms-product', editorDoc)), String(r.status));
 
 // --- Global Content: draft only (option B, not B1) -------------------------
 const g = await api(tokens.admin, 'GET', '@apostrophecms/global');
@@ -379,7 +379,7 @@ check('contributor cannot raise their own role', refused(r) && roleAfter === 'co
     alt: `${P} editor image alt text`,
     attachment: editorAttachment
   });
-  r = await co('PATCH', `assurer-product/${dismissed._id}`, { _image: [ image ] });
+  r = await co('PATCH', `wms-product/${dismissed._id}`, { _image: [ image ] });
   check('contributor chooses an existing image for a draft',
     r.status === 200 && (r.json.imageIds || []).length === 1, String(r.status));
 }
@@ -387,15 +387,15 @@ check('contributor cannot raise their own role', refused(r) && roleAfter === 'co
 await finish();
 
 async function verifyAfterRestart() {
-  const a = await findOne(tokens.admin, 'assurer-product', TITLES.approved);
-  check('after restart: approved product still published', a && (await published('assurer-product', a))?.summary === 'Checked by the editor.');
-  const d = await findOne(tokens.admin, 'assurer-product', TITLES.dismissed);
+  const a = await findOne(tokens.admin, 'wms-product', TITLES.approved);
+  check('after restart: approved product still published', a && (await published('wms-product', a))?.summary === 'Checked by the editor.');
+  const d = await findOne(tokens.admin, 'wms-product', TITLES.dismissed);
   check('after restart: dismissed product still a draft, not submitted',
-    d && !d.submitted && !(await published('assurer-product', d)));
-  const p = await findOne(tokens.admin, 'assurer-product', TITLES.pending);
+    d && !d.submitted && !(await published('wms-product', d)));
+  const p = await findOne(tokens.admin, 'wms-product', TITLES.pending);
   const tray = await submittedList(tokens.editor);
   check('after restart: pending submission still waiting for the editor',
-    p && tray.some(x => x.aposDocId === p.aposDocId) && !(await published('assurer-product', p)));
+    p && tray.some(x => x.aposDocId === p.aposDocId) && !(await published('wms-product', p)));
   check('after restart: approved page change still public',
     (await page(SLUGS.existing)).html.includes('existing page, revised'));
   const existing = await pageBySlug(tokens.admin, SLUGS.existing);

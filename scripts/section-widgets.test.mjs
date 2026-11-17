@@ -16,7 +16,7 @@ import { fileSize, fileType } from '../lib/file-meta.js';
 import {
   LIMIT_MAX, docIds, listLimit, loadListed, modeField
 } from '../lib/listing.js';
-import { DEMO } from '../modules/assurer-demo/lib/corporate.js';
+import { DEMO } from '../modules/wms-demo/lib/corporate.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 

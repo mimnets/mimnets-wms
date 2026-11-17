@@ -100,7 +100,7 @@ as_app node app @apostrophecms/migration:migrate
 
 if [ ! -e "$SECRETS/.content-ready" ]; then
   log "First start: loading demo content and creating the admin account"
-  as_app node app assurer-demo:seed
+  as_app node app wms-demo:seed
   # The prompt echoes what it reads, so its output must stay out of the logs.
   echo "${ASSURER_ADMIN_PASSWORD:-admin}" | as_app node app @apostrophecms/user:add admin admin > /dev/null
   touch "$SECRETS/.content-ready"

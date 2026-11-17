@@ -17,14 +17,14 @@ function setExpanded(button, open) {
 }
 
 function enhance(nav) {
-  if (nav.dataset.assurerNavReady) {
+  if (nav.dataset.wmsNavReady) {
     return;
   }
-  nav.dataset.assurerNavReady = 'true';
-  nav.classList.add('assurer-nav--enhanced');
+  nav.dataset.wmsNavReady = 'true';
+  nav.classList.add('wms-nav--enhanced');
 
-  const toggle = nav.querySelector('[data-assurer-nav-toggle]');
-  const expanders = [ ...nav.querySelectorAll('[data-assurer-submenu-toggle]') ];
+  const toggle = nav.querySelector('[data-wms-nav-toggle]');
+  const expanders = [ ...nav.querySelectorAll('[data-wms-submenu-toggle]') ];
   toggle.hidden = false;
   expanders.forEach(button => {
     button.hidden = false;
@@ -82,9 +82,9 @@ function enhance(nav) {
     if (!window.matchMedia(DESKTOP).matches) {
       return;
     }
-    const item = event.target.closest('.assurer-nav__item--parent');
+    const item = event.target.closest('.wms-nav__item--parent');
     if (item && !item.contains(event.relatedTarget)) {
-      const button = item.querySelector('[data-assurer-submenu-toggle]');
+      const button = item.querySelector('[data-wms-submenu-toggle]');
       if (button) {
         setExpanded(button, false);
       }
@@ -100,6 +100,6 @@ function enhance(nav) {
 
 export default () => {
   apos.util.onReady(() => {
-    document.querySelectorAll('[data-assurer-nav]').forEach(enhance);
+    document.querySelectorAll('[data-wms-nav]').forEach(enhance);
   });
 };

@@ -26,7 +26,7 @@ function DemoNotice() {
     return null;
   }
   return (
-    <div className="assurer-demo-notice" role="note">
+    <div className="wms-demo-notice" role="note">
       Demonstration site — Milestone 0 proof of concept. Content is placeholder only.
     </div>
   );
@@ -71,40 +71,40 @@ function Nav({
     return null;
   }
   return (
-    <nav className="assurer-nav" aria-label="Main" data-assurer-nav>
+    <nav className="wms-nav" aria-label="Main" data-wms-nav>
       <button
-        className="assurer-nav__toggle"
+        className="wms-nav__toggle"
         type="button"
         aria-expanded="false"
-        aria-controls="assurer-nav-menu"
-        data-assurer-nav-toggle
+        aria-controls="wms-nav-menu"
+        data-wms-nav-toggle
         hidden
       >
-        <span className="assurer-nav__toggle-icon" aria-hidden="true" />
+        <span className="wms-nav__toggle-icon" aria-hidden="true" />
         Menu
       </button>
-      <ul className="assurer-nav__menu" id="assurer-nav-menu">
+      <ul className="wms-nav__menu" id="wms-nav-menu">
         {items.map(item => {
           const children = item._children || [];
-          const submenuId = `assurer-submenu-${item.aposDocId}`;
+          const submenuId = `wms-submenu-${item.aposDocId}`;
           return (
-            <li className={`assurer-nav__item${children.length ? ' assurer-nav__item--parent' : ''}`}>
-              <NavLink item={item} page={page} className="assurer-nav__link" />
+            <li className={`wms-nav__item${children.length ? ' wms-nav__item--parent' : ''}`}>
+              <NavLink item={item} page={page} className="wms-nav__link" />
               {children.length > 0 && (
                 <>
                   <button
-                    className="assurer-nav__expand"
+                    className="wms-nav__expand"
                     type="button"
                     aria-expanded="false"
                     aria-controls={submenuId}
-                    data-assurer-submenu-toggle
+                    data-wms-submenu-toggle
                     hidden
                   >
-                    <span className="assurer-visually-hidden">{`${item.title} submenu`}</span>
+                    <span className="wms-visually-hidden">{`${item.title} submenu`}</span>
                   </button>
-                  <ul className="assurer-nav__submenu" id={submenuId}>
+                  <ul className="wms-nav__submenu" id={submenuId}>
                     {children.map(child => (
-                      <li><NavLink item={child} page={page} className="assurer-nav__sublink" /></li>
+                      <li><NavLink item={child} page={page} className="wms-nav__sublink" /></li>
                     ))}
                   </ul>
                 </>
@@ -113,8 +113,8 @@ function Nav({
           );
         })}
         {ctaHref && (
-          <li className="assurer-nav__item assurer-nav__item--cta">
-            <a className="assurer-button assurer-button--primary" href={ctaHref}>{global.linkText}</a>
+          <li className="wms-nav__item wms-nav__item--cta">
+            <a className="wms-button wms-button--primary" href={ctaHref}>{global.linkText}</a>
           </li>
         )}
       </ul>
@@ -135,9 +135,9 @@ const LOGO = {
 
 function BrandMark() {
   return (
-    <a className="assurer-header__brand" href="/">
+    <a className="wms-header__brand" href="/">
       {LOGO
-        ? <img className="assurer-header__logo" src={LOGO.src} alt="Assurer World" width={LOGO.width} height={LOGO.height} />
+        ? <img className="wms-header__logo" src={LOGO.src} alt="Assurer World" width={LOGO.width} height={LOGO.height} />
         : <>Assurer <span>World</span></>}
     </a>
   );
@@ -156,7 +156,7 @@ function FaviconLinks() {
 
 // Development only (m1-024). The Vite dev server injects the site CSS by
 // script after the first paint, so every refresh showed the page unstyled.
-// Hide the body until the site CSS arrives (_assurer.scss makes it visible
+// Hide the body until the site CSS arrives (_wms.scss makes it visible
 // again); the animation reveals it after 3 s if the CSS never loads.
 // Production links the CSS in <head>, which already blocks rendering.
 // The body margin and the skip link are set as the site CSS sets them
@@ -169,7 +169,7 @@ function DevStyleGuard({ apos }) {
   }
   return (
     <style>
-      {':where(body) { margin: 0; visibility: hidden; animation: assurer-dev-reveal 0s 3s forwards; } @keyframes assurer-dev-reveal { to { visibility: visible; } } :where(.assurer-skip-link) { position: absolute; }'}
+      {':where(body) { margin: 0; visibility: hidden; animation: wms-dev-reveal 0s 3s forwards; } @keyframes wms-dev-reveal { to { visibility: visible; } } :where(.wms-skip-link) { position: absolute; }'}
     </style>
   );
 }
@@ -178,11 +178,11 @@ function Header({
   user, home, page, global
 }) {
   return (
-    <header className="assurer-header">
+    <header className="wms-header">
       <BrandMark />
       <Nav home={home} page={page} global={global} />
       {!user && (
-        <a className="assurer-button assurer-button--outline assurer-header__login" href="/login">Log in</a>
+        <a className="wms-button wms-button--outline wms-header__login" href="/login">Log in</a>
       )}
     </header>
   );
@@ -196,10 +196,10 @@ function Breadcrumbs({ data }) {
     return null;
   }
   return (
-    <nav className="assurer-breadcrumbs" aria-label="Breadcrumb">
-      <ol className="assurer-breadcrumbs__list">
+    <nav className="wms-breadcrumbs" aria-label="Breadcrumb">
+      <ol className="wms-breadcrumbs__list">
         {items.map(item => (
-          <li className="assurer-breadcrumbs__item">
+          <li className="wms-breadcrumbs__item">
             {item.current
               ? <span aria-current="page">{item.title}</span>
               : <a href={item.url}>{item.title}</a>}
@@ -219,11 +219,11 @@ function Footer({ global = {} }) {
   // Only a published page is joined for visitors (m1-019).
   const privacyPage = global._privacyPage?.[0];
   return (
-    <footer className="assurer-footer">
-      {global.footerText && <p className="assurer-footer__text">{global.footerText}</p>}
+    <footer className="wms-footer">
+      {global.footerText && <p className="wms-footer__text">{global.footerText}</p>}
       {hasContact && (
-        <address className="assurer-footer__contact">
-          {global.contactAddress && <span className="assurer-footer__address">{global.contactAddress}</span>}
+        <address className="wms-footer__contact">
+          {global.contactAddress && <span className="wms-footer__address">{global.contactAddress}</span>}
           {global.contactPhone && (
             <a href={`tel:${global.contactPhone.replace(/[^+0-9]/g, '')}`}>{global.contactPhone}</a>
           )}
@@ -231,26 +231,26 @@ function Footer({ global = {} }) {
         </address>
       )}
       {locations.length > 0 && (
-        <ul className="assurer-footer__locations" aria-label="Locations">
+        <ul className="wms-footer__locations" aria-label="Locations">
           {locations.map(location => (
             <li>{location.city ? `${location.city}, ${location.country}` : location.title}</li>
           ))}
         </ul>
       )}
       {social.length > 0 && (
-        <ul className="assurer-footer__social" aria-label="Social media">
+        <ul className="wms-footer__social" aria-label="Social media">
           {social.map(link => (
             <li><a href={link.url} rel="noopener">{SOCIAL_LABELS[link.network] || link.network}</a></li>
           ))}
         </ul>
       )}
       {privacyPage?._url && (
-        <p className="assurer-footer__privacy">
+        <p className="wms-footer__privacy">
           <a href={privacyPage._url}>Privacy notice</a>
         </p>
       )}
       {(global.copyrightName || DEMO_SITE) && (
-        <p className="assurer-footer__legal">
+        <p className="wms-footer__legal">
           {global.copyrightName
             ? `© ${new Date().getFullYear()} ${global.copyrightName}`
             : '© Assurer World — demonstration content. Built with ApostropheCMS Community Edition.'}
@@ -260,7 +260,7 @@ function Footer({ global = {} }) {
   );
 }
 
-// Signed in only (m1-026): the class tells _assurer.scss to reserve room for
+// Signed in only (m1-026): the class tells _wms.scss to reserve room for
 // the admin bar's context bar before the bar mounts. Same condition as core's
 // context bar (admin-bar getBrowserData and TheAposContextBar.vue) for a
 // single-locale site: a page or piece the user can edit, whose type has the
@@ -271,7 +271,7 @@ function contextBarClass(data, apos) {
     return undefined;
   }
   return apos.doc.getManager(context.type)?.options.contextBar
-    ? 'assurer-has-context-bar'
+    ? 'wms-has-context-bar'
     : undefined;
 }
 
@@ -293,12 +293,12 @@ export default function (data, { Extend, apos }) {
       bodyClass={contextBarClass(data, apos)}
       extraHead={<><FaviconLinks /><DevStyleGuard apos={apos} /></>}
       main={
-        <div className="assurer-wrapper">
-          <a className="assurer-skip-link" href="#main-content">Skip to content</a>
+        <div className="wms-wrapper">
+          <a className="wms-skip-link" href="#main-content">Skip to content</a>
           <DemoNotice />
           <Header user={data.user} home={data.home} page={data.page} global={data.global} />
           <Breadcrumbs data={data} />
-          <main className="assurer-main" id="main-content" tabindex="-1">
+          <main className="wms-main" id="main-content" tabindex="-1">
             {data.main}
           </main>
           <Footer global={data.global} />

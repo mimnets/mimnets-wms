@@ -7,9 +7,9 @@ export default function ({ page, user }, { Extend, Area }) {
     <Extend
       templateName="layout.jsx"
       main={
-        <div className="assurer-home">
+        <div className="wms-home">
           {user && !(page.main?.items?.length) && (
-            <p className="assurer-hint">
+            <p className="wms-hint">
               This page is empty. Choose <strong>Edit</strong> in the admin bar, then use
               the <strong>+</strong> button to add an Assurer Hero, Slideshow, Product Cards
               or Form section. Or run <code>npm run seed:demo</code> to load the sample layout.

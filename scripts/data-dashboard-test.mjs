@@ -21,7 +21,7 @@ import path from 'node:path';
 
 const BASE = process.env.BASE_URL || 'http://localhost:3000';
 const P = 'm1-070 test';
-const DASHBOARD = 'assurer-data-dashboard';
+const DASHBOARD = 'wms-data-dashboard';
 const ROUTES = [ 'overview', 'find', 'document', 'activity', 'health' ];
 const USER_FIELDS = [
   '_id', 'type', 'title', 'username', 'email', 'role', 'disabled',
@@ -163,13 +163,13 @@ async function main() {
   check('admin: overview answers 200', overview.status === 200, String(overview.status));
   const types = overview.json?.types || [];
   const row = name => types.find(type => type.name === name);
-  check('overview lists pages and products', Boolean(row('@apostrophecms/page') && row('assurer-product')));
+  check('overview lists pages and products', Boolean(row('@apostrophecms/page') && row('wms-product')));
   check('overview leaves out core\'s cross-type views',
     !row('@apostrophecms/recently-edited') && !row('@apostrophecms/submitted-draft'));
-  const products = await api(tokens.admin, 'GET', 'assurer-product?perPage=100');
+  const products = await api(tokens.admin, 'GET', 'wms-product?perPage=100');
   check('product count matches the REST API',
-    row('assurer-product')?.live === products.results.length,
-    `${row('assurer-product')?.live} / ${products.results.length}`);
+    row('wms-product')?.live === products.results.length,
+    `${row('wms-product')?.live} / ${products.results.length}`);
   check('users have a total only (no draft/published)',
     row('@apostrophecms/user')?.published === null && row('@apostrophecms/user')?.live >= 2);
   check('form submissions: count and link only',
@@ -177,11 +177,11 @@ async function main() {
     overview.json.formSubmissions.url === '/assurer/form-submissions');
 
   // A published product for the find and import checks
-  product = await api(tokens.admin, 'POST', 'assurer-product', { title: `${P} product` });
-  await api(tokens.admin, 'POST', `assurer-product/${product._id}/publish`, {});
+  product = await api(tokens.admin, 'POST', 'wms-product', { title: `${P} product` });
+  await api(tokens.admin, 'POST', `wms-product/${product._id}/publish`, {});
 
   // Find
-  let found = await dashboard(tokens.admin, 'find', `q=${encodeURIComponent('m1-070 TEST prod')}&type=assurer-product`);
+  let found = await dashboard(tokens.admin, 'find', `q=${encodeURIComponent('m1-070 TEST prod')}&type=wms-product`);
   check('find: title, any case, part of it', found.json?.results?.some(doc => doc.aposDocId === product.aposDocId),
     String(found.status));
   check('find: History is offered for products', found.json?.results?.[0]?.history === true);
@@ -219,14 +219,14 @@ async function main() {
     _ids: [ product._id ],
     relatedTypes: []
   };
-  const editorExport = await call(tokens.editor, 'POST', 'assurer-product/import-export-export', exportBody);
+  const editorExport = await call(tokens.editor, 'POST', 'wms-product/import-export-export', exportBody);
   check('editor: export refused', editorExport.status === 403, String(editorExport.status));
   const userExport = await call(tokens.admin, 'POST', '@apostrophecms/user/import-export-export', {
     _ids: [ admin._id ],
     relatedTypes: []
   });
   check('users cannot be exported', userExport.status === 404, String(userExport.status));
-  const exported = await call(tokens.admin, 'POST', 'assurer-product/import-export-export', exportBody);
+  const exported = await call(tokens.admin, 'POST', 'wms-product/import-export-export', exportBody);
   const exportUrl = WINDOWS
     ? (exported.json?.url || '').replace(/\\/g, '/')
     : exported.json?.url || '';
@@ -237,17 +237,17 @@ async function main() {
   const archive = await readFile(path.join(process.env.APOS_TEST_UPLOADS_PATH, 'uploads', exportPath));
 
   // Change the product and publish, then import the old version as drafts
-  const current = await api(tokens.admin, 'GET', `assurer-product/${product._id}`);
-  await api(tokens.admin, 'PUT', `assurer-product/${product._id}`, {
+  const current = await api(tokens.admin, 'GET', `wms-product/${product._id}`);
+  await api(tokens.admin, 'PUT', `wms-product/${product._id}`, {
     ...current,
     title: `${P} product changed`
   });
-  await api(tokens.admin, 'POST', `assurer-product/${product._id}/publish`, {});
+  await api(tokens.admin, 'POST', `wms-product/${product._id}/publish`, {});
 
-  const editorImport = await importFile(tokens.editor, 'assurer-product', archive, { importDraftsOnly: true });
+  const editorImport = await importFile(tokens.editor, 'wms-product', archive, { importDraftsOnly: true });
   check('editor: import refused', editorImport.status === 403, String(editorImport.status));
 
-  const imported = await importFile(tokens.admin, 'assurer-product', archive, { importDraftsOnly: true });
+  const imported = await importFile(tokens.admin, 'wms-product', archive, { importDraftsOnly: true });
   if (WINDOWS) {
     check('admin: import fails on Windows (known package bug)', imported.status === 500,
       String(imported.status));
@@ -262,7 +262,7 @@ async function main() {
   } else {
     await replaceAsDrafts(imported);
   }
-  const visitor = await fetch(`${BASE}/api/v1/assurer-product/${product.aposDocId}:en:draft?aposMode=draft`);
+  const visitor = await fetch(`${BASE}/api/v1/wms-product/${product.aposDocId}:en:draft?aposMode=draft`);
   check('visitors get no draft', [ 401, 403, 404 ].includes(visitor.status), String(visitor.status));
 
   // Activity log
@@ -271,7 +271,7 @@ async function main() {
   const has = (kind, test = () => true) =>
     entries.some(entry => entry.kind === kind && test(entry));
   check('activity: export recorded', has('export', e => e.details.outcome === 'done' &&
-    e.details.type === 'assurer-product' && e.username === process.env.APOS_TEST_USER));
+    e.details.type === 'wms-product' && e.username === process.env.APOS_TEST_USER));
   if (WINDOWS) {
     check('activity: failed import recorded', has('import', e => e.details.outcome === 'failed' &&
       e.details.draftsOnly === true && e.details.bytes === archive.length),
@@ -312,8 +312,8 @@ async function replaceAsDrafts(imported) {
     formatLabel: imported.json?.formatLabel
   }, { draft: false });
   check('admin: replace existing answers 200', replaced.status === 200, String(replaced.status));
-  const draft = await api(tokens.admin, 'GET', `assurer-product/${product.aposDocId}:en:draft`);
-  const published = await api(tokens.admin, 'GET', `assurer-product/${product.aposDocId}:en:published`,
+  const draft = await api(tokens.admin, 'GET', `wms-product/${product.aposDocId}:en:draft`);
+  const published = await api(tokens.admin, 'GET', `wms-product/${product.aposDocId}:en:published`,
     null, { draft: false });
   check('drafts only: the draft is the imported version', draft.title === `${P} product`, draft.title);
   check('drafts only: the published product is unchanged', published.title === `${P} product changed`,
@@ -322,7 +322,7 @@ async function replaceAsDrafts(imported) {
 
 async function finish() {
   if (product) {
-    await call(tokens.admin, 'PATCH', `assurer-product/${product._id}`, { archived: true });
+    await call(tokens.admin, 'PATCH', `wms-product/${product._id}`, { archived: true });
   }
   for (const token of Object.values(tokens)) {
     await call(token, 'POST', '@apostrophecms/login/logout', {}, { draft: false });

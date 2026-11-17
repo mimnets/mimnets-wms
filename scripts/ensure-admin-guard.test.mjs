@@ -1,4 +1,4 @@
-// Unit tests for the refusal rules of `assurer-test:ensure-admin` (m1-009).
+// Unit tests for the refusal rules of `wms-test:ensure-admin` (m1-009).
 // Run: npm run test:unit
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { refuseReason } from '../modules/assurer-test/lib/guard.js';
+import { refuseReason } from '../modules/wms-test/lib/guard.js';
 
 const tmp = mkdtempSync(path.join(os.tmpdir(), 'guard-test-'));
 const runnerTemp = mkdtempSync(path.join(os.tmpdir(), 'guard-runner-'));

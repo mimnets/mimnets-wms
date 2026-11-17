@@ -8,7 +8,7 @@
 // uploads folder. The session secret and test-admin password are generated
 // per run, masked in GitHub Actions logs and never printed. `.env` is not
 // read, so the developer database, media folder and credentials are never
-// used. Steps: create the test admin (assurer-test:ensure-admin), seed demo
+// used. Steps: create the test admin (wms-test:ensure-admin), seed demo
 // content, start the server, run the smoke and editor-workflow suites, restart
 // the server, run the persistence check, restart with notification email
 // pointed at a local SMTP sink and run the form-operations suite (m1-012),
@@ -16,12 +16,12 @@
 // (APOS_HTTPS, APOS_TRUST_PROXY, HSTS; m1-011) and run the security suite in
 // proxy mode, then stop and delete everything. The sink never relays mail,
 // and the SMTP password is a random per-run value the form suite checks for
-// leaks. m1-014 adds a test editor (assurer-test:ensure-editor), runs the
+// leaks. m1-014 adds a test editor (wms-test:ensure-editor), runs the
 // corporate demo seed twice (it must add nothing the second time) and runs
 // the content-model suite before and after a restart. m1-018 adds the SEO
 // suite, seeds the legacy redirects twice while the server is stopped and,
 // after the restart, requests every legacy URL (one 301 hop each). m1-037
-// adds a test contributor (assurer-test:ensure-contributor) and runs the
+// adds a test contributor (wms-test:ensure-contributor) and runs the
 // publishing-workflow suite (D-CONTENT-11) before and after a restart.
 // m1-070 adds the data dashboard suite (D-DB-24).
 // Uses Node built-ins only.
@@ -215,12 +215,12 @@ async function steps() {
     summary.push('FAIL  port check');
     return false;
   }
-  return await run('create test admin (assurer-test:ensure-admin)', [ 'app', 'assurer-test:ensure-admin' ]) &&
-    await run('create test editor (assurer-test:ensure-editor)', [ 'app', 'assurer-test:ensure-editor' ]) &&
-    await run('create test contributor (assurer-test:ensure-contributor)', [ 'app', 'assurer-test:ensure-contributor' ]) &&
-    await run('seed demo content (assurer-demo:seed)', [ 'app', 'assurer-demo:seed' ]) &&
-    await run('seed corporate demo records (assurer-demo:seed-corporate)', [ 'app', 'assurer-demo:seed-corporate' ]) &&
-    await run('seed corporate demo records again (must add nothing)', [ 'app', 'assurer-demo:seed-corporate' ]) &&
+  return await run('create test admin (wms-test:ensure-admin)', [ 'app', 'wms-test:ensure-admin' ]) &&
+    await run('create test editor (wms-test:ensure-editor)', [ 'app', 'wms-test:ensure-editor' ]) &&
+    await run('create test contributor (wms-test:ensure-contributor)', [ 'app', 'wms-test:ensure-contributor' ]) &&
+    await run('seed demo content (wms-demo:seed)', [ 'app', 'wms-demo:seed' ]) &&
+    await run('seed corporate demo records (wms-demo:seed-corporate)', [ 'app', 'wms-demo:seed-corporate' ]) &&
+    await run('seed corporate demo records again (must add nothing)', [ 'app', 'wms-demo:seed-corporate' ]) &&
     await startServer('first') &&
     await run('smoke test', [ 'scripts/smoke-test.mjs' ]) &&
     await run('editor workflow test', [ 'scripts/editor-workflow-test.mjs' ]) &&
@@ -228,10 +228,10 @@ async function steps() {
     await run('SEO test', [ 'scripts/seo-test.mjs' ], { SEO_TEST_DISPOSABLE: '1' }) &&
     await run('publishing workflow test', [ 'scripts/publishing-workflow-test.mjs' ], { PUBLISH_TEST_DISPOSABLE: '1' }) &&
     await run('data dashboard test', [ 'scripts/data-dashboard-test.mjs' ], { DASHBOARD_TEST_DISPOSABLE: '1' }) &&
-    await stopServer().then(() => run('seed legacy redirects (assurer-seo:seed-redirects)', [
-      'app', 'assurer-seo:seed-redirects', '--strict'
+    await stopServer().then(() => run('seed legacy redirects (wms-seo:seed-redirects)', [
+      'app', 'wms-seo:seed-redirects', '--strict'
     ])) &&
-    await run('seed legacy redirects again (must add nothing)', [ 'app', 'assurer-seo:seed-redirects', '--strict' ]) &&
+    await run('seed legacy redirects again (must add nothing)', [ 'app', 'wms-seo:seed-redirects', '--strict' ]) &&
     await startServer('restart') &&
     await run('persistence test after restart', [ 'scripts/editor-workflow-test.mjs', '--verify-only' ]) &&
     await run('content model persistence after restart', [ 'scripts/content-model-test.mjs', '--verify-only' ], {

@@ -1,21 +1,21 @@
 // Entrance animation (m1-072). Widgets whose editors chose an "Entrance
-// animation" style carry `assurer-enter-fade` or `assurer-enter-rise` on their
+// animation" style carry `wms-enter-fade` or `wms-enter-rise` on their
 // styles wrapper (lib/motion.js). Content is hidden only once this script has
-// added `assurer-motion` to <html>, so without JavaScript, when printing,
+// added `wms-motion` to <html>, so without JavaScript, when printing,
 // under reduced motion and in edit mode nothing is hidden and nothing moves.
 //
 // States per widget: shown at once (in view at page load: `is-visible` and
 // `is-instant`), or waiting below the fold until it scrolls into view, then
-// animated in (`is-visible`), once. `data-assurer-enter-state` (waiting,
+// animated in (`is-visible`), once. `data-wms-enter-state` (waiting,
 // shown) says which, for tests and agents.
 
-const SELECTOR = '.assurer-enter-fade, .assurer-enter-rise';
+const SELECTOR = '.wms-enter-fade, .wms-enter-rise';
 
 let observer = null;
 
 function show(el, ...classes) {
   el.classList.add('is-visible', ...classes);
-  el.dataset.assurerEnterState = 'shown';
+  el.dataset.wmsEnterState = 'shown';
 }
 
 function reveal(el) {
@@ -30,7 +30,7 @@ function setup() {
   observer?.disconnect();
   observer = null;
   if (reduceMotion || editing || !('IntersectionObserver' in window)) {
-    root.classList.remove('assurer-motion');
+    root.classList.remove('wms-motion');
     return;
   }
   const waiting = [ ...document.querySelectorAll(SELECTOR) ]
@@ -44,10 +44,10 @@ function setup() {
   }, { rootMargin: '0px 0px -10% 0px' });
   waiting.filter(el => !el.classList.contains('is-visible'))
     .forEach(el => {
-      el.dataset.assurerEnterState = 'waiting';
+      el.dataset.wmsEnterState = 'waiting';
       observer.observe(el);
     });
-  root.classList.add('assurer-motion');
+  root.classList.add('wms-motion');
 }
 
 export default () => {

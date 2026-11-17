@@ -10,12 +10,12 @@
 //
 // Changes from upstream, all in `submit()`:
 // - Success is shown only for a 2xx response carrying
-//   `X-Assurer-Submission: stored`, which the server (modules/assurer-forms)
+//   `X-Wms-Submission: stored`, which the server (modules/wms-forms)
 //   sets only after it has stored the submission.
 // - Every other outcome shows an error and keeps what the visitor typed:
 //   field errors as upstream, otherwise a message for the status (403, 404,
 //   429, other 4xx, 5xx) or for a lost connection or timeout.
-// - A random key per form fill (X-Assurer-Submission-Key) lets the server
+// - A random key per form fill (X-Wms-Submission-Key) lets the server
 //   answer a retry of an already stored submission without storing it twice.
 // - A second click while a request is in flight is ignored (upstream queued
 //   it, which could send the message twice).
@@ -25,7 +25,7 @@
 //   the thank-you message is final: an error from a retry that answers
 //   after a success no longer appears next to it.
 // - m1-019: the spam guard's fill token and honeypot value, rendered by
-//   views/widget.jsx, are sent with the submission (modules/assurer-forms).
+//   views/widget.jsx, are sent with the submission (modules/wms-forms).
 //   reCAPTCHA is not offered, so upstream's `recaptcha.js` (which loads
 //   Google's script) is no longer imported.
 //
@@ -42,9 +42,9 @@ import { processErrors } from 'Modules/@apostrophecms/form-widget/errors.js';
 import { collectValues } from 'Modules/@apostrophecms/form-widget/fields.js';
 
 const TIMEOUT_MS = 30000;
-// Must match modules/assurer-forms/lib/guard.js.
-const HONEYPOT_FIELD = '_assurerWebsite';
-const TOKEN_FIELD = '_assurerFill';
+// Must match modules/wms-forms/lib/guard.js.
+const HONEYPOT_FIELD = '_wmsWebsite';
+const TOKEN_FIELD = '_wmsFill';
 const MESSAGES = {
   csrf: 'Your message was not sent: your session has expired or a security cookie is ' +
     'missing. Please reload the page and try again.',
@@ -102,7 +102,7 @@ export default () => {
       // One key per form fill; renewed only after a confirmed success.
       let submissionKey = newSubmissionKey();
 
-      // Submission state, shown on the wrapper as `data-assurer-form-state`:
+      // Submission state, shown on the wrapper as `data-wms-form-state`:
       //   idle    -> sending  the visitor submits
       //   sending -> idle     an error, or no answer within TIMEOUT_MS
       //   sending -> sent     the server confirms it stored the message
@@ -117,7 +117,7 @@ export default () => {
 
       function setState(next) {
         state = next;
-        el.setAttribute('data-assurer-form-state', next);
+        el.setAttribute('data-wms-form-state', next);
         const sending = next === 'sending';
         // Upstream's busy marker, kept for compatibility.
         if (sending) {
@@ -183,8 +183,8 @@ export default () => {
         }
 
         input._id = form.getAttribute('data-apos-form-form');
-        input[TOKEN_FIELD] = form.querySelector('[data-assurer-form-fill]')?.value || '';
-        input[HONEYPOT_FIELD] = form.querySelector('[data-assurer-form-trap]')?.value || '';
+        input[TOKEN_FIELD] = form.querySelector('[data-wms-form-fill]')?.value || '';
+        input[HONEYPOT_FIELD] = form.querySelector('[data-wms-form-trap]')?.value || '';
 
         // For resubmissions
         const errorMsg = el.querySelector('[data-apos-form-submit-error]');
@@ -218,7 +218,7 @@ export default () => {
           body: formData,
           fullResponse: true,
           headers: {
-            'X-Assurer-Submission-Key': submissionKey
+            'X-Wms-Submission-Key': submissionKey
           }
         });
 
@@ -247,11 +247,11 @@ export default () => {
         }
 
         // The server sets this header only once the submission is stored
-        // (modules/assurer-forms). A 2xx without it, for example a captive
+        // (modules/wms-forms). A 2xx without it, for example a captive
         // portal page, is not treated as success.
         function accepted(response) {
           const ok = response?.status >= 200 && response.status < 300 &&
-            response.headers?.['x-assurer-submission'] === 'stored';
+            response.headers?.['x-wms-submission'] === 'stored';
           return ok ? { ok } : { message: MESSAGES.unknown };
         }
 

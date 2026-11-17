@@ -2,7 +2,7 @@
 //
 // Extends upstream's Nunjucks `widgetBase.html` and replaces only its
 // `submitBlock`, inside the <form>. The block adds:
-// - the spam guard's fill token and honeypot field (modules/assurer-forms,
+// - the spam guard's fill token and honeypot field (modules/wms-forms,
 //   D-FORM-3). The honeypot is off screen, hidden from assistive technology
 //   and out of the tab order; people never see it;
 // - the privacy notice line, linked to the page chosen in Global Content.
@@ -10,8 +10,8 @@
 // The submit button is the same as upstream's, without the reCAPTCHA
 // `disabled` state: reCAPTCHA is not offered (modules/@apostrophecms/form).
 
-const HONEYPOT_FIELD = '_assurerWebsite';
-const TOKEN_FIELD = '_assurerFill';
+const HONEYPOT_FIELD = '_wmsWebsite';
+const TOKEN_FIELD = '_wmsFill';
 
 function PrivacyNotice({ global, className }) {
   const page = global?._privacyPage?.[0];
@@ -41,10 +41,10 @@ export default function ({ widget, global }, {
           <input
             type="hidden"
             name={TOKEN_FIELD}
-            value={apos.modules['assurer-forms'].fillToken()}
-            data-assurer-form-fill
+            value={apos.modules['wms-forms'].fillToken()}
+            data-wms-form-fill
           />
-          <div className="assurer-form__trap" aria-hidden="true">
+          <div className="wms-form__trap" aria-hidden="true">
             <label>
               Leave this field empty
               <input
@@ -52,7 +52,7 @@ export default function ({ widget, global }, {
                 name={HONEYPOT_FIELD}
                 tabindex="-1"
                 autocomplete="off"
-                data-assurer-form-trap
+                data-wms-form-trap
               />
             </label>
           </div>

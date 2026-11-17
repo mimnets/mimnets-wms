@@ -47,7 +47,7 @@ export default {
       // ============================================
 
       // No body font control (m1-021): the brand font is fixed by the
-      // --assurer-font-body token, so editors cannot change it (D-M0-11).
+      // --wms-font-body token, so editors cannot change it (D-M0-11).
       lineHeight: {
         type: 'range',
         label: 'Line Height',

@@ -117,11 +117,12 @@ Each task's report includes a browser checklist (see `docs/engineering/STANDARDS
 - Never modify production systems, mimPortal, or the existing WordPress site or database.
 
 ### Project conventions
-- Project modules use the `assurer-` prefix (`modules/assurer-*`); core overrides live
-  under `modules/@apostrophecms/<module>/`.
+- Project modules use the `wms-` prefix (`modules/wms-*`; `assurer-` until m1-076); core
+  overrides live under `modules/@apostrophecms/<module>/`. A rename of a module that stores a
+  type ships an `@apostrophecms/migration` for the stored names.
 - Page-or-URL links use `linkFields()` / `linkHref()` from `lib/link.js`. Page-level `main`
   areas use `lib/area.js`.
-- Demo content is seeded by `node app assurer-demo:seed` and is always labelled "Demo".
+- Demo content is seeded by `node app wms-demo:seed` and is always labelled "Demo".
 
 ---
 

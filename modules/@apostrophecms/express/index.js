@@ -1,6 +1,6 @@
 // Session secret comes from the environment so it is never committed.
 // Fail fast rather than silently running with an undefined secret.
-import { readSecurityEnv } from '../../assurer-security/lib/config.js';
+import { readSecurityEnv } from '../../wms-security/lib/config.js';
 
 const secret = process.env.APOS_SESSION_SECRET;
 
@@ -12,7 +12,7 @@ if (!secret || secret.length < 32) {
 }
 
 // HTTPS and reverse-proxy settings (m1-011); all off by default. See
-// modules/assurer-security/lib/config.js for the variables and their rules.
+// modules/wms-security/lib/config.js for the variables and their rules.
 const { https, trustProxy } = readSecurityEnv();
 
 export default {
