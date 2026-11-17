@@ -9,7 +9,7 @@ import { entranceStyle } from '../../lib/motion.js';
 export default {
   extend: '@apostrophecms/widget-type',
   options: {
-    label: 'Assurer Hero',
+    label: 'Hero',
     description: 'Large banner with headline, text, background image and buttons.',
     icon: 'image-area-icon'
   },

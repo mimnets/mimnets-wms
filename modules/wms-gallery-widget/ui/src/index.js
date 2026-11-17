@@ -1,4 +1,4 @@
-// Lightbox for the Assurer gallery (m1-015). Project code, no package.
+// Lightbox for the gallery widget (m1-015). Project code, no package.
 //
 // The thumbnails are ordinary links to the full image. With JavaScript, a
 // click opens a modal <dialog> instead: the rest of the page is inert while

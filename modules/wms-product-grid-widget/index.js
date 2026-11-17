@@ -7,7 +7,7 @@ import { entranceStyle } from '../../lib/motion.js';
 export default {
   extend: '@apostrophecms/widget-type',
   options: {
-    label: 'Assurer Product Cards',
+    label: 'Product Cards',
     description: 'Section heading with a grid of product cards.',
     icon: 'view-grid-icon'
   },

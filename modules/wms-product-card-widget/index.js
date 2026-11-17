@@ -6,7 +6,7 @@ import { linkFields } from '../../lib/link.js';
 export default {
   extend: '@apostrophecms/widget-type',
   options: {
-    label: 'Assurer Product Card',
+    label: 'Product Card',
     icon: 'card-text-icon'
   },
   icons: {

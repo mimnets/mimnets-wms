@@ -15,7 +15,7 @@ const choices = (...pairs) => pairs.map(([ value, label ]) => ({
 export default {
   extend: '@apostrophecms/widget-type',
   options: {
-    label: 'Assurer Slideshow',
+    label: 'Slideshow',
     description: 'Rotating images, or full banners with headline, text and buttons.',
     icon: 'view-carousel-icon'
   },
