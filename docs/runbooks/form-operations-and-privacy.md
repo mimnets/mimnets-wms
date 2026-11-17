@@ -124,8 +124,8 @@ or stored.
 |---|---|---|
 | List (50 per page, newest first, filter by form) | `/assurer/form-submissions` | Users who may manage user accounts (**admin role**). Everyone else, including editors and anonymous visitors, gets 404 |
 | CSV export (all forms or one form, optional `since`/`until` as `YYYY-MM-DD`) | "Download CSV" on that page, or `/assurer/form-submissions/export.csv?form=…&since=…&until=…` | Same |
-| Retry failed notifications | `node app assurer-forms:retry-notifications` | Server operators |
-| Retention report or deletion | `node app assurer-forms:retention` (section 5) | Server operators |
+| Retry failed notifications | `node app wms-forms:retry-notifications` | Server operators |
+| Retention report or deletion | `node app wms-forms:retention` (section 5) | Server operators |
 
 - Sign in at `/login` first. There is no admin-bar link yet (deferred).
 - The responses are `Cache-Control: no-store` and `X-Robots-Tag: noindex`, and keep the site's
@@ -154,14 +154,14 @@ copied into that system and governed by its rules.
 The task always reports first:
 
 ```
-node app assurer-forms:retention --days=180            # dry run: counts per form, oldest date; deletes nothing
-node app assurer-forms:retention --days=180 --form=<form id>
+node app wms-forms:retention --days=180            # dry run: counts per form, oldest date; deletes nothing
+node app wms-forms:retention --days=180 --form=<form id>
 ```
 
 Deletion needs **both** the approved period in the environment and an explicit flag:
 
 ```
-APOS_FORM_RETENTION_DAYS=<approved> node app assurer-forms:retention --execute
+APOS_FORM_RETENTION_DAYS=<approved> node app wms-forms:retention --execute
 ```
 
 Safety rules built into the task:
@@ -229,7 +229,7 @@ from many IP addresses is not stopped.
 | Option | License / cost | Privacy | Accessibility | Fit |
 |---|---|---|---|---|
 | Keep current controls only | — | Best | Best | Enough for a low-traffic launch, with monitoring of submission volume |
-| **Honeypot field + minimum fill time** (project code, no dependency) | Free | No third party, no tracking | Invisible to people; must be hidden correctly from screen readers | **Recommended next step.** A small project task: server-side check in `assurer-forms` and a hidden field in the widget |
+| **Honeypot field + minimum fill time** (project code, no dependency) | Free | No third party, no tracking | Invisible to people; must be hidden correctly from screen readers | **Recommended next step.** A small project task: server-side check in `wms-forms` and a hidden field in the widget |
 | **ALTCHA** (self-hosted proof-of-work; `altcha` widget and `altcha-lib`) | Open source, MIT per its repositories (re-verify at approval), free self-hosted | No third party, no cookies | No puzzle; a short automatic computation. Needs a check with assistive technology | **Recommended if spam appears.** Needs dependency approval and an integration task |
 | Google reCAPTCHA v3 (built into `@apostrophecms/form`) | Free tier with limits | Sends visitor data to Google; usually needs consent | Score-based, no puzzle | Not recommended (third-party tracking, consent) |
 | hCaptcha / Cloudflare Turnstile | Free tiers; external services | Third-party processing | Challenges can be hard for some users (hCaptcha) | Only with separate approval, if self-hosted options fail |

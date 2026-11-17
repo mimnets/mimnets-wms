@@ -75,11 +75,11 @@ through exactly that many proxies.
   form. Please try again. Too many submissions. Please try again later."
 - **Client key:** `req.ip`, so only trusted proxies can change it. IPv6 addresses are grouped by
   /64. Visitors behind one shared address (an office NAT) share one quota.
-- **Store:** core `apos.cache` (collection `aposCache`, namespace `assurer-form-rate-limit`), so
+- **Store:** core `apos.cache` (collection `aposCache`, namespace `wms-form-rate-limit`), so
   every app process on the same database shares it. Entries expire on their own.
 - **Fails open:** if the cache errors, the submission proceeds and the error is logged.
 - **Unblock everyone** (for example a legitimate office, or before re-running the HTTP test suites
-  locally): `node app assurer-security:clear-form-rate-limit`. Command line only.
+  locally): `node app wms-security:clear-form-rate-limit`. Command line only.
 
 Local note: `npm run test:security` deliberately uses up the quota of the machine running it.
 Run it after `npm run test:smoke`, or clear the counters first.
@@ -104,6 +104,6 @@ Each control can be turned off without a code change, except the headers and the
 - Unset `APOS_HTTPS`, `APOS_TRUST_PROXY` or `APOS_HSTS_MAX_AGE`. HSTS already cached by browsers
   remains until `max-age` runs out; to withdraw it, send `APOS_HSTS_MAX_AGE=0` for at least the
   old `max-age`.
-- Raise `APOS_FORM_RATE_LIMIT_MAX`, or remove `'assurer-security': {}` from `app.js`.
+- Raise `APOS_FORM_RATE_LIMIT_MAX`, or remove `'wms-security': {}` from `app.js`.
 - Headers: remove `'@apostrophecms/security-headers': {}` from `app.js` and the `static` option in
   `modules/@apostrophecms/asset/index.js`, or revert the m1-011 commit.

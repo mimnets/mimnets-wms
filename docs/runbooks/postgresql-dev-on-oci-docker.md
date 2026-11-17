@@ -9,7 +9,7 @@
 
 > **Safety rules**
 > - **Demo data only.** No real content (D-CONTENT-16), no production copy, no personal data.
->   Fill the database with `node app assurer-demo:seed` and a disposable test user.
+>   Fill the database with `node app wms-demo:seed` and a disposable test user.
 > - **Never expose port 5432 to the internet.** The container listens on the server's loopback
 >   only, and your PC reaches it through an SSH tunnel. Do not add an OCI ingress rule for 5432.
 > - **Secrets stay out of Git.** Passwords live in a `chmod 600` file on the server and in your
@@ -199,7 +199,7 @@ APOS_DB_URI=postgres://assurer_dev:<app password>@127.0.0.1:15432/assurer_m1033
 
 ```sh
 node app @apostrophecms/migration:migrate
-node app assurer-demo:seed
+node app wms-demo:seed
 node app @apostrophecms/user:add <disposable admin name> admin
 npm run dev
 ```
@@ -245,8 +245,8 @@ node --env-file=.env scripts/pg-connection-drop-test.mjs --database=assurer_m103
   not restart the container, so the 30 s outage really happens. The start command brings it back.
 - `^` continues a line in `cmd`. In PowerShell, use a backtick or keep the command on one line.
 - Then run the sanitize task against the same database (D-DB-6):
-  `node app assurer-security:sanitize-after-restore` (dry run), then
-  `node app assurer-security:sanitize-after-restore --execute --database=assurer_m1033`.
+  `node app wms-security:sanitize-after-restore` (dry run), then
+  `node app wms-security:sanitize-after-restore --execute --database=assurer_m1033`.
 
 What this run covers, and what it does not:
 
@@ -324,8 +324,8 @@ Run these against the **new** database, with the app stopped
 
 ```sh
 node app @apostrophecms/migration:migrate                                         # rebuilds search
-node app assurer-security:sanitize-after-restore                                  # dry run
-node app assurer-security:sanitize-after-restore --execute --database=<name>      # removes sessions and tokens
+node app wms-security:sanitize-after-restore                                  # dry run
+node app wms-security:sanitize-after-restore --execute --database=<name>      # removes sessions and tokens
 ```
 
 Then restore the matching `uploads.tgz` (or copy it to the target's media store, D-DB-3), give
@@ -339,7 +339,7 @@ the target its own `APOS_SESSION_SECRET`, and run the smoke and workflow tests.
   §6.1–§6.4.
 - Do not copy your local SQLite development database into this server unless the owner approves
   it. It holds test users and the unpublished privacy-notice draft. A fresh database plus
-  `assurer-demo:seed` is enough for the D-DB-5 test.
+  `wms-demo:seed` is enough for the D-DB-5 test.
 
 ## 7. Clean up after the test
 

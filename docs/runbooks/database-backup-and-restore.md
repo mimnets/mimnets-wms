@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft. **Verified 2026-10-19 (`m0-003`):** SQLite `apos-db-dump`, `apos-db-restore` into a fresh file, and `migrate` rebuilding search. **Not executed:** the `tar` media steps and all PostgreSQL steps (pending the acceptance test in ADR-0002 §6). **m1-032 (2026-11-02):** `assurer-security:sanitize-after-restore` added (§B, §F). Verified on throwaway SQLite databases only, not on PostgreSQL. **m1-052 (2026-11-08):** staging and production run MongoDB 8.0.x with PBM ([ADR-0004](../architecture/decisions/ADR-0004-mongodb-for-staging-and-production.md), accepted 2026-11-08). The PostgreSQL steps here are superseded for those environments; §A (local SQLite) and the JSONL steps still apply. PBM procedures: [m1-046 results](../milestones/m1-046-pbm-poc-results.md), not yet a runbook. |
+| **Status** | Draft. **Verified 2026-10-19 (`m0-003`):** SQLite `apos-db-dump`, `apos-db-restore` into a fresh file, and `migrate` rebuilding search. **Not executed:** the `tar` media steps and all PostgreSQL steps (pending the acceptance test in ADR-0002 §6). **m1-032 (2026-11-02):** `wms-security:sanitize-after-restore` added (§B, §F). Verified on throwaway SQLite databases only, not on PostgreSQL. **m1-052 (2026-11-08):** staging and production run MongoDB 8.0.x with PBM ([ADR-0004](../architecture/decisions/ADR-0004-mongodb-for-staging-and-production.md), accepted 2026-11-08). The PostgreSQL steps here are superseded for those environments; §A (local SQLite) and the JSONL steps still apply. PBM procedures: [m1-046 results](../milestones/m1-046-pbm-poc-results.md), not yet a runbook. |
 | **Decision** | [ADR-0002](../architecture/decisions/ADR-0002-database-strategy.md) · [ADR-0004](../architecture/decisions/ADR-0004-mongodb-for-staging-and-production.md) |
 | **Audience** | Operators with access to the target environment's secrets |
 
@@ -32,7 +32,7 @@ Expected: the dump has one header line per collection (12 in M0) followed by one
 ```sh
 npx apos-db-restore "sqlite://./data/restore-test.db" --input=backups/<date>-local.jsonl
 APOS_DB_URI="sqlite://./data/restore-test.db" node app @apostrophecms/migration:migrate   # rebuilds search index
-APOS_DB_URI="sqlite://./data/restore-test.db" node app assurer-security:sanitize-after-restore --execute --database=restore-test
+APOS_DB_URI="sqlite://./data/restore-test.db" node app wms-security:sanitize-after-restore --execute --database=restore-test
 tar -xzf backups/<date>-uploads.tgz          # only into a matching checkout
 ```
 
@@ -40,6 +40,10 @@ The sanitize step (m1-032) removes the sessions, bearer tokens, login-throttle c
 password-reset hashes that the dump carried, so the copied cookies and tokens no longer work on
 the restored copy. Without `--execute` it only reports counts. The database name for
 `--database` is the one the dry run prints. For SQLite it is the file name without `.db`.
+
+The `migrate` step also renames the stored `assurer-*` type names in a backup taken before
+m1-076 (migration `wms-rename-stage-3`, [design](../milestones/m1-076-rename-stage-3-design.md)).
+The app does the same at its next start, so a restored old backup needs nothing else.
 
 **Verify:**
 - `npm run test:smoke` passes against the restored database.
@@ -67,7 +71,7 @@ At each release, and before any migration:
 2. Create a **new** database, from PITR, `pg_restore`, or `apos-db-restore` of the JSONL export.
 3. Restore media from the same point.
 4. Run `node app @apostrophecms/migration:migrate` against the new database.
-   Optional for the same site: `node app assurer-security:sanitize-after-restore --execute
+   Optional for the same site: `node app wms-security:sanitize-after-restore --execute
    --database=<name>` logs everyone out. Use it when sessions or tokens may be compromised.
 5. Run the smoke test and the editor workflow test against an isolated URL.
 6. Switch `APOS_DB_URI`, restart, and monitor.
@@ -79,8 +83,8 @@ Not allowed without approval. If approved:
 - Restore into a new, empty database in the lower environment, with the app stopped.
 - Before the app serves any request, sanitize the copy (m1-032):
   ```sh
-  node app assurer-security:sanitize-after-restore                                # dry run: counts, database name
-  node app assurer-security:sanitize-after-restore --execute --database=<name>    # apply
+  node app wms-security:sanitize-after-restore                                # dry run: counts, database name
+  node app wms-security:sanitize-after-restore --execute --database=<name>    # apply
   ```
   This deletes `sessions` and `aposBearerTokens` documents and the
   `@apostrophecms/loginAttempt*` entries in `aposCache`, and clears `passwordResetHash` in
