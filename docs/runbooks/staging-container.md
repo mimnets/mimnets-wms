@@ -17,7 +17,7 @@
 
 ## 1. Layout
 
-Compose project `mimnets-cms` (m1-068; the containers are `mimnets-cms-<service>-1`). Images from
+Compose project `mimnets-wms` (m1-068; `mimnets-cms` until rename stage 5, m1-078, §12.6; the containers are `mimnets-wms-<service>-1`). Images from
 `ghcr.io/mimnets/`, tagged with the commit (§12).
 
 | Container | Image | Holds | Host ports |
@@ -35,7 +35,7 @@ Start order: `setup` completes → `mongo` healthy (writable primary, users chec
 → `backup`. nginx waits only for `cert-bootstrap`.
 
 Networks: `edge` (nginx and the app; `172.30.57.0/24` by default, changed in m1-068 so it does not
-clash with the one-container stack's network; change `ASSURER_EDGE_SUBNET` and `ASSURER_NGINX_IP`
+clash with the one-container stack's network; change `WMS_EDGE_SUBNET` and `WMS_NGINX_IP`
 together if that range is taken). `db` is internal, with no route out: only the app, `mongo`,
 `pbm` and `backup` are on it. The app trusts the `X-Forwarded-*` headers from nginx's fixed address
 only.
@@ -49,17 +49,17 @@ volume (hardening runbook §5, §7).
 
 | Variable | Where | Default | Meaning |
 |---|---|---|---|
-| `ASSURER_IMAGE_TAG` | `docker/staging/.env` | required | the release: a commit SHA on `main`; `deploy.sh` writes it (§12), with `ASSURER_PREVIOUS_TAG` |
-| `ASSURER_PROXY_MODE` | `docker/staging/.env` | required by `deploy.sh` | `ip`, `npm` or `standalone`: which Compose files belong to this server; the setup scripts write it |
-| `ASSURER_DOMAIN` | shell or `docker/staging/.env` | required | host name, for example `staging.example.org` |
+| `WMS_IMAGE_TAG` | `docker/staging/.env` | required | the release: a commit SHA on `main`; `deploy.sh` writes it (§12), with `WMS_PREVIOUS_TAG` |
+| `WMS_PROXY_MODE` | `docker/staging/.env` | required by `deploy.sh` | `ip`, `npm` or `standalone`: which Compose files belong to this server; the setup scripts write it |
+| `WMS_DOMAIN` | shell or `docker/staging/.env` | required | host name, for example `staging.example.org` |
 | `APOS_BASE_URL` | shell or `docker/staging/.env` | required | `https://` plus the host name, no trailing slash |
 | `APOS_CLUSTER_PROCESSES` | same | `2` | Node web processes (m1-054: 2 doubles the headroom for about 0.6 GiB) |
-| `ASSURER_MONGO_CACHE_GB` | same | `1` | MongoDB cache; size it with the processes against the server's memory |
+| `WMS_MONGO_CACHE_GB` | same | `1` | MongoDB cache; size it with the processes against the server's memory |
 | `APOS_HSTS_MAX_AGE` | same | `300` | raise once HTTPS is confirmed (hardening runbook §8 point 4) |
-| `ASSURER_BACKUP_INTERVAL_HOURS`, `ASSURER_BACKUP_RETENTION` | same | `24`, `8d` | PBM base backups ([PBM runbook](./pbm-backup-and-restore.md) §1) |
-| `ASSURER_MONGO_MEMORY`, `ASSURER_APP_MEMORY`, `ASSURER_PBM_MEMORY`, `ASSURER_BACKUP_MEMORY`, `ASSURER_NGINX_MEMORY`, `ASSURER_CERTBOT_MEMORY` | same | `2g`, `2g`, `1g`, `256m`, `256m`, `256m` | memory limit per container; fit them to the server |
-| `ASSURER_MAX_BODY`, `ASSURER_RATE_LIMIT`, `ASSURER_RATE_BURST` | same | `32m`, `30r/s`, `60` | nginx upload limit and per-address rate limit |
-| `ASSURER_HTTP_BIND`, `ASSURER_HTTPS_BIND` | same | `80`, `443` | host ports, on all network interfaces by default; **set `127.0.0.1:80` and `127.0.0.1:443` for a local test**, so the site is not open to the local network (m1-058) |
+| `WMS_BACKUP_INTERVAL_HOURS`, `WMS_BACKUP_RETENTION` | same | `24`, `8d` | PBM base backups ([PBM runbook](./pbm-backup-and-restore.md) §1) |
+| `WMS_MONGO_MEMORY`, `WMS_APP_MEMORY`, `WMS_PBM_MEMORY`, `WMS_BACKUP_MEMORY`, `WMS_NGINX_MEMORY`, `WMS_CERTBOT_MEMORY` | same | `2g`, `2g`, `1g`, `256m`, `256m`, `256m` | memory limit per container; fit them to the server |
+| `WMS_MAX_BODY`, `WMS_RATE_LIMIT`, `WMS_RATE_BURST` | same | `32m`, `30r/s`, `60` | nginx upload limit and per-address rate limit |
+| `WMS_HTTP_BIND`, `WMS_HTTPS_BIND` | same | `80`, `443` | host ports, on all network interfaces by default; **set `127.0.0.1:80` and `127.0.0.1:443` for a local test**, so the site is not open to the local network (m1-058) |
 | SMTP and form settings | `docker/staging/site.env`, mode `0600`, git-ignored | none | as in [form operations](./form-operations-and-privacy.md) |
 
 The image sets `NODE_ENV=production` and `APOS_DEMO_SITE=0`. Compose sets `APOS_HTTPS=1` and
@@ -72,14 +72,14 @@ On a server, use the setup script of the route (§9.2, §10 or §11); each write
 
 ```sh
 S="docker compose -f docker/staging/compose.yaml"
-bash docker/staging/deploy.sh   # pull, start, check (needs ASSURER_PROXY_MODE in .env)
+bash docker/staging/deploy.sh   # pull, start, check (needs WMS_PROXY_MODE in .env)
 $S logs -f app                   # wait for "Starting (2 web process(es))"
 ```
 
 On a PC, build instead of pulling (no `deploy.sh`):
 
 ```sh
-export ASSURER_IMAGE_TAG=local
+export WMS_IMAGE_TAG=local
 B="docker compose -f docker/staging/compose.yaml -f docker/staging/compose.build.yaml"
 $B build && $B up -d
 ```
@@ -104,7 +104,7 @@ server and port 80 open:
 
 ```sh
 $S run --rm --entrypoint certbot certbot certonly --webroot -w /var/www/acme \
-  -d "$ASSURER_DOMAIN" --email <ops address> --agree-tos --no-eff-email \
+  -d "$WMS_DOMAIN" --email <ops address> --agree-tos --no-eff-email \
   --deploy-hook wms-deploy-hook
 $S exec nginx nginx -s reload
 ```
@@ -147,8 +147,8 @@ write say so, and the import changes only drafts.
 ## 5. Checks after a start
 
 ```sh
-curl -sI http://$ASSURER_DOMAIN/            # 301 to https
-curl -sI https://$ASSURER_DOMAIN/           # 200, Strict-Transport-Security, no Server version
+curl -sI http://$WMS_DOMAIN/            # 301 to https
+curl -sI https://$WMS_DOMAIN/           # 200, Strict-Transport-Security, no Server version
 $S exec pbm pbmc status                     # agent running, PITR on
 ```
 
@@ -162,7 +162,7 @@ PBM's values into their volumes at each start when they differ.
 - **Admin account:** in the admin UI.
 - **Session secret:** replace `session-secret` in the `app-secrets` volume with a new random hex
   value and recreate the app; every user is logged out.
-- **Database passwords** (`assurerApp`, `pbm`): change the user's password as `siteAdmin` in
+- **Database passwords** (`wmsApp`, `pbm`): change the user's password as `siteAdmin` in
   `mongosh` in the `mongo` container, write the same value to the matching file in the
   `mongo-secrets` volume, then `$S up -d` (setup copies it) and restart the app or `pbm` and
   `backup`. Take a base backup after the change, because a restore needs the passwords that were
@@ -201,7 +201,7 @@ project on `127.0.0.1`. Full results: [m1-055 report](../engineering/reports/202
 |---|---|
 | First start with no demo content or demo notice; `admin`/`admin` refused; the random password logs in; no secret value in the site log | PASS |
 | HTTP redirect; HTTPS with HSTS and `Secure` cookies; other host names refused; 34 MB upload refused (413); rate limit (429), recovering within 3 s | PASS |
-| MongoDB refuses non-TLS, unauthenticated and untrusted-CA clients; `assurerApp` limited to its database; `$where` refused; no CA key on disk; secrets unreadable by the app and `pbm` users except `ca.pem` | PASS |
+| MongoDB refuses non-TLS, unauthenticated and untrusted-CA clients; `wmsApp` limited to its database; `$where` refused; no CA key on disk; secrets unreadable by the app and `pbm` users except `ca.pem` | PASS |
 | Smoke 18/18, workflow 15/15, persistence 7/7 through nginx, after seeding demo content and setting `APOS_DEMO_SITE=1` for the test only | PASS |
 | One web process killed (no failed request of 20, replaced); `pbm-agent` killed (restarted, site up) | PASS |
 | certbot `renew` with no certificate, deploy hook with a test certificate, nginx reload | PASS |
@@ -246,7 +246,7 @@ against a stand-in for NPM, not against NPM itself (§8). Started on the owner's
 (§9.2), not yet behind NPM.
 
 ```
- Internet ──► :80/:443 NPM ──assurer-npm (172.30.56.0/24)──► nginx :8080 ──edge──► app:3000
+ Internet ──► :80/:443 NPM ──wms-npm (172.30.56.0/24)──► nginx :8080 ──edge──► app:3000
                TLS, certificate     NPM 172.30.56.2              real_ip from NPM only
 ```
 
@@ -254,9 +254,9 @@ What changes against the standalone mode:
 
 | Point | NPM mode |
 |---|---|
-| Host ports | none; `ASSURER_HTTP_BIND` and `ASSURER_HTTPS_BIND` do not apply |
-| Entry | nginx's internal port `8080`, on the external network `assurer-npm` only |
-| Visitor address | nginx takes `X-Real-IP` from `ASSURER_UPSTREAM_PROXY_IP` only; rate limit, logs and the app's form limit are per visitor. `APOS_TRUST_PROXY` does not change |
+| Host ports | none; `WMS_HTTP_BIND` and `WMS_HTTPS_BIND` do not apply |
+| Entry | nginx's internal port `8080`, on the external network `wms-npm` only |
+| Visitor address | nginx takes `X-Real-IP` from `WMS_UPSTREAM_PROXY_IP` only; rate limit, logs and the app's form limit are per visitor. `APOS_TRUST_PROXY` does not change |
 | Certificate | NPM issues and renews it. `certbot` does not start; §3 "First real certificate" does not apply |
 | HSTS | the app sends it; leave it **off** in NPM, so it is not sent twice |
 
@@ -264,18 +264,18 @@ What changes against the standalone mode:
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `ASSURER_UPSTREAM_PROXY_IP` | required | NPM's fixed address on `assurer-npm`. One IPv4 address; nginx refuses to start on anything else |
-| `ASSURER_NPM_NGINX_IP` | `172.30.56.10` | nginx's fixed address on `assurer-npm`; NPM forwards to it |
-| `ASSURER_NPM_NETWORK` | `assurer-npm` | the external network's name |
+| `WMS_UPSTREAM_PROXY_IP` | required | NPM's fixed address on `wms-npm`. One IPv4 address; nginx refuses to start on anything else |
+| `WMS_NPM_NGINX_IP` | `172.30.56.10` | nginx's fixed address on `wms-npm`; NPM forwards to it |
+| `WMS_NPM_NETWORK` | `wms-npm` | the external network's name. A host set up before m1-078 keeps `wms-npm`'s old name `assurer-npm` here (§12.6) |
 
 **Owner's steps, once per host** (the owner's NPM, the owner's change; each needs the owner's approval):
 
 1. Create the network. `--internal` keeps it to NPM and nginx, with no route out:
-   `docker network create --internal --subnet 172.30.56.0/24 assurer-npm`
-2. In NPM's Compose file: join `assurer-npm` (external) with `ipv4_address: 172.30.56.2`; set
+   `docker network create --internal --subnet 172.30.56.0/24 wms-npm`
+2. In NPM's Compose file: join `wms-npm` (external) with `ipv4_address: 172.30.56.2`; set
    `IP_RANGES_FETCH_ENABLED=false` (paper §3.3); keep port 81 off the internet (an SSH tunnel to it
-   is enough). Recreate NPM. Nothing else may join `assurer-npm`: nginx trusts one address on it.
-3. Start the stack (below), then in NPM's admin UI add a proxy host for `$ASSURER_DOMAIN`:
+   is enough). Recreate NPM. Nothing else may join `wms-npm`: nginx trusts one address on it.
+3. Start the stack (below), then in NPM's admin UI add a proxy host for `$WMS_DOMAIN`:
    scheme `http`, forward to `172.30.56.10` port `8080`; Let's Encrypt certificate; Force SSL **on**,
    HTTP/2 **on**, HSTS **off**, WebSocket support **off**, Cache Assets **off**, Block Common Exploits
    **off** for the first test (untested with Apostrophe).
@@ -286,7 +286,7 @@ What changes against the standalone mode:
 S="docker compose -f docker/staging/compose.yaml -f docker/staging/compose.npm.yaml"
 $S config | grep -c published   # 0 in NPM mode (2 in standalone mode)
 $S up -d                         # the stack with cert-bootstrap and nginx; no certbot
-$S logs nginx | grep assurer-npm  # "NPM mode: port 8080, X-Real-IP trusted from <NPM address> only"
+$S logs nginx | grep wms-npm  # "NPM mode: port 8080, X-Real-IP trusted from <NPM address> only"
 ```
 
 Use `$S` for every command in §3 to §6, or nginx loses the NPM settings and publishes 80 and 443
@@ -331,10 +331,10 @@ another service uses: pointing it at the test server takes that service down.
 
 Connect as usual (`ssh -i <key> ubuntu@<server-address>`; `ubuntu` is the default user on OCI's Ubuntu
 images). The commands are in [`docker/staging/host-facts.sh`](../../docker/staging/host-facts.sh), which
-only reads. From the repository clone (for example `/home/ubuntu/vcl-assurer-group`):
+only reads. From the repository clone (for example `/home/ubuntu/mimnets-wms`):
 
 ```sh
-cd /home/ubuntu/vcl-assurer-group
+cd /home/ubuntu/mimnets-wms
 git pull                                 # gets the script if the clone is older
 bash docker/staging/host-facts.sh        # sudo may ask for a password
 ```
@@ -361,7 +361,7 @@ NPM later. The script never touches NPM or another container, so the site stays 
 **Now** (as root, in the clone, on the branch or `main` that carries the script):
 
 ```sh
-cd /home/ubuntu/vcl-assurer-group
+cd /home/ubuntu/mimnets-wms
 git pull
 bash docker/staging/npm-setup.sh
 ```
@@ -369,9 +369,9 @@ bash docker/staging/npm-setup.sh
 It stops, before changing anything, if the kernel is not on the 6.8 line (D-DB-16), if Compose is
 older than 2.24, or if a standalone stack is there. Then it:
 
-1. creates the `assurer-npm` network (`172.30.56.0/24`, internal) if missing, or checks the existing one;
+1. creates the `wms-npm` network (`172.30.56.0/24`, internal) if missing, or checks the existing one;
 2. writes `docker/staging/.env` (git-ignored, mode `0600`) once, with the placeholder domain
-   `assurer.invalid` and NPM's address `172.30.56.2`; it never overwrites the file;
+   `wms.invalid` and NPM's address `172.30.56.2`; it never overwrites the file;
 3. checks that the stack publishes no host port, then pulls and starts the clone's release
    (`deploy.sh --here`, §12);
 4. waits up to 10 minutes for a 200 from the site on nginx's internal port 8080, and prints how to
@@ -380,7 +380,7 @@ older than 2.24, or if a standalone stack is there. Then it:
 **Later, when the domain is chosen** (each step the owner's, with the owner's approval):
 
 1. Cloudflare record for the host name, **DNS only** (§9.1 A).
-2. NPM joins `assurer-npm` at `172.30.56.2`, with `IP_RANGES_FETCH_ENABLED=false` and port 81 on
+2. NPM joins `wms-npm` at `172.30.56.2`, with `IP_RANGES_FETCH_ENABLED=false` and port 81 on
    `127.0.0.1` only (§9 owner's step 2). When NPM is a Portainer stack, make the change in Portainer
    (**Stacks →** the stack **→ Editor → Update the stack**), not in the file on disk. Updating
    recreates NPM: every site behind it is down for a moment. First copy the stack text and back up
@@ -405,12 +405,12 @@ good**; never run it on a stack with content to keep. NPM, Portainer and other c
 touched. As root, in the clone:
 
 ```sh
-cd /home/ubuntu/vcl-assurer-group
+cd /home/ubuntu/mimnets-wms
 S="docker compose -f docker/staging/compose.yaml -f docker/staging/compose.npm.yaml"
 
 # 1. Look first: what will go
 $S ps -a
-docker volume ls --format '{{.Name}}' | grep -E '^(assurer-staging|mimnets-cms|assurer)_'
+docker volume ls --format '{{.Name}}' | grep -E '^(assurer-staging|mimnets-cms|mimnets-wms|assurer|wms-local)_'
 docker image ls --format '{{.Repository}}:{{.Tag}}  {{.Size}}' | grep -E '^(ghcr.io/mimnets/)?(assurer|wms)-'
 
 # 2. The test stack: containers, its networks and volumes
@@ -418,14 +418,14 @@ $S down -v --remove-orphans
 # 3. The demo container's volumes, if `docker compose up -d` was run in the clone
 docker compose down -v
 # 4. The shared network (only after the stack is down; NPM must not be joined to it)
-docker network rm assurer-npm
+docker network rm wms-npm
 # 5. The images (frees several GB) and the settings file
 docker image rm $(docker image ls --format '{{.Repository}}:{{.Tag}}' | grep -E '^(ghcr.io/mimnets/)?(assurer|wms)-')
 rm -f docker/staging/.env
 
 # 6. Check: no output from these three
 docker ps -a --format '{{.Names}}' | grep assurer
-docker volume ls --format '{{.Name}}' | grep -E '^(assurer-staging|mimnets-cms|assurer)_'
+docker volume ls --format '{{.Name}}' | grep -E '^(assurer-staging|mimnets-cms|mimnets-wms|assurer|wms-local)_'
 docker network ls --format '{{.Name}}' | grep assurer
 ```
 
@@ -440,7 +440,7 @@ a time through the public address, the domain, the certificate and the final che
 decision: [m1-064 paper](../milestones/m1-064-installer-design.md) (D-DB-18). Tested locally only
 (§8); not yet run on a server.
 
-**What it changes.** Only this stack: `docker/staging/.env`, the `assurer-npm` network, the images,
+**What it changes.** Only this stack: `docker/staging/.env`, the `wms-npm` network, the images,
 the containers and, in route A, certbot in the stack's own container. For NPM, Portainer, Cloudflare,
 the OCI console and the firewall it shows the exact command or setting and waits; the owner makes
 each of those changes. It never reads or prints the admin password.
@@ -448,7 +448,7 @@ each of those changes. It never reads or prints the admin password.
 **Run it** as root, from the clone of `main`, in an SSH session (it reads answers from the terminal):
 
 ```sh
-cd /home/ubuntu/vcl-assurer-group
+cd /home/ubuntu/mimnets-wms
 git pull
 bash docker/staging/install.sh              # all steps
 bash docker/staging/install.sh --step 6     # start at one step (0 to 9)
@@ -469,12 +469,12 @@ the domain. A real certificate already in place skips step 7.
 |---|---|---|
 | 0 Host checks, read-only | Stops if the kernel is not on the 6.8 line (D-DB-16) or Compose is older than 2.24. Warns on the branch, local changes, an older clone and under 15 GB free disk. Shows ports 80, 81 and 443, NPM and existing `assurer` containers | same |
 | 1 Route | Recommended when ports 80 and 443 are free and no NPM runs | Recommended when NPM runs. If something else owns 80 or 443, the script stops |
-| 2 Settings | Writes `.env` once (mode `0600`): domain (Enter keeps the placeholder `assurer.invalid` until step 6), web processes, MongoDB cache (§2) | same, plus `ASSURER_UPSTREAM_PROXY_IP=172.30.56.2` |
+| 2 Settings | Writes `.env` once (mode `0600`): domain (Enter keeps the placeholder `wms.invalid` until step 6), web processes, MongoDB cache (§2) | same, plus `WMS_UPSTREAM_PROXY_IP=172.30.56.2` |
 | 3 Pull and start | `deploy.sh --here` (§12), waits for a 200 | runs `npm-setup.sh` (§9.2) |
 | 4 Check on the server | HTTPS 200 and HTTP 301 through the stack's nginx; shows the first admin login (§3) | 200 on nginx's port 8080; same login text |
 | 5 Public address | From the PC with `curl.exe --resolve`; if it fails, the OCI security list path and `iptables -S DOCKER-USER` (read-only) | does not apply: nothing is published |
 | 6 Domain and Cloudflare | Sets the domain in `.env`, `up -d`; shows the Cloudflare record (§9.1 A, **DNS only**); checks the DNS answer, and names a Cloudflare address as an orange cloud | `npm-setup.sh --domain`; the same record and check |
-| 7 Certificate | certbot as in §3: `--test-cert` first, then the real certificate with `--force-renewal`, `nginx -s reload`; checks the issuer | (a) NPM backup commands, after showing NPM's mounts; (b) the lines for NPM's stack in Portainer; (c) the proxy-host settings (§9 owner's step 3). The script checks: NPM on `assurer-npm` at `172.30.56.2`, nothing else there, `IP_RANGES_FETCH_ENABLED=false`, port 81 on `127.0.0.1` only, then 200, a redirect and a Let's Encrypt issuer |
+| 7 Certificate | certbot as in §3: `--test-cert` first, then the real certificate with `--force-renewal`, `nginx -s reload`; checks the issuer | (a) NPM backup commands, after showing NPM's mounts; (b) the lines for NPM's stack in Portainer; (c) the proxy-host settings (§9 owner's step 3). The script checks: NPM on `wms-npm` at `172.30.56.2`, nothing else there, `IP_RANGES_FETCH_ENABLED=false`, port 81 on `127.0.0.1` only, then 200, a redirect and a Let's Encrypt issuer |
 | 8 Final checks | From the server: redirect, 200, real certificate, HSTS once, no `Server` version, `Secure` cookie, 413 at 34 MB, `pbmc status`. From the PC, two `curl.exe` requests with random markers: the script finds them in nginx's log; the logged address must be the PC's, not a private one, and a forged `X-Real-IP` must be ignored. Per-visitor 429 is listed as manual (two outside addresses) | same, plus `Test-NetConnection <ip> -Port 81` from the PC (must be `False`) |
 | 9 Summary | PASS, FAIL, SKIPPED, NOT TESTED and MANUAL per check, the production items still open (§9.2) and the log's path | same |
 
@@ -513,7 +513,7 @@ admin password again. The production items in §9.2 stay open.
 As root, in the clone, on `main`:
 
 ```sh
-cd /home/ubuntu/vcl-assurer-group
+cd /home/ubuntu/mimnets-wms
 git switch main && git pull
 bash docker/staging/ip-setup.sh <public-ip>          # port 8090
 bash docker/staging/ip-setup.sh <public-ip> 8091     # another port
@@ -522,7 +522,7 @@ bash docker/staging/ip-setup.sh <public-ip> 8091     # another port
 The public IP is in the OCI console: **Compute → Instances →** the instance **→ Public IP address**.
 The script stops, before it changes anything, if the kernel is not on the 6.8 line (D-DB-16), if a
 standalone stack is there, or if the port is in use (§11.2). Then it writes `docker/staging/.env`
-(git-ignored, mode `0600`; the same keys as §9.2, plus `ASSURER_PUBLIC_IP` and `ASSURER_IP_PORT`),
+(git-ignored, mode `0600`; the same keys as §9.2, plus `WMS_PUBLIC_IP` and `WMS_IP_PORT`),
 pulls and starts the clone's release (`deploy.sh --here`, §12), waits for a 200 and prints the
 next steps. The first time, run `docker login ghcr.io` before it (§12.1).
 
@@ -573,7 +573,7 @@ the owner's approval. The WordPress site stops answering for the domain at step 
 content is ready.
 
 1. Cloudflare: change the domain's record to an `A` record with the server's IPv4, **DNS only** (§9.1 A).
-2. NPM joins `assurer-npm` at `172.30.56.2` (§9 owner's step 2, §9.2 "Later" step 2).
+2. NPM joins `wms-npm` at `172.30.56.2` (§9 owner's step 2, §9.2 "Later" step 2).
 3. `bash docker/staging/npm-setup.sh --domain <host name>`. This removes the public port from the
    app, starts nginx in NPM mode and switches the site to `https://<host name>`.
 4. NPM proxy host for the host name (§9 owner's step 3), real Let's Encrypt certificate (§10).
@@ -597,7 +597,7 @@ bash docker/staging/deploy.sh <commit>        # a given commit on main
 
 It moves the clone to the commit (detached), so the Compose files match the images; pulls them,
 and if that fails, changes nothing; takes a PBM base backup if the stack runs (a PITR point just
-before the release); writes `ASSURER_IMAGE_TAG` (and `ASSURER_PREVIOUS_TAG`) to `.env`; runs `up -d`,
+before the release); writes `WMS_IMAGE_TAG` (and `WMS_PREVIOUS_TAG`) to `.env`; runs `up -d`,
 which recreates only what changed (**an app release does not restart MongoDB**); restarts `mongo`
 and its clients if `setup` made a new MongoDB certificate; waits for the app and `pbm-agent`, then
 prints the image digests and the rollback command. After a deploy the clone is on a detached
@@ -619,7 +619,7 @@ At the time of writing, GitHub's container registry accepts a *classic* personal
 ### 12.2 Rollback
 
 ```sh
-bash docker/staging/deploy.sh <ASSURER_PREVIOUS_TAG from .env> --rollback
+bash docker/staging/deploy.sh <WMS_PREVIOUS_TAG from .env> --rollback
 ```
 
 `deploy.sh` refuses an older commit without `--rollback`. **Apostrophe migrations only go forward:**
@@ -712,3 +712,88 @@ deploy is the usual `deploy.sh <sha>`, outside business hours. It is different o
 - Export archives (`@apostrophecms/import-export`) made before this release hold the old type names
   and do not import afterwards; export again. A database backup from before the release can be
   restored at any time: the migration runs again at the next start.
+
+### 12.6 Rename stage 5: from `mimnets-cms` to `mimnets-wms` (once per server; m1-078)
+
+Rename stage 5 ([design](../milestones/m1-078-rename-stage-5-design.md), D-GIT-80) renames the
+stored names: the Compose project `mimnets-cms` becomes `mimnets-wms` (its volumes, networks and
+containers with it), the `ASSURER_*` settings become `WMS_*`, the database `assurer` becomes `wms`
+and its user `assurerApp` becomes `wmsApp`, and the cookie prefix becomes `mimnets-wms`. **The
+data is carried over**; the old containers and volumes stay, untouched, as the way back.
+
+Choose a quiet hour: every container is recreated (a few minutes down), and **everyone signs in
+again** (new cookie names). As root, in the clone:
+
+1. `git switch main && git pull`. The pull matters: only the new `deploy.sh` knows the switch. An
+   old `deploy.sh` stops at the pull ("no images"), and nothing changes.
+2. Run the switch:
+
+   ```sh
+   bash docker/staging/deploy.sh --switch-to-mimnets-wms
+   ```
+
+   It checks that no `mimnets-wms` container or foreign `mimnets-wms_*` volume exists; pulls the
+   images; takes a base backup in the old `pbm` container; stops the old stack (`docker stop`, so
+   containers and volumes stay) and removes its networks (they hold no data, and the new `edge`
+   network needs the same fixed subnet); copies its eight volumes to `mimnets-wms_*` (label
+   `wms.copied-from`); keeps the old settings as `docker/staging/.env.before-m1-078` and writes the
+   renamed ones; then starts the new stack. At its first start, `mongo` moves the database:
+   `$S logs mongo` shows "Moved N collections from assurer to wms: D documents before, D after"
+   and "Dropped the old app user assurerApp". It ends with "Done".
+
+   If it stops before "settings renamed", fix the cause and run the same command again: the old
+   volumes are unchanged, and the copy starts over into the volumes it made.
+3. Check: `$S ps` (all healthy), the home page, sign in as `admin` (again), a page with each kind
+   of widget, media, the data dashboard's Health tab, `$S exec pbm pbmc status` (agent OK; the
+   backups from before the switch are listed too).
+4. Optional, any time later: move the clone (`mv /home/ubuntu/vcl-assurer-group
+   /home/ubuntu/mimnets-wms`), then run `bash docker/staging/deploy.sh --here` once from the new
+   path, so Compose records the new place of `site.env`.
+
+An NPM host keeps the network it shares with NPM: the switch writes `WMS_NPM_NETWORK=assurer-npm`
+into `.env`. New installs use `wms-npm`.
+
+**Back to the old stack** (content edited after the switch is lost). `deploy.sh --rollback` cannot
+do this: it refuses every release from before m1-078.
+
+```sh
+S="docker compose -f docker/staging/compose.yaml -f docker/staging/compose.ip.yaml"   # your route
+$S down                                             # new containers and networks; volumes stay
+cp -p docker/staging/.env.before-m1-078 docker/staging/.env
+git checkout --detach <release before m1-078>       # its ASSURER_PREVIOUS_TAG or ASSURER_IMAGE_TAG in .env.before-m1-078
+$S up -d                                            # the old project mimnets-cms, its own volumes
+```
+
+`$S down` runs before the checkout, so it names `mimnets-wms` only. `docker start`
+alone is not enough: the switch removed the old networks; `up -d` makes them again.
+
+To switch again after that, first remove the new stack's volumes, so the copy starts from the old
+volumes as they are now. Not `$S down -v`: after the checkout above, `$S` names the old project.
+By label, `mimnets-wms` only:
+
+```sh
+docker volume rm $(docker volume ls -q --filter label=com.docker.compose.project=mimnets-wms)
+```
+
+Then `git switch main && git pull` and step 2.
+
+**Backups from before the switch** restore the `assurer` database and the user `assurerApp` (PBM
+runbook §4 step 5). Restored on a running site, `wms` is still there too, and its user is gone.
+Stop the app first; after `pbmc restore`, drop `wms` (the site is now in `assurer`), then restart
+`mongo`, which moves `assurer` to `wms` again and makes `wmsApp`, then start the rest:
+
+```sh
+$S exec -T mongo mongosh --quiet --tls --tlsCAFile /secrets/tls/ca.pem --host localhost --eval   'db.getSiblingDB("admin").auth("pbm", require("fs").readFileSync("/secrets/mongo-pbm-password", "utf8").trim()); printjson(db.getSiblingDB("wms").dropDatabase())'
+$S restart mongo
+$S up -d
+```
+
+The password is read from the secrets volume, never typed. If `mongo` is restarted while both
+databases hold collections, it logs "Both databases assurer and wms have collections" and "Not
+ready: the site database needs a decision"; MongoDB keeps running, the app waits. Run the drop
+above (or drop `assurer`, if `wms` is the site), then restart `mongo`.
+
+**Later, each with its own approval:** remove the old stack (`docker rm` of the `mimnets-cms`
+containers, `docker volume rm` of the `mimnets-cms_*` volumes, `docker network rm` of its networks)
+and, at the same time, the old `ghcr.io/mimnets/assurer-*` packages: together they end the way back
+(D-GIT-80 Q7).

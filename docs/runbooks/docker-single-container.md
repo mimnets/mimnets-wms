@@ -10,7 +10,7 @@
 > **Default login: user `admin`, password `admin` (owner's direction, D-DB-11).**
 > Anyone who can reach the site can log in with it. Compose publishes the site on `127.0.0.1` only,
 > so only this computer can reach it. Before you run it anywhere else, or change the `ports:` line,
-> set `ASSURER_ADMIN_PASSWORD` for the first start, or change the password in the admin UI.
+> set `WMS_ADMIN_PASSWORD` for the first start, or change the password in the admin UI.
 
 ## 1. Start it
 
@@ -22,7 +22,7 @@ Open <http://localhost:3042/> and log in at <http://localhost:3042/login>. The f
 under a minute after the build. It creates:
 
 - the database secrets, in the `secrets` volume (random values, never in the image);
-- a one-member replica set with access control and the `assurerApp` database user;
+- a one-member replica set with access control and the `wmsApp` database user;
 - the demo content (`wms-demo:seed`) and the `admin` account.
 
 Later starts reuse them and run the migrations. The corporate demo records are not loaded, because
@@ -49,6 +49,11 @@ content matters.
 | `uploads` | `/app/public/uploads` | Uploaded media |
 | `app-data` | `/app/data` | Apostrophe's working files |
 
+The Compose project is `wms-local`, so the volumes are `wms-local_mongo-data` and so on. Until
+rename stage 5 (m1-078) the project was `assurer`: its volumes `assurer_*` are not reused, and the
+demo site seeds itself again in the new ones. Remove the old ones when no longer wanted
+(`docker volume ls -q | grep '^assurer_'`).
+
 This data is separate from the development site. `.env` and the local SQLite database are not used,
 and `.dockerignore` keeps them out of the image.
 
@@ -72,16 +77,16 @@ older virtual machines and small ARM boards do not meet this, and `mongod` then 
 for both and load or share them, build each platform by name:
 
 ```sh
-docker buildx build --platform linux/arm64 -t assurer-site:local-arm64 --load .
-docker buildx build --platform linux/amd64 -t assurer-site:local-amd64 --load .
+docker buildx build --platform linux/arm64 -t wms-site:local-arm64 --load .
+docker buildx build --platform linux/amd64 -t wms-site:local-amd64 --load .
 ```
 
 To move an image to a computer without a registry:
 
 ```sh
-docker save assurer-site:local-arm64 | gzip > assurer-site-arm64.tar.gz
+docker save wms-site:local-arm64 | gzip > wms-site-arm64.tar.gz
 # on the other computer
-gunzip -c assurer-site-arm64.tar.gz | docker load
+gunzip -c wms-site-arm64.tar.gz | docker load
 ```
 
 The image holds no secrets, but pushing it to a public registry would publish the code. Pushing needs
@@ -95,7 +100,7 @@ the owner's approval. Running it on the OCI server also needs approval (D-DB-10)
   site. The database connection stays inside the container on `127.0.0.1`.
 - **Plain HTTP.** Secure cookies need `APOS_HTTPS=1` and a TLS proxy
   ([security configuration](./security-configuration.md)).
-- **First start always seeds demo content and creates `admin`.** If `ASSURER_ADMIN_PASSWORD` is not
+- **First start always seeds demo content and creates `admin`.** If `WMS_ADMIN_PASSWORD` is not
   set, the password is `admin`. A staging version must remove this fallback and the seed, and add
   TLS, x.509 on production (hardening runbook §12 choice 2) and a backup tool.
 - **Inside the container the app listens on `0.0.0.0`,** which Docker's port publishing needs. The

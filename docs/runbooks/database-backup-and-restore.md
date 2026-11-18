@@ -20,7 +20,7 @@
 ```sh
 # 1. Stop the app (dumps are not snapshot-consistent while writes happen)
 # 2. Portable dump
-npx apos-db-dump "sqlite://./data/vcl-assurer-group.db" --output="backups/$(date +%F)-local.jsonl"
+npx apos-db-dump "sqlite://./data/mimnets-wms.db" --output="backups/$(date +%F)-local.jsonl"   # the APOS_DB_URI in .env; data/vcl-assurer-group.db before m1-078
 # 3. Media
 tar -czf "backups/$(date +%F)-uploads.tgz" public/uploads
 ```

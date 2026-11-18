@@ -123,6 +123,10 @@ Each task's report includes a browser checklist (see `docs/engineering/STANDARDS
 - Page-or-URL links use `linkFields()` / `linkHref()` from `lib/link.js`. Page-level `main`
   areas use `lib/area.js`.
 - Demo content is seeded by `node app wms-demo:seed` and is always labelled "Demo".
+- **Local containers run on Kiri** (owner's standing instruction, 2026-11-18, m1-078). On the
+  owner's PC, build and run containers with Kiri (`kiri compose …`, or `docker` through Kiri's own
+  CLI and context `kiri`), not Docker Desktop. Servers and CI keep Docker Engine. Never use
+  `kiri share` (it puts a local port on the internet) without the owner's approval.
 
 ---
 

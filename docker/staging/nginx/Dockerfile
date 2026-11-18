@@ -11,7 +11,7 @@ RUN apk add --no-cache --upgrade 'zlib>=1.4-r0' \
 COPY nginx/wms.conf.template /etc/nginx/templates/wms.conf.template
 COPY --chmod=755 nginx/40-wms-reload.sh /docker-entrypoint.d/40-wms-reload.sh
 # NPM mode (m1-062): outside templates/, so it is rendered only when
-# 35-wms-npm.sh finds ASSURER_UPSTREAM_PROXY_IP set.
+# 35-wms-npm.sh finds WMS_UPSTREAM_PROXY_IP set.
 COPY nginx/wms-npm.conf.template /etc/nginx/wms-npm/wms-npm.conf.template
 COPY --chmod=755 nginx/35-wms-npm.sh /docker-entrypoint.d/35-wms-npm.sh
 

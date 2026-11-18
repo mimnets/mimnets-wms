@@ -1,6 +1,8 @@
 .env
 # Staging settings (m1-055).
 /docker/staging/site.env
+# The settings kept by the rename stage 5 switch (m1-078).
+/docker/staging/.env.before-m1-078
 /locales
 npm-debug.log
 /data

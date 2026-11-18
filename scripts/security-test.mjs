@@ -183,6 +183,7 @@ const hidden = [
   '/package.json',
   '/package-lock.json',
   '/app.js',
+  '/data/mimnets-wms.db',
   '/data/vcl-assurer-group.db',
   '/modules/@apostrophecms/express/index.js',
   '/node_modules/apostrophe/package.json',

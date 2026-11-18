@@ -2,10 +2,11 @@
 # The mongo service (m1-068, D-DB-20): MongoDB 8.0 with TLS and member
 # authentication, as a one-member replica set named mongo:27017. At every
 # start it checks the database itself and adds what is missing: the replica
-# set, the user administrator, the app user and the PBM user. The secrets come
+# set, the user administrator, the app user and the PBM user; it also moves
+# the site database from its name before m1-078 (move_old_database). The secrets come
 # from the setup job, in the read-only /secrets volume.
 #
-# ASSURER_RESTORE=1 (restore drill): no app user, because `pbm restore` brings
+# WMS_RESTORE=1 (restore drill): no app user, because `pbm restore` brings
 # it back with the backup.
 #
 # Guides: docs/runbooks/staging-container.md, docs/runbooks/pbm-backup-and-restore.md
@@ -13,9 +14,9 @@ set -euo pipefail
 
 SECRETS=/secrets
 TLS="$SECRETS/tls"
-DB_NAME=assurer
+DB_NAME=wms
 MEMBER=mongo:27017
-CACHE_GB="${ASSURER_MONGO_CACHE_GB:-1}"
+CACHE_GB="${WMS_MONGO_CACHE_GB:-1}"
 # Removed at every start; written when the checks below are done. The health
 # check needs it, so the app and PBM start only after their users exist.
 READY=/tmp/wms-mongo-ready
@@ -30,12 +31,13 @@ mongosh_local() {
 
 # Runs the script on standard input with --file, so that an error stops this
 # entrypoint (piped input would not). The file holds passwords, so it is
-# private and removed at once; they never go into the arguments.
+# private and removed at once; they never go into the arguments. Only the
+# script's own "[wms] ..." lines reach the log.
 run_js() {
   local file status=0
   file="$(umask 077; mktemp /tmp/wms-XXXXXX.js)"
   cat > "$file"
-  mongosh_local --file "$file" > /dev/null || status=$?
+  mongosh_local --file "$file" | { grep '^\[wms\]' || true; } || status=$?
   rm -f "$file"
   return "$status"
 }
@@ -75,12 +77,62 @@ if (!known) {
 EOF
 }
 
+# Rename stage 5 (m1-078, D-GIT-80): the site database was `assurer` with the
+# app user `assurerApp`. Moves every collection to `wms` (renameCollection
+# across databases copies documents and indexes) and drops the old user. Runs
+# at every start, before the health check passes, so the app never meets an
+# empty `wms` while `assurer` holds the site: after deploy.sh copied the old
+# volumes, and after restoring a PBM backup from before m1-078 on a running
+# site (drop `wms` first, then restart mongo).
+# Does nothing when `assurer` has no collections; when both
+# databases have some, MongoDB runs but never becomes ready, because only a
+# person can tell which one is the site.
+# The user administrator cannot read data, so it holds readWriteAnyDatabase
+# only while `assurer` exists, for the move.
+move_old_database() {
+  mongosh_admin <<'EOF'
+const admin = db.getSiblingDB("admin");
+const from = db.getSiblingDB("assurer");
+const to = db.getSiblingDB("wms");
+// listDatabases needs no data access (clusterAdmin); MongoDB lists a database only while it has collections.
+const listed = admin.runCommand({ listDatabases: 1, nameOnly: true }).databases.map((d) => d.name);
+if (listed.includes("assurer")) {
+  admin.grantRolesToUser("siteAdmin", [ "readWriteAnyDatabase" ]);
+  try {
+    const names = from.getCollectionNames().filter((name) => !name.startsWith("system."));
+    if (to.getCollectionNames().length) {
+      throw new Error("[wms] Both databases assurer and wms have collections; nothing moved. See the PBM runbook, rename stage 5");
+    }
+    const count = (d) => d.getCollectionNames().reduce((n, c) => n + d.getCollection(c).countDocuments({}), 0);
+    const before = count(from);
+    for (const name of names) {
+      const result = admin.runCommand({ renameCollection: `assurer.${name}`, to: `wms.${name}` });
+      if (result.ok !== 1) {
+        throw new Error(`[wms] Moving assurer.${name} failed: ${result.errmsg}`);
+      }
+    }
+    const after = count(to);
+    print(`[wms] Moved ${names.length} collections from assurer to wms: ${before} documents before, ${after} after`);
+    if (before !== after) {
+      throw new Error("[wms] Document counts differ after the move");
+    }
+  } finally {
+    admin.revokeRolesFromUser("siteAdmin", [ "readWriteAnyDatabase" ]);
+  }
+}
+if (from.getUser("assurerApp")) {
+  from.dropUser("assurerApp");
+  print("[wms] Dropped the old app user assurerApp");
+}
+EOF
+}
+
 ensure_app_user() {
   mongosh_admin <<EOF
 const site = db.getSiblingDB("$DB_NAME");
-if (!site.getUser("assurerApp")) {
+if (!site.getUser("wmsApp")) {
   site.createUser({
-    user: "assurerApp",
+    user: "wmsApp",
     pwd: "$(cat "$SECRETS/mongo-app-password")",
     roles: [ { role: "readWrite", db: "$DB_NAME" } ]
   });
@@ -142,14 +194,21 @@ until mongosh_local --eval 'db.hello().ok' > /dev/null 2>&1; do
 done
 
 ensure_replica_set_and_admin
-if [ "${ASSURER_RESTORE:-0}" != 1 ]; then
+if [ "${WMS_RESTORE:-0}" != 1 ]; then
+  if ! move_old_database; then
+    # MongoDB stays up, never ready: the health check fails and the app waits,
+    # while a person decides (staging runbook §12.6).
+    log "Not ready: the site database needs a decision (staging runbook §12.6). The app waits."
+    wait "$mongod_pid" || true
+    exit 1
+  fi
   ensure_app_user
 fi
 ensure_pbm_user
 # The certificate MongoDB loaded at this start, for deploy.sh (setup.sh).
 cp "$TLS/serial" /tmp/wms-tls-serial 2> /dev/null || true
 touch "$READY"
-if [ "${ASSURER_RESTORE:-0}" = 1 ]; then
+if [ "${WMS_RESTORE:-0}" = 1 ]; then
   log "MongoDB ready for a restore (cache ${CACHE_GB} GB); no app user"
 else
   log "MongoDB ready (cache ${CACHE_GB} GB)"

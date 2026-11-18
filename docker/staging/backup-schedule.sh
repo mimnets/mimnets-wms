@@ -1,27 +1,27 @@
 #!/bin/bash
 # The backup service (m1-068; the schedule of m1-055): applies the PBM
 # configuration if the database has none, then takes a base backup soon after
-# each start and every ASSURER_BACKUP_INTERVAL_HOURS, followed by removing
-# backups and oplog slices older than ASSURER_BACKUP_RETENTION. PITR needs a
+# each start and every WMS_BACKUP_INTERVAL_HOURS, followed by removing
+# backups and oplog slices older than WMS_BACKUP_RETENTION. PITR needs a
 # base backup older than the point it restores to, so the retention is one day
 # longer than the 7-day PITR target (D-DB-4). Runs as the pbm user; pbm-agent
 # (the pbm service) does the work.
 #
-# ASSURER_BACKUP_INTERVAL_HOURS=0 (restore drill): configure with PITR off, read
+# WMS_BACKUP_INTERVAL_HOURS=0 (restore drill): configure with PITR off, read
 # the backup list from storage, then exit.
 #
 # Guide: docs/runbooks/pbm-backup-and-restore.md
 set -euo pipefail
 
-BACKUP_HOURS="${ASSURER_BACKUP_INTERVAL_HOURS:-24}"
-BACKUP_RETENTION="${ASSURER_BACKUP_RETENTION:-8d}"
+BACKUP_HOURS="${WMS_BACKUP_INTERVAL_HOURS:-24}"
+BACKUP_RETENTION="${WMS_BACKUP_RETENTION:-8d}"
 
 log() {
   echo "[wms] $*"
 }
 
 if ! [[ "$BACKUP_HOURS" =~ ^[0-9]+$ ]]; then
-  log "ASSURER_BACKUP_INTERVAL_HOURS must be a whole number (0: configure only)"
+  log "WMS_BACKUP_INTERVAL_HOURS must be a whole number (0: configure only)"
   exit 1
 fi
 

@@ -33,7 +33,7 @@ test('test contributor guard: temp database and contributor credentials required
   }, opts), /APOS_TEST_CONTRIBUTOR_USER/);
   assert.match(contributorRefuseReason({
     ...env,
-    APOS_DB_URI: 'sqlite://./data/vcl-assurer-group.db'
+    APOS_DB_URI: 'sqlite://./data/mimnets-wms.db'
   }, opts), /temporary SQLite|absolute path/);
   assert.match(contributorRefuseReason({
     ...env,

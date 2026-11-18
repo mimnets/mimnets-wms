@@ -1,11 +1,11 @@
 # docker compose up -d --build, then open http://localhost:3042/
 # Guide: docs/runbooks/docker-single-container.md
-name: assurer
+name: wms-local
 
 services:
   site:
     build: .
-    image: assurer-site:local
+    image: wms-site:local
     restart: unless-stopped
     stop_grace_period: 60s
     ports:

@@ -9,9 +9,9 @@
 services:
   app:
     ports:
-      - "${ASSURER_IP_PORT:-8090}:3000"
+      - "${WMS_IP_PORT:-8090}:3000"
     environment:
-      APOS_BASE_URL: http://${ASSURER_PUBLIC_IP:?set the server's public IPv4}:${ASSURER_IP_PORT:-8090}
+      APOS_BASE_URL: http://${WMS_PUBLIC_IP:?set the server's public IPv4}:${WMS_IP_PORT:-8090}
       # No proxy in front and no TLS, so no Secure cookies, proxy trust or HSTS.
       APOS_HTTPS: "0"
       APOS_TRUST_PROXY: ""

@@ -6,10 +6,10 @@
 set -euo pipefail
 
 SECRETS=/data/secrets
-DB_NAME=assurer
+DB_NAME=wms
 
 log() {
-  echo "[assurer] $*"
+  echo "[wms] $*"
 }
 
 # Writes a random secret once. The value is hex, so it is safe in a URI and in
@@ -26,7 +26,7 @@ mongosh_local() {
 }
 
 as_app() {
-  gosu assurer "$@"
+  gosu wms "$@"
 }
 
 mkdir -p "$SECRETS"
@@ -41,9 +41,9 @@ chmod 400 "$SECRETS/mongo-keyfile"
 # mongod reads its key file as the mongodb user.
 chmod 711 "$SECRETS"
 chown -R mongodb:mongodb /data/db
-chown -R assurer:assurer /app/public/uploads /app/data
+chown -R wms:wms /app/public/uploads /app/data
 
-gosu mongodb mongod --config /etc/assurer/mongod.conf &
+gosu mongodb mongod --config /etc/wms/mongod.conf &
 mongod_pid=$!
 app_pid=
 
@@ -84,7 +84,7 @@ db.getSiblingDB("admin").createUser({
 });
 db.getSiblingDB("admin").auth("siteAdmin", "$(cat "$SECRETS/mongo-admin-password")");
 db.getSiblingDB("$DB_NAME").createUser({
-  user: "assurerApp",
+  user: "wmsApp",
   pwd: "$(cat "$SECRETS/mongo-app-password")",
   roles: [ { role: "readWrite", db: "$DB_NAME" } ]
 });
@@ -92,7 +92,7 @@ EOF
   touch "$SECRETS/.database-ready"
 fi
 
-APOS_DB_URI="mongodb://assurerApp:$(cat "$SECRETS/mongo-app-password")@127.0.0.1:27017/$DB_NAME?replicaSet=rs0&authSource=$DB_NAME"
+APOS_DB_URI="mongodb://wmsApp:$(cat "$SECRETS/mongo-app-password")@127.0.0.1:27017/$DB_NAME?replicaSet=rs0&authSource=$DB_NAME"
 APOS_SESSION_SECRET="$(cat "$SECRETS/session-secret")"
 export APOS_DB_URI APOS_SESSION_SECRET
 
@@ -102,13 +102,13 @@ if [ ! -e "$SECRETS/.content-ready" ]; then
   log "First start: loading demo content and creating the admin account"
   as_app node app wms-demo:seed
   # The prompt echoes what it reads, so its output must stay out of the logs.
-  echo "${ASSURER_ADMIN_PASSWORD:-admin}" | as_app node app @apostrophecms/user:add admin admin > /dev/null
+  echo "${WMS_ADMIN_PASSWORD:-admin}" | as_app node app @apostrophecms/user:add admin admin > /dev/null
   touch "$SECRETS/.content-ready"
 fi
 
 as_app node app &
 app_pid=$!
-log "Started. Admin login: user 'admin', default password unless ASSURER_ADMIN_PASSWORD was set"
+log "Started. Admin login: user 'admin', default password unless WMS_ADMIN_PASSWORD was set"
 
 # Stop when either process ends. shutdown() handles a stop request.
 wait -n "$mongod_pid" "$app_pid" || true

@@ -151,7 +151,7 @@ and where each one comes from:
 | `security.keyFile`, `clusterAuthMode: keyFile` | random key file | Member authentication: a key file is acceptable on staging; **production needs x.509** (§12 choice 2) |
 | `security.javascriptEnabled` | `false` | §12 choice 7 (m1-044) |
 | `replication.replSetName` | `rs0`, one member | Needed for point-in-time recovery (D-DB-4) |
-| WiredTiger cache | `ASSURER_MONGO_CACHE_GB`, default 1 GB | The app shares the container's memory (m1-054 results §3) |
+| WiredTiger cache | `WMS_MONGO_CACHE_GB`, default 1 GB | The app shares the container's memory (m1-054 results §3) |
 
 What the stack does on the first start (m1-068: the `setup` job, [`docker/staging/setup.sh`](../../docker/staging/setup.sh),
 then the `mongo` container's [`mongo-entrypoint.sh`](../../docker/staging/mongo-entrypoint.sh); until
@@ -175,11 +175,11 @@ and security checklist [6]:
    | User | Roles | Used by |
    |---|---|---|
    | `siteAdmin` (break-glass) | `userAdminAnyDatabase`, `clusterAdmin` | the entrypoint, and admins by hand |
-   | `assurerApp` | `readWrite` on the `assurer` database only | the app |
+   | `wmsApp` | `readWrite` on the `wms` database only (`assurer` before m1-078) | the app |
    | `pbm` | `backup`, `restore`, `clusterMonitor`, `readWrite` on `admin`, and `pbmAnyAction` (`anyAction`) | `pbm-agent` and the backup schedule. Far more than the `backup` role first planned; accepted by the owner (D-DB-12) |
 
 5. Builds the app's connection string from the secrets at each start, in the app's environment only:
-   `mongodb://assurerApp:<secret>@mongo:27017/assurer?replicaSet=rs0&authSource=assurer&tls=true&tlsCAFile=/secrets/ca.pem` (m1-068).
+   `mongodb://wmsApp:<secret>@mongo:27017/wms?replicaSet=rs0&authSource=wms&tls=true&tlsCAFile=/secrets/ca.pem` (m1-068).
    It is never written to a file, a log or Git.
 
 MongoDB writes its log to the container's standard output, which Docker keeps. Set a size cap for
@@ -215,7 +215,7 @@ container runbook §6).
 4. **Users inside the site container:** the app runs as `assurer`, MongoDB as `mongodb`, `pbm-agent`
    as `pbm`. Only `root` reads the secrets; the app and `pbm-agent` get their credentials in their
    own environment only.
-5. **Settings:** `APOS_BASE_URL` and `ASSURER_DOMAIN` in the shell or Compose's `.env` file next to
+5. **Settings:** `APOS_BASE_URL` and `WMS_DOMAIN` in the shell or Compose's `.env` file next to
    `compose.yaml`; everything else that is per site (SMTP, form notification addresses) in
    `docker/staging/site.env`, owner `root`, mode `0600`, never in Git. The Compose file already sets
    `APOS_HTTPS=1`, `APOS_TRUST_PROXY` (nginx's fixed address) and `APOS_HSTS_MAX_AGE=300`
@@ -293,7 +293,7 @@ All rows are **NOT EXECUTED**: no server exists.
 | V3 | Host firewall active | `sudo ufw status verbose` | NOT EXECUTED |
 | V4 | SSH: no root, no passwords | `ssh root@<host>` and a password login both refused | NOT EXECUTED |
 | V5 | MongoDB refuses unauthenticated and non-TLS clients | `mongosh` without credentials, and without TLS | NOT EXECUTED |
-| V6 | App user cannot read other databases or manage users | `mongosh` as `assurerApp` | NOT EXECUTED |
+| V6 | App user cannot read other databases or manage users | `mongosh` as `wmsApp` | NOT EXECUTED |
 | V7 | Data area encrypted | `lsblk -f` shows `crypto_LUKS` under the data mount (option A or B) | NOT EXECUTED |
 | V8 | Automatic security updates on | `apt-config dump APT::Periodic::Unattended-Upgrade` returns `"1"` | NOT EXECUTED |
 | V9 | App restarts after a crash | kill one web process (`docker compose exec site pkill -KILL -f 'node /app/app'`), then the whole container (`docker kill site`); the site answers again | NOT EXECUTED |
