@@ -62,6 +62,7 @@ Checks marked agent-executed were run by the agent. They are not human approval.
 | `npm run test:persistence` | PASS, 7/7 |
 | `wms-patterns:seed` twice (audit database) | PASS: first run created 7 draft pages; second run "Patterns already present; nothing changed." |
 | `npm run test:ci`, `test:security`, `test:forms` | NOT RUN (not required by AGENTS.md for this change) |
+| `npm run audit:check` (after the push) | FAIL on hosted CI, then PASS locally after D-SEC-11: a new high advisory, GHSA-fc5q-39xc-vjpf (`picomatch`, no patched version), not caused by this branch; accepted in the baseline by the owner, review by 2027-02-16. Three new moderate/low advisories warn only |
 
 The first seed run failed with `Cannot read properties of undefined (reading 'emit')`: the page
 type was not passed through `convert`. Fixed as in `wms-demo` before the runs above.
