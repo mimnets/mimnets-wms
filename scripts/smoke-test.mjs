@@ -29,6 +29,14 @@ check('slideshow rendered with 3 slides', (html.match(/data-slide(?=[\s>])/g) ||
 check('product cards rendered', (html.match(/class="wms-card"/g) || []).length >= 3);
 check('contact form rendered', html.includes('data-apos-form-form'));
 check('no admin UI bundle for anonymous visitor', !html.includes('apos-build.js'));
+// m1-080: visitors get the Global Styles stylesheet even if nobody has saved
+// Global Styles (CI starts from a new database, where core alone leaves it out).
+const stylesHref = html.match(/<link rel="stylesheet" href="([^"]*@apostrophecms\/styles\/stylesheet[^"]*)"/)?.[1];
+check('Global Styles stylesheet linked for visitors', Boolean(stylesHref));
+if (stylesHref) {
+  const css = await fetch(new URL(stylesHref.replaceAll('&amp;', '&'), BASE));
+  check('Global Styles stylesheet served', css.status === 200 && (await css.text()).includes('line-height'), String(css.status));
+}
 // m1-019: reCAPTCHA is not offered, and the spam guard is in the form.
 check('no reCAPTCHA in the page', !/recaptcha/i.test(html));
 check('form spam guard rendered (fill token and hidden honeypot)',

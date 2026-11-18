@@ -12,6 +12,8 @@ export default {
       alignment: 'alignment',
       // Background colour, gradient or image for the whole layout (m1-071).
       background: 'background',
+      // m1-080: inner space, so content stays off the background's edges.
+      padding: 'padding',
       // m1-072: animate the whole layout, or one column (layout-column-widget).
       entrance: entranceStyle
     }

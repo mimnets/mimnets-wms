@@ -52,6 +52,13 @@ body {
   padding-right: var(--wms-space-4);
 }
 
+// Core puts the Width style (`width: 100%`) and the Padding style on the same
+// widget wrapper; without this the padding adds to the width and the section
+// overflows the page (m1-080).
+[data-apos-widget-style-wrapper-for] {
+  box-sizing: border-box;
+}
+
 .wms-header {
   display: flex;
   flex-wrap: wrap;
