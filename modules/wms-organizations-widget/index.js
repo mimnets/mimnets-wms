@@ -18,6 +18,11 @@ export default {
   },
   styles: {
     add: {
+      // Colour, gradient or photo with overlay behind the section, and the
+      // inner space that keeps content off its edges (m1-080, D-CONTENT-25).
+      // Core presets, as on the layout widget.
+      background: 'background',
+      padding: 'padding',
       entrance: entranceStyle
     }
   },

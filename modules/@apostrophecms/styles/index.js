@@ -422,5 +422,42 @@ export default {
         }
       }
     }
+  },
+  handlers(self) {
+    return {
+      // Rule: every global doc carries the visitor stylesheet and body classes
+      // (`stylesStylesheet`, `stylesClasses`), so visitors see the same Global
+      // Styles and preset as editors (m1-080, D-CONTENT-25).
+      //
+      // Core 4.34.0 writes them only in the styles doc's afterSave. On a new
+      // database the styles singleton is inserted before the global doc
+      // (module order in apostrophe/defaults.js), so that write finds nothing
+      // and visitors get browser defaults until an admin saves Global Styles.
+      // This runs after core's insertRequired (same event, earlier module),
+      // at every dev start and at `migration:migrate`. Where the stylesheet
+      // is missing it saves the styles doc once with the official update, so
+      // core itself writes it; afterwards it does nothing. Remove when core
+      // inserts the global doc first.
+      '@apostrophecms/migration:requirements': {
+        async ensureVisitorStylesheet() {
+          for (const locale of Object.keys(self.apos.i18n.locales)) {
+            for (const mode of [ 'draft', 'published' ]) {
+              const req = self.apos.task.getReq({
+                locale,
+                mode
+              });
+              const global = await self.apos.global.findGlobal(req);
+              if (!global || global.stylesStylesheet) {
+                continue;
+              }
+              const styles = await self.find(req, {}).toObject();
+              if (styles) {
+                await self.update(req, styles);
+              }
+            }
+          }
+        }
+      }
+    };
   }
 };

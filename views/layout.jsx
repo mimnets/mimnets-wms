@@ -215,6 +215,12 @@ function Breadcrumbs({ data }) {
 function Footer({ global = {} }) {
   const locations = global._footerLocations || [];
   const social = (global.socialLinks || []).filter(link => link.url);
+  const links = (global.footerLinks || [])
+    .map(link => ({
+      text: link.linkText,
+      href: linkHref(link)
+    }))
+    .filter(link => link.text && link.href);
   const hasContact = global.contactEmail || global.contactPhone || global.contactAddress;
   // Only a published page is joined for visitors (m1-019).
   const privacyPage = global._privacyPage?.[0];
@@ -229,6 +235,13 @@ function Footer({ global = {} }) {
           )}
           {global.contactEmail && <a href={`mailto:${global.contactEmail}`}>{global.contactEmail}</a>}
         </address>
+      )}
+      {links.length > 0 && (
+        <ul className="wms-footer__links" aria-label="Links">
+          {links.map(link => (
+            <li><a href={link.href}>{link.text}</a></li>
+          ))}
+        </ul>
       )}
       {locations.length > 0 && (
         <ul className="wms-footer__locations" aria-label="Locations">

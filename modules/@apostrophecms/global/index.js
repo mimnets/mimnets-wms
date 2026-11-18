@@ -94,6 +94,18 @@ export default {
           }
         }
       },
+      // m1-080 (D-CONTENT-25): a short list of links in the footer, such as
+      // a sister company's site or the sitemap.
+      footerLinks: {
+        type: 'array',
+        label: 'Footer links',
+        help: 'Optional, in the order shown. A link to a page appears only while the page is published.',
+        titleField: 'linkText',
+        max: 8,
+        fields: {
+          add: linkFields()
+        }
+      },
       showHeaderCta: {
         type: 'boolean',
         label: 'Show a button at the end of the main menu',
@@ -152,7 +164,7 @@ export default {
       },
       footer: {
         label: 'Footer',
-        fields: [ 'footerText', 'copyrightName', '_footerLocations', 'socialLinks' ]
+        fields: [ 'footerText', 'copyrightName', '_footerLocations', 'footerLinks', 'socialLinks' ]
       },
       navigation: {
         label: 'Navigation',
@@ -186,7 +198,7 @@ export default {
   handlers(self) {
     return {
       beforeSave: {
-        rejectNonWebUrls: rejectNonWebUrls(self, [ 'socialLinks.url', 'linkUrl' ])
+        rejectNonWebUrls: rejectNonWebUrls(self, [ 'socialLinks.url', 'footerLinks.linkUrl', 'linkUrl' ])
       },
       // @apostrophecms/form adds Google reCAPTCHA settings here under the same
       // handler name. reCAPTCHA sends visitor data to Google, so it is not
