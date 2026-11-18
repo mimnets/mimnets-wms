@@ -59,7 +59,7 @@ body.wms-theme-quiet {
     border-color: var(--wms-color-border-subtle);
   }
 
-  // Desktop: the logo centred above the menu; the log-in link at the right.
+  // Desktop: the logo centred above the menu.
   @media (min-width: $bp-desktop) {
     .wms-header {
       flex-direction: column;
@@ -67,12 +67,6 @@ body.wms-theme-quiet {
       padding-top: 28px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--wms-color-border-subtle);
-    }
-
-    .wms-header__login {
-      position: absolute;
-      top: 20px;
-      right: 16px;
     }
   }
 }

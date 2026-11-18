@@ -45,6 +45,13 @@ body {
   box-sizing: border-box;
 }
 
+// The side margin the header, breadcrumbs and footer already have, so page
+// content never touches the screen edge on tablets and phones (m1-079).
+.wms-main {
+  padding-left: var(--wms-space-4);
+  padding-right: var(--wms-space-4);
+}
+
 .wms-header {
   display: flex;
   flex-wrap: wrap;
@@ -224,7 +231,8 @@ a[data-link-style='button-outline'] {
   }
 }
 
-@container (min-width: 720px) {
+// Three cards from 840 px: two on a tablet (m1-079).
+@container (min-width: 840px) {
   .wms-products__grid--cols-3 > [data-apos-area],
   .wms-products__grid--cols-3 > .apos-area,
   .wms-products__grid--cols-4 > [data-apos-area],
@@ -280,9 +288,13 @@ a[data-link-style='button-outline'] {
   text-align: left;
 }
 
+// At least 44 px high, a comfortable tap target (WCAG 2.5.5; m1-079).
 .wms-card__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 4px;
   color: var(--wms-color-accent);
   font-weight: 600;
 }

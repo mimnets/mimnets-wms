@@ -174,16 +174,16 @@ function DevStyleGuard({ apos }) {
   );
 }
 
+// No log-in link for visitors (m1-079, D-CONTENT-24 Q2): staff sign in at
+// /login, and the header's button slot is the call to action in Global
+// Settings.
 function Header({
-  user, home, page, global
+  home, page, global
 }) {
   return (
     <header className="wms-header">
       <BrandMark />
       <Nav home={home} page={page} global={global} />
-      {!user && (
-        <a className="wms-button wms-button--outline wms-header__login" href="/login">Log in</a>
-      )}
     </header>
   );
 }
@@ -296,7 +296,7 @@ export default function (data, { Extend, apos }) {
         <div className="wms-wrapper">
           <a className="wms-skip-link" href="#main-content">Skip to content</a>
           <DemoNotice />
-          <Header user={data.user} home={data.home} page={data.page} global={data.global} />
+          <Header home={data.home} page={data.page} global={data.global} />
           <Breadcrumbs data={data} />
           <main className="wms-main" id="main-content" tabindex="-1">
             {data.main}
