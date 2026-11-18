@@ -14,7 +14,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 S=(docker compose -f docker/staging/compose.yaml -f docker/staging/compose.ip.yaml)
 ENV_FILE=docker/staging/.env
-PLACEHOLDER=assurer.invalid
+PLACEHOLDER=wms.invalid
 
 say() { echo "[ip-setup] $*"; }
 die() { echo "[ip-setup] STOP: $*" >&2; exit 1; }
@@ -42,12 +42,12 @@ case "$kernel" in
   *) die "kernel $kernel is not on the 6.8 line; MongoDB 8.0.34 may refuse it (D-DB-16)" ;;
 esac
 say "Compose $(docker compose version --short), $(uname -m)"
-if docker ps -a --format '{{.Names}}' | grep -qxE '(assurer-staging|mimnets-cms)-certbot-1'; then
+if docker ps -a --format '{{.Names}}' | grep -qxE '(assurer-staging|mimnets-cms|mimnets-wms)-certbot-1'; then
   die "a standalone stack is here (certbot container); see runbook §9 before switching"
 fi
 # The port must be free, or already this site's own (a run again, or the
 # one-container site, which deploy.sh stops with --switch-from-one-container).
-users=$(docker ps --filter "publish=$port" --format '{{.Names}}' | grep -vxE 'mimnets-cms-app-1|assurer-staging-site-1' || true)
+users=$(docker ps --filter "publish=$port" --format '{{.Names}}' | grep -vxE 'mimnets-wms-app-1|mimnets-cms-app-1|assurer-staging-site-1' || true)
 [ -z "$users" ] || die "port $port is used by container(s): $users. Pick another port: bash docker/staging/ip-setup.sh $ip <port>"
 if [ -z "$(docker ps --filter "publish=$port" --format '{{.Names}}')" ] \
   && ss -Htln "sport = :$port" 2>/dev/null | grep -q .; then
@@ -61,23 +61,25 @@ set_key() {
   if grep -q "^$1=" "$ENV_FILE"; then sed -i "s|^$1=.*|$1=$2|" "$ENV_FILE"
   else echo "$1=$2" >> "$ENV_FILE"; fi
 }
+# Rename stage 5 (m1-078): settings from before it are switched by deploy.sh.
+! grep -qs '^ASSURER_' "$ENV_FILE" || die "$ENV_FILE has ASSURER_ settings (before rename stage 5). Run deploy.sh --switch-to-mimnets-wms first (runbook §12.6)"
 if [ ! -f "$ENV_FILE" ]; then
   (umask 077; cat > "$ENV_FILE" <<EOF
 # Written by ip-setup.sh (m1-065). Settings: runbook staging-container.md §2, §9 and §11.
-ASSURER_PROXY_MODE=ip
-ASSURER_DOMAIN=$PLACEHOLDER
+WMS_PROXY_MODE=ip
+WMS_DOMAIN=$PLACEHOLDER
 APOS_BASE_URL=https://$PLACEHOLDER
-ASSURER_UPSTREAM_PROXY_IP=172.30.56.2
+WMS_UPSTREAM_PROXY_IP=172.30.56.2
 APOS_CLUSTER_PROCESSES=2
-ASSURER_MONGO_CACHE_GB=1
+WMS_MONGO_CACHE_GB=1
 EOF
   )
   say "settings written to $ENV_FILE"
 fi
 chmod 600 "$ENV_FILE"
-set_key ASSURER_PROXY_MODE ip
-set_key ASSURER_PUBLIC_IP "$ip"
-set_key ASSURER_IP_PORT "$port"
+set_key WMS_PROXY_MODE ip
+set_key WMS_PUBLIC_IP "$ip"
+set_key WMS_IP_PORT "$port"
 
 # 3. Pull and start the clone's release (deploy.sh). It stops nginx from an
 # NPM-mode start by name, so nothing else is removed.
@@ -105,7 +107,7 @@ Done. The site runs at:  http://$ip:$port/   (admin: http://$ip:$port/login)
      ${S[*]} exec app cat /app/data/admin-initial-password
    This is plain HTTP: the password crosses the internet unencrypted. Change it again after go-live.
 3. Go-live, when the content is ready (same database and media; runbook §11):
-   Cloudflare record (DNS only), NPM joins assurer-npm, NPM proxy host, then:
+   Cloudflare record (DNS only), NPM joins wms-npm, NPM proxy host, then:
      bash docker/staging/npm-setup.sh --domain <your host name>
    and remove the ingress rule for port $port.
 EOF

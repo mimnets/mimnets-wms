@@ -17,10 +17,10 @@ cd "$(dirname "$0")/../.."
 ENV_FILE=docker/staging/.env
 STANDALONE=(docker compose -f docker/staging/compose.yaml)
 NPMMODE=(docker compose -f docker/staging/compose.yaml -f docker/staging/compose.npm.yaml)
-NET="${ASSURER_NPM_NETWORK:-assurer-npm}"
+NET="${WMS_NPM_NETWORK:-wms-npm}"
 NPM_IP=172.30.56.2
 NPM_NGINX_IP=172.30.56.10
-PLACEHOLDER=assurer.invalid
+PLACEHOLDER=wms.invalid
 DOMAIN_RE='([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}'
 IP_RE='((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])'
 
@@ -96,18 +96,20 @@ set_key() {
 }
 
 load_env() {
-  MODE=$(env_get ASSURER_PROXY_MODE)
+  # Rename stage 5 (m1-078): settings from before it are switched by deploy.sh.
+  ! grep -qs '^ASSURER_' "$ENV_FILE" || die "$ENV_FILE has ASSURER_ settings (before rename stage 5). Run deploy.sh --switch-to-mimnets-wms first (runbook §12.6)"
+  MODE=$(env_get WMS_PROXY_MODE)
   # Settings written by hand (runbook §3) or by npm-setup.sh name no route.
   if [ -z "$MODE" ] && [ -f "$ENV_FILE" ]; then
-    if [ -n "$(env_get ASSURER_UPSTREAM_PROXY_IP)" ]; then MODE=npm; else MODE=standalone; fi
+    if [ -n "$(env_get WMS_UPSTREAM_PROXY_IP)" ]; then MODE=npm; else MODE=standalone; fi
   fi
-  DOMAIN=$(env_get ASSURER_DOMAIN)
+  DOMAIN=$(env_get WMS_DOMAIN)
   if [ "$MODE" = npm ]; then S=("${NPMMODE[@]}"); else S=("${STANDALONE[@]}"); fi
 }
 
-# The NPM container on this host, if any (ASSURER_NPM_CONTAINER overrides, for tests).
+# The NPM container on this host, if any (WMS_NPM_CONTAINER overrides, for tests).
 npm_container() {
-  if [ -n "${ASSURER_NPM_CONTAINER:-}" ]; then echo "$ASSURER_NPM_CONTAINER"; return; fi
+  if [ -n "${WMS_NPM_CONTAINER:-}" ]; then echo "$WMS_NPM_CONTAINER"; return; fi
   docker ps --format '{{.Names}} {{.Image}}' | awk '$2 ~ /nginx-proxy-manager/ {print $1; exit}'
 }
 
@@ -115,7 +117,7 @@ npm_container() {
 # Standalone: the stack's nginx. NPM mode: NPM on 80 and 443.
 front() {
   if [ "$MODE" = npm ]; then
-    if [ "$1" = 80 ]; then echo "${ASSURER_FRONT_HTTP:-127.0.0.1:80}"; else echo "${ASSURER_FRONT_HTTPS:-127.0.0.1:443}"; fi
+    if [ "$1" = 80 ]; then echo "${WMS_FRONT_HTTP:-127.0.0.1:80}"; else echo "${WMS_FRONT_HTTPS:-127.0.0.1:443}"; fi
   else
     "${S[@]}" port nginx "$1" 2> /dev/null | head -1 | sed 's/^0\.0\.0\.0:/127.0.0.1:/; s/^\[::\]:/127.0.0.1:/'
   fi
@@ -212,7 +214,7 @@ step0() {
   else ss -tlnH '( sport = :80 or sport = :81 or sport = :443 )' | sed 's/^/    /'; warn "not root: process names hidden"; fi
   local npm; npm=$(npm_container)
   [ -n "$npm" ] && say "Nginx Proxy Manager runs here: container $npm"
-  docker ps -a --format '{{.Names}}\t{{.Status}}' | grep '^assurer' | sed 's/^/    /' || true
+  docker ps -a --format '{{.Names}}\t{{.Status}}' | grep -E '^(assurer|mimnets-)' | sed 's/^/    /' || true
   record "0 host checks" PASS "kernel $kernel, Compose $compose"
 }
 
@@ -247,12 +249,12 @@ EOF
 step2() {
   hr "Step 2: settings ($ENV_FILE)"
   if [ -f "$ENV_FILE" ]; then
-    local m; m=$(env_get ASSURER_PROXY_MODE)
-    [ -n "$m" ] || set_key ASSURER_PROXY_MODE "$MODE"
+    local m; m=$(env_get WMS_PROXY_MODE)
+    [ -n "$m" ] || set_key WMS_PROXY_MODE "$MODE"
     chmod 600 "$ENV_FILE"
     load_env
     say "settings exist; kept as they are (the domain can change in step 6):"
-    grep -E '^(ASSURER_PROXY_MODE|ASSURER_DOMAIN|APOS_CLUSTER_PROCESSES|ASSURER_MONGO_CACHE_GB)=' "$ENV_FILE" | sed 's/^/    /'
+    grep -E '^(WMS_PROXY_MODE|WMS_DOMAIN|APOS_CLUSTER_PROCESSES|WMS_MONGO_CACHE_GB)=' "$ENV_FILE" | sed 's/^/    /'
     record "2 settings" PASS "kept"; return
   fi
   [ -n "$MODE" ] || die "no route chosen; run step 1 first"
@@ -267,12 +269,12 @@ step2() {
   while :; do c=$(ask "MongoDB cache in GB (1 to 64)" 1); [[ "$c" =~ ^[1-9][0-9]?$ ]] && [ "$c" -le 64 ] && break; done
   (umask 077; {
     echo "# Written by install.sh (m1-064). Settings: runbook staging-container.md §2, §9 and §10."
-    echo "ASSURER_PROXY_MODE=$MODE"
-    echo "ASSURER_DOMAIN=$d"
+    echo "WMS_PROXY_MODE=$MODE"
+    echo "WMS_DOMAIN=$d"
     echo "APOS_BASE_URL=https://$d"
-    [ "$MODE" = npm ] && echo "ASSURER_UPSTREAM_PROXY_IP=$NPM_IP"
+    [ "$MODE" = npm ] && echo "WMS_UPSTREAM_PROXY_IP=$NPM_IP"
     echo "APOS_CLUSTER_PROCESSES=$w"
-    echo "ASSURER_MONGO_CACHE_GB=$c"
+    echo "WMS_MONGO_CACHE_GB=$c"
   } > "$ENV_FILE")
   chmod 600 "$ENV_FILE"
   load_env
@@ -383,12 +385,12 @@ step6() {
   fi
   if [ "$d" != "$DOMAIN" ]; then
     if [ "$MODE" = npm ]; then show "The script runs (recreates app and nginx):" "bash docker/staging/npm-setup.sh --domain $d"
-    else show "The script sets ASSURER_DOMAIN and APOS_BASE_URL in $ENV_FILE, then runs (recreates app and nginx):" "${S[*]} up -d"; fi
+    else show "The script sets WMS_DOMAIN and APOS_BASE_URL in $ENV_FILE, then runs (recreates app and nginx):" "${S[*]} up -d"; fi
     [ "$(choose "[r]un, [s]kip or [q]uit?" rsq)" = r ] || { record "6 domain and DNS" SKIPPED "domain not changed"; return; }
     if [ "$MODE" = npm ]; then
       bash docker/staging/npm-setup.sh --domain "$d" || { record "6 domain and DNS" FAIL "npm-setup.sh --domain stopped"; return; }
     else
-      set_key ASSURER_DOMAIN "$d"; set_key APOS_BASE_URL "https://$d"
+      set_key WMS_DOMAIN "$d"; set_key APOS_BASE_URL "https://$d"
       "${S[@]}" up -d || { record "6 domain and DNS" FAIL "up failed"; return; }
     fi
     load_env

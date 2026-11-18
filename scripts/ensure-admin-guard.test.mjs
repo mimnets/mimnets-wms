@@ -64,13 +64,13 @@ test('refuses non-SQLite databases', () => {
 
 test('refuses a relative SQLite path (the developer database)', () => {
   assert.match(
-    refuseReason(safe({ APOS_DB_URI: 'sqlite://./data/vcl-assurer-group.db' }), opts),
+    refuseReason(safe({ APOS_DB_URI: 'sqlite://./data/mimnets-wms.db' }), opts),
     /absolute path/
   );
 });
 
 test('refuses an absolute SQLite path outside the temp directory', () => {
-  const dev = path.join(projectRoot, 'data', 'vcl-assurer-group.db');
+  const dev = path.join(projectRoot, 'data', 'mimnets-wms.db');
   assert.match(refuseReason(safe({ APOS_DB_URI: `sqlite://${dev}` }), opts), /not under/);
 });
 

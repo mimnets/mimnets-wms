@@ -8,10 +8,10 @@
 # Settings: docker/staging/.env (written by the setup scripts) and
 # docker/staging/site.env (SMTP and so on); both git-ignored.
 # Guide: docs/runbooks/staging-container.md
-name: mimnets-cms
+name: mimnets-wms
 
-x-app-image: &app-image ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-app:${ASSURER_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
-x-mongo-image: &mongo-image ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-mongo:${ASSURER_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
+x-app-image: &app-image ${WMS_REGISTRY:-ghcr.io/mimnets}/wms-app:${WMS_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
+x-mongo-image: &mongo-image ${WMS_REGISTRY:-ghcr.io/mimnets}/wms-mongo:${WMS_IMAGE_TAG:?set the release, a commit SHA on main (deploy.sh sets it)}
 
 services:
   # Writes the missing secrets and the MongoDB TLS files at each start, then
@@ -34,7 +34,7 @@ services:
         condition: service_completed_successfully
     environment:
       # Size it with the app's processes against the server's memory (m1-054 results §3).
-      ASSURER_MONGO_CACHE_GB: ${ASSURER_MONGO_CACHE_GB:-1}
+      WMS_MONGO_CACHE_GB: ${WMS_MONGO_CACHE_GB:-1}
     volumes:
       - mongo-db:/data/db
       - mongo-secrets:/secrets:ro
@@ -46,7 +46,7 @@ services:
       timeout: 10s
       start_period: 120s
       retries: 6
-    mem_limit: ${ASSURER_MONGO_MEMORY:-2g}
+    mem_limit: ${WMS_MONGO_MEMORY:-2g}
 
   # pbm-agent is the container's only process; Docker restarts it if it stops.
   pbm:
@@ -62,7 +62,7 @@ services:
       - pbm-secrets:/secrets:ro
     networks:
       - db
-    mem_limit: ${ASSURER_PBM_MEMORY:-1g}
+    mem_limit: ${WMS_PBM_MEMORY:-1g}
 
   # The PBM configuration and the base-backup schedule (backup-schedule.sh).
   backup:
@@ -74,14 +74,14 @@ services:
       pbm:
         condition: service_started
     environment:
-      ASSURER_BACKUP_INTERVAL_HOURS: ${ASSURER_BACKUP_INTERVAL_HOURS:-24}
-      ASSURER_BACKUP_RETENTION: ${ASSURER_BACKUP_RETENTION:-8d}
+      WMS_BACKUP_INTERVAL_HOURS: ${WMS_BACKUP_INTERVAL_HOURS:-24}
+      WMS_BACKUP_RETENTION: ${WMS_BACKUP_RETENTION:-8d}
     volumes:
       - pbm-backups:/backups:ro
       - pbm-secrets:/secrets:ro
     networks:
       - db
-    mem_limit: ${ASSURER_BACKUP_MEMORY:-256m}
+    mem_limit: ${WMS_BACKUP_MEMORY:-256m}
 
   app:
     image: *app-image
@@ -98,7 +98,7 @@ services:
       APOS_BASE_URL: ${APOS_BASE_URL:?set the public https origin, for example https://www.example.org}
       APOS_HTTPS: "1"
       # Only nginx may set the X-Forwarded headers (security-configuration.md).
-      APOS_TRUST_PROXY: ${ASSURER_NGINX_IP:-172.30.57.10}
+      APOS_TRUST_PROXY: ${WMS_NGINX_IP:-172.30.57.10}
       # Start short and raise it once HTTPS is confirmed (runbook §8 point 4).
       APOS_HSTS_MAX_AGE: ${APOS_HSTS_MAX_AGE:-300}
       APOS_CLUSTER_PROCESSES: ${APOS_CLUSTER_PROCESSES:-2}
@@ -109,7 +109,7 @@ services:
     networks:
       - db
       - edge
-    mem_limit: ${ASSURER_APP_MEMORY:-2g}
+    mem_limit: ${WMS_APP_MEMORY:-2g}
 
   # Writes a self-signed certificate valid for 30 days if there is none yet,
   # so nginx can start before certbot has issued the real one.
@@ -121,45 +121,45 @@ services:
         if [ ! -s /certs/current/fullchain.pem ]; then
         mkdir -p /certs/current &&
         (umask 077; openssl req -x509 -newkey rsa:2048 -nodes -days 30
-        -subj "/CN=$$ASSURER_DOMAIN" -addext "subjectAltName=DNS:$$ASSURER_DOMAIN"
+        -subj "/CN=$$WMS_DOMAIN" -addext "subjectAltName=DNS:$$WMS_DOMAIN"
         -keyout /certs/current/privkey.pem -out /certs/current/fullchain.pem 2> /dev/null) &&
         chmod 644 /certs/current/fullchain.pem &&
-        echo "[cert-bootstrap] Self-signed certificate written for $$ASSURER_DOMAIN";
+        echo "[cert-bootstrap] Self-signed certificate written for $$WMS_DOMAIN";
         fi
     environment:
-      ASSURER_DOMAIN: ${ASSURER_DOMAIN:?set the site's host name}
+      WMS_DOMAIN: ${WMS_DOMAIN:?set the site's host name}
     volumes:
       - certs:/certs
     network_mode: none
 
   nginx:
-    image: ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-nginx:${ASSURER_IMAGE_TAG:?set the release}
+    image: ${WMS_REGISTRY:-ghcr.io/mimnets}/wms-nginx:${WMS_IMAGE_TAG:?set the release}
     restart: unless-stopped
     init: true
     depends_on:
       cert-bootstrap:
         condition: service_completed_successfully
     ports:
-      - "${ASSURER_HTTP_BIND:-80}:80"
-      - "${ASSURER_HTTPS_BIND:-443}:443"
+      - "${WMS_HTTP_BIND:-80}:80"
+      - "${WMS_HTTPS_BIND:-443}:443"
     environment:
-      ASSURER_DOMAIN: ${ASSURER_DOMAIN:?set the site's host name}
+      WMS_DOMAIN: ${WMS_DOMAIN:?set the site's host name}
       APOS_BASE_URL: ${APOS_BASE_URL:?set the public https origin}
-      ASSURER_MAX_BODY: ${ASSURER_MAX_BODY:-32m}
-      ASSURER_RATE_LIMIT: ${ASSURER_RATE_LIMIT:-30r/s}
-      ASSURER_RATE_BURST: ${ASSURER_RATE_BURST:-60}
+      WMS_MAX_BODY: ${WMS_MAX_BODY:-32m}
+      WMS_RATE_LIMIT: ${WMS_RATE_LIMIT:-30r/s}
+      WMS_RATE_BURST: ${WMS_RATE_BURST:-60}
     volumes:
       - certs:/etc/nginx/certs:ro
       - acme-webroot:/var/www/acme:ro
     networks:
       edge:
-        ipv4_address: ${ASSURER_NGINX_IP:-172.30.57.10}
-    mem_limit: ${ASSURER_NGINX_MEMORY:-256m}
+        ipv4_address: ${WMS_NGINX_IP:-172.30.57.10}
+    mem_limit: ${WMS_NGINX_MEMORY:-256m}
 
   # Renews the certificate twice a day when it is due. The first certificate is
   # requested by hand (docs/runbooks/staging-container.md).
   certbot:
-    image: ${ASSURER_REGISTRY:-ghcr.io/mimnets}/wms-certbot:${ASSURER_IMAGE_TAG:?set the release}
+    image: ${WMS_REGISTRY:-ghcr.io/mimnets}/wms-certbot:${WMS_IMAGE_TAG:?set the release}
     restart: unless-stopped
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -172,7 +172,7 @@ services:
     volumes:
       - certs:/etc/letsencrypt
       - acme-webroot:/var/www/acme
-    mem_limit: ${ASSURER_CERTBOT_MEMORY:-256m}
+    mem_limit: ${WMS_CERTBOT_MEMORY:-256m}
 
   # Restore drill (docs/runbooks/pbm-backup-and-restore.md §3), profile
   # "restore". Copies what a rebuild would get back from elsewhere: the
@@ -210,8 +210,8 @@ services:
     profiles: [restore]
     stop_grace_period: 60s
     environment:
-      ASSURER_RESTORE: "1"
-      ASSURER_MONGO_CACHE_GB: "1"
+      WMS_RESTORE: "1"
+      WMS_MONGO_CACHE_GB: "1"
     volumes:
       - restore-mongo-db:/data/db
       - restore-mongo-secrets:/secrets:ro
@@ -249,7 +249,7 @@ services:
       restore-pbm:
         condition: service_started
     environment:
-      ASSURER_BACKUP_INTERVAL_HOURS: "0"
+      WMS_BACKUP_INTERVAL_HOURS: "0"
     volumes:
       - restore-pbm-secrets:/secrets:ro
     networks:
@@ -263,11 +263,11 @@ services:
     init: true
     stop_grace_period: 60s
     ports:
-      - "127.0.0.1:${ASSURER_RESTORE_PORT:-3044}:3000"
+      - "127.0.0.1:${WMS_RESTORE_PORT:-3044}:3000"
     environment:
-      APOS_BASE_URL: http://localhost:${ASSURER_RESTORE_PORT:-3044}
+      APOS_BASE_URL: http://localhost:${WMS_RESTORE_PORT:-3044}
       APOS_CLUSTER_PROCESSES: "1"
-      ASSURER_CREATE_ADMIN: "0"
+      WMS_CREATE_ADMIN: "0"
     volumes:
       - restore-media:/app/public/uploads
       - restore-app-data:/app/data
@@ -280,7 +280,7 @@ networks:
   edge:
     ipam:
       config:
-        - subnet: ${ASSURER_EDGE_SUBNET:-172.30.57.0/24}
+        - subnet: ${WMS_EDGE_SUBNET:-172.30.57.0/24}
   # No route out: only the app, MongoDB and PBM are on it.
   db:
     internal: true

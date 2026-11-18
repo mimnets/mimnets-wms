@@ -22,9 +22,9 @@ FROM mongo:8.0.34@sha256:b9924c330a8bbc5800fe9c69f04a84e221eca7b28fd049a0354147d
 ARG APOS_RELEASE_ID=docker-local
 COPY --from=build /usr/local/bin/node /usr/local/bin/node
 COPY --from=build /app /app
-COPY docker/mongod.conf /etc/assurer/mongod.conf
-COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/assurer-entrypoint
-RUN useradd --system --uid 1001 --no-create-home --shell /usr/sbin/nologin assurer
+COPY docker/mongod.conf /etc/wms/mongod.conf
+COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/wms-entrypoint
+RUN useradd --system --uid 1001 --no-create-home --shell /usr/sbin/nologin wms
 
 WORKDIR /app
 ENV NODE_ENV=production \
@@ -39,4 +39,4 @@ VOLUME ["/data/secrets", "/app/public/uploads", "/app/data"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:3000/').then(r => process.exit(r.status === 200 ? 0 : 1), () => process.exit(1))"
 
-ENTRYPOINT ["assurer-entrypoint"]
+ENTRYPOINT ["wms-entrypoint"]

@@ -1,3 +1,6 @@
+# Historical (frozen since m1-078, D-GIT-80): not maintained and not renamed in
+# rename stage 5: it keeps the names from before m1-076 and m1-078 and may
+# not run as written.
 # PBM proof of concept (m1-046). Disposable: its own images, containers and
 # volumes, separate from the demo site (project "assurer"). Run from the
 # repository root:

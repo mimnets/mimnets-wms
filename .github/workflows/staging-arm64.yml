@@ -40,9 +40,9 @@ jobs:
     runs-on: ubuntu-22.04-arm
     timeout-minutes: 60
     env:
-      ASSURER_DOMAIN: localhost
+      WMS_DOMAIN: localhost
       APOS_BASE_URL: https://localhost
-      ASSURER_IMAGE_TAG: ci
+      WMS_IMAGE_TAG: ci
       S: docker compose -f docker/staging/compose.yaml -f docker/staging/compose.build.yaml
       R: docker compose -f docker/staging/compose.yaml -f docker/staging/compose.build.yaml --profile restore
       RS: docker compose -f docker/staging/compose.yaml -f docker/staging/compose.build.yaml --profile restore --profile restore-site

@@ -1,3 +1,6 @@
+# Historical (frozen since m1-078, D-GIT-80): not maintained and not renamed in
+# rename stage 5: it keeps the names from before m1-076 and m1-078 and may
+# not run as written.
 # Load test of the one-container image with MongoDB (m1-051, D-DB-8), with the
 # same script and profile as the SQLite run in m1-050. Disposable: its own
 # project name, image tag and volumes, so the demo site (project "assurer",

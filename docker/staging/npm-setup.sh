@@ -12,10 +12,10 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 S=(docker compose -f docker/staging/compose.yaml -f docker/staging/compose.npm.yaml)
 ENV_FILE=docker/staging/.env
-NET="${ASSURER_NPM_NETWORK:-assurer-npm}"
+NET="${WMS_NPM_NETWORK:-wms-npm}"
 SUBNET=172.30.56.0/24
 NPM_IP=172.30.56.2
-PLACEHOLDER=assurer.invalid
+PLACEHOLDER=wms.invalid
 
 say() { echo "[npm-setup] $*"; }
 die() { echo "[npm-setup] STOP: $*" >&2; exit 1; }
@@ -43,7 +43,7 @@ if [ "$major" -lt 2 ] || { [ "$major" -eq 2 ] && [ "$minor" -lt 24 ]; }; then
   die "Compose $compose is older than 2.24 and cannot apply 'ports: !reset'"
 fi
 say "Compose $compose, $(uname -m)"
-if docker ps -a --format '{{.Names}}' | grep -qxE '(assurer-staging|mimnets-cms)-certbot-1'; then
+if docker ps -a --format '{{.Names}}' | grep -qxE '(assurer-staging|mimnets-cms|mimnets-wms)-certbot-1'; then
   die "a standalone stack is here (certbot container); see runbook §9 before switching"
 fi
 
@@ -63,28 +63,30 @@ set_key() {
   if grep -q "^$1=" "$ENV_FILE"; then sed -i "s|^$1=.*|$1=$2|" "$ENV_FILE"
   else echo "$1=$2" >> "$ENV_FILE"; fi
 }
+# Rename stage 5 (m1-078): settings from before it are switched by deploy.sh.
+! grep -qs '^ASSURER_' "$ENV_FILE" || die "$ENV_FILE has ASSURER_ settings (before rename stage 5). Run deploy.sh --switch-to-mimnets-wms first (runbook §12.6)"
 if [ ! -f "$ENV_FILE" ]; then
   (umask 077; cat > "$ENV_FILE" <<EOF
 # Written by npm-setup.sh (m1-063). Settings: runbook staging-container.md §2 and §9.
-ASSURER_PROXY_MODE=npm
-ASSURER_DOMAIN=$PLACEHOLDER
+WMS_PROXY_MODE=npm
+WMS_DOMAIN=$PLACEHOLDER
 APOS_BASE_URL=https://$PLACEHOLDER
-ASSURER_UPSTREAM_PROXY_IP=$NPM_IP
+WMS_UPSTREAM_PROXY_IP=$NPM_IP
 APOS_CLUSTER_PROCESSES=2
-ASSURER_MONGO_CACHE_GB=1
+WMS_MONGO_CACHE_GB=1
 EOF
   )
   say "settings written to $ENV_FILE"
 fi
 chmod 600 "$ENV_FILE"
-set_key ASSURER_PROXY_MODE npm
+set_key WMS_PROXY_MODE npm
 if [ -n "$domain" ]; then
-  set_key ASSURER_DOMAIN "$domain"
+  set_key WMS_DOMAIN "$domain"
   set_key APOS_BASE_URL "https://$domain"
   say "domain set to $domain"
 fi
-current=$(sed -n 's/^ASSURER_DOMAIN=//p' "$ENV_FILE")
-[ -n "$current" ] || die "ASSURER_DOMAIN is empty in $ENV_FILE"
+current=$(sed -n 's/^WMS_DOMAIN=//p' "$ENV_FILE")
+[ -n "$current" ] || die "WMS_DOMAIN is empty in $ENV_FILE"
 [ "$("${S[@]}" config | grep -c 'published:')" -eq 0 ] \
   || die "the stack would publish host ports; check compose.npm.yaml"
 

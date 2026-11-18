@@ -11,7 +11,7 @@ apostrophe({
   root: import.meta,
   // Used as the default database name and for session cookie naming.
   // The actual database is selected by APOS_DB_URI (see .env.example).
-  shortName: 'vcl-assurer-group',
+  shortName: 'mimnets-wms',
   // Public site address for absolute URLs (canonicals, sitemap, JSON-LD).
   // Core replaces it with APOS_BASE_URL when that is set (m1-018; see
   // modules/wms-seo/lib/config.js).

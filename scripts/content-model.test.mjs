@@ -90,7 +90,7 @@ test('corporate seed: allowed on a temporary SQLite database', () => {
 });
 
 test('corporate seed: other databases need the confirmation flag', () => {
-  for (const uri of [ 'sqlite://./data/vcl-assurer-group.db', 'postgres://localhost/x', '' ]) {
+  for (const uri of [ 'sqlite://./data/mimnets-wms.db', 'postgres://localhost/x', '' ]) {
     assert.match(seedRefuseReason({ APOS_DB_URI: uri }, [], opts), /--dev-database/, uri);
     const confirmed = seedRefuseReason({ APOS_DB_URI: uri }, [ CONFIRM_FLAG ], opts);
     assert.equal(confirmed, null, uri);
@@ -114,7 +114,7 @@ test('test editor guard: temp database and editor credentials required', () => {
   }, opts), /APOS_TEST_EDITOR_USER/);
   assert.match(editorRefuseReason({
     ...env,
-    APOS_DB_URI: 'sqlite://./data/vcl-assurer-group.db'
+    APOS_DB_URI: 'sqlite://./data/mimnets-wms.db'
   }, opts), /temporary SQLite|absolute path/);
   assert.match(editorRefuseReason({
     ...env,

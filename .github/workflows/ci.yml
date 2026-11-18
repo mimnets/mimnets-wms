@@ -163,10 +163,10 @@ jobs:
       contents: read
       packages: write
     env:
-      ASSURER_REGISTRY: ghcr.io/mimnets
-      ASSURER_IMAGE_TAG: ${{ github.sha }}-${{ matrix.arch }}
+      WMS_REGISTRY: ghcr.io/mimnets
+      WMS_IMAGE_TAG: ${{ github.sha }}-${{ matrix.arch }}
       APOS_RELEASE_ID: ${{ github.sha }}
-      ASSURER_DOMAIN: localhost
+      WMS_DOMAIN: localhost
       APOS_BASE_URL: https://localhost
       S: docker compose -f docker/staging/compose.yaml -f docker/staging/compose.build.yaml
     steps:
@@ -180,7 +180,7 @@ jobs:
       - name: The images are linux/${{ matrix.arch }}
         run: |
           for name in app mongo nginx certbot; do
-            arch="$(docker image inspect -f '{{.Architecture}}' "$ASSURER_REGISTRY/wms-$name:$ASSURER_IMAGE_TAG")"
+            arch="$(docker image inspect -f '{{.Architecture}}' "$WMS_REGISTRY/wms-$name:$WMS_IMAGE_TAG")"
             echo "wms-$name $arch"
             test "$arch" = "${{ matrix.arch }}"
           done
@@ -234,7 +234,7 @@ jobs:
           # Up to 3 tries per image: ghcr.io sometimes answers a push with a
           # passing error (m1-068).
           for name in app mongo nginx certbot; do
-            image="$ASSURER_REGISTRY/wms-$name:$ASSURER_IMAGE_TAG"
+            image="$WMS_REGISTRY/wms-$name:$WMS_IMAGE_TAG"
             for try in 1 2 3; do
               docker push --quiet "$image" && break
               [ "$try" = 3 ] && exit 1
@@ -253,7 +253,7 @@ jobs:
     permissions:
       packages: write
     env:
-      ASSURER_REGISTRY: ghcr.io/mimnets
+      WMS_REGISTRY: ghcr.io/mimnets
       SHA: ${{ github.sha }}
     steps:
       - name: Tag the release
@@ -263,7 +263,7 @@ jobs:
         run: |
           printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GH_ACTOR" --password-stdin
           for name in app mongo nginx certbot; do
-            image="$ASSURER_REGISTRY/wms-$name"
+            image="$WMS_REGISTRY/wms-$name"
             docker buildx imagetools create -t "$image:$SHA" "$image:$SHA-amd64" "$image:$SHA-arm64"
             docker buildx imagetools inspect "$image:$SHA" | grep -E 'Name:|Platform:'
           done

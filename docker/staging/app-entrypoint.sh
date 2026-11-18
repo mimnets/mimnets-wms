@@ -4,7 +4,7 @@
 # (APOS_CLUSTER_PROCESSES; m1-054). Runs as the wms user. Compose starts
 # it once the mongo service is healthy.
 #
-# ASSURER_CREATE_ADMIN=0 (restore drill): no admin account, because the
+# WMS_CREATE_ADMIN=0 (restore drill): no admin account, because the
 # restored database has its own.
 #
 # Guide: docs/runbooks/staging-container.md
@@ -23,7 +23,7 @@ node app @apostrophecms/migration:migrate
 
 # A random password, written to the app-data volume and never logged. The
 # owner reads it once, changes it in the admin UI and deletes the file.
-if [ "${ASSURER_CREATE_ADMIN:-1}" = 1 ] && [ ! -e "$DATA/.admin-ready" ]; then
+if [ "${WMS_CREATE_ADMIN:-1}" = 1 ] && [ ! -e "$DATA/.admin-ready" ]; then
   log "First start: creating the admin account with a random password"
   (umask 077; node -e "console.log(require('node:crypto').randomBytes(16).toString('hex'))" \
     > "$DATA/admin-initial-password")
