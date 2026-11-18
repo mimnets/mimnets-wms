@@ -109,6 +109,8 @@ apostrophe({
     'wms-demo': {},
     // WordPress import into drafts (m1-067, D-CONTENT-17).
     'wms-wp-import': {},
+    // Section patterns as draft pages for editors (m1-079, D-CONTENT-24).
+    'wms-patterns': {},
     // Database dashboard, layer 1 (m1-070, D-DB-24): export and import of
     // content (official module, MIT), for site administrators only, and the
     // admin-only dashboard.

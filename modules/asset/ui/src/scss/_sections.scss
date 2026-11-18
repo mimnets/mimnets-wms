@@ -32,8 +32,9 @@
 }
 
 // Editor-chosen column counts in wide containers. One per row in narrow ones,
-// two from 560 px, as `.wms-grid` already does.
-@container (min-width: 720px) {
+// two from 560 px, as `.wms-grid` already does; three from 840 px, so a
+// tablet keeps two readable cards per row (m1-079).
+@container (min-width: 840px) {
   .wms-grid--cols-3,
   .wms-grid--cols-4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

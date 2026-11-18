@@ -9,6 +9,44 @@ Started from the official
 > **Status: Milestone 0 proof of concept.** All content is placeholder demonstration
 > content. Not for deployment. See [`docs/milestones/`](./docs/milestones/).
 
+## How it is built
+
+mimnets-wms is a standard ApostropheCMS project. Apostrophe is installed as a framework from npm;
+this repository configures it, extends it through its official extension points, and adds its own
+modules. **Apostrophe's own code is never modified**, so upstream updates install like any other
+package update.
+
+### Three layers
+
+| Layer | Where | What it holds | Changed by this project? |
+|---|---|---|---|
+| **1. Apostrophe core and official add-ons** | `node_modules/` (from `package.json`) | `apostrophe` 4.x: pages, pieces, widgets, the editor UI, users, drafts and publishing, the database layer, media. Add-ons: `@apostrophecms/form`, `seo`, `sitemap`, `redirect`, `import-export`, `security-headers`, `vite` | **No.** Upgraded with npm |
+| **2. Core module overrides** | `modules/@apostrophecms/*` | A folder named like a core module adjusts it: options, extra fields, templates. Examples: `page/` (page types, the 404 template), `i18n/` (translation strings), `uploadfs/` (media storage), `security-headers/` (CSP) | Configuration only. Apostrophe merges these settings over its defaults; its source files stay untouched |
+| **3. Project modules** | `modules/wms-*`, `lib/`, `views/` | The Assurer World site: content types, widgets, page types and tools (below). `lib/` holds shared field helpers (links, areas, listings); `views/layout.jsx` is the site chrome (header, navigation, footer) | Yes. Built only with Apostrophe's official APIs (`extend`, schema fields, the query builder, `@apostrophecms/migration`), as [AGENTS.md](./AGENTS.md) requires |
+
+Project modules by kind:
+
+- **Content types (pieces):** `wms-product`, `wms-person`, `wms-location`, `wms-organization`
+- **Page types:** `wms-division-page`, `wms-product-category-page` (and the starter kit's `default-page`)
+- **Widgets:** hero, slideshow, product grid and card, feature grid, stats, gallery, downloads,
+  and listings of products, people, locations and organisations (`wms-*-widget`)
+- **Tools:** `wms-wp-import` (WordPress import into drafts), `wms-patterns` (section patterns for
+  editors), `wms-seo`, `wms-security`, `wms-forms`, `wms-data-dashboard`, `wms-demo` (demo
+  content), `wms-test` (CI only)
+
+### What happens when the site runs
+
+1. `node app` (`app.js`) boots Apostrophe with the module list.
+2. Apostrophe loads its core modules, then the overrides in `modules/@apostrophecms/`, then the
+   `wms-*` modules.
+3. Content is stored by Apostrophe itself: in **MongoDB** on servers and in containers, in
+   **SQLite** for local development (`@apostrophecms/db-connect`). There is no second database
+   and no custom ORM ([ADR-0002](./docs/architecture/decisions/)).
+4. For each request, Apostrophe finds the page and renders its **JSX template** to HTML on the
+   server, with Apostrophe's own renderer. There is no React and no client-side framework.
+5. Editors work in Apostrophe's built-in admin UI; the project's fields and widgets appear inside
+   it.
+
 ## Prerequisites
 
 | Requirement | Version |
@@ -96,6 +134,7 @@ code conventions are in [ARCHITECTURE.md](./ARCHITECTURE.md) and [AGENTS.md](./A
 | `wms-product-grid-widget` | Product section; cards are widgets in an area (add / reorder in place) |
 | `wms-product-card-widget` | Single product card |
 | `wms-demo` | `wms-demo:seed` task for demonstration content |
+| `wms-patterns` | `wms-patterns:seed`: section patterns as draft pages under "Patterns (do not publish)"; never publishes |
 | `wms-test` | `wms-test:ensure-admin`: creates the CI test admin; refuses anything but a temporary SQLite database |
 | `@apostrophecms/form` (+ field widgets) | Contact forms (Community, MIT) |
 
