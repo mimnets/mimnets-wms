@@ -60,7 +60,7 @@ through exactly that many proxies.
 **Check after deployment:**
 
 1. `curl -sI https://<host>/` shows the headers above and `Strict-Transport-Security` (if set).
-2. Log in through the browser. The `vcl-assurer-group.sid` cookie is marked `Secure`. If login
+2. Log in through the browser. The `mimnets-wms.sid` cookie (`vcl-assurer-group.sid` before m1-078) is marked `Secure`. If login
    seems to work but you are logged out on the next page, the proxy is not sending
    `X-Forwarded-Proto` or `APOS_TRUST_PROXY` does not match the proxy's address.
 3. `npm run test:security` against an isolated copy (`BASE_URL=…`) passes.

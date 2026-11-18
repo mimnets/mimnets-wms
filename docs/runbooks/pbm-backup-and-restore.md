@@ -27,8 +27,8 @@ S="docker compose -f docker/staging/compose.yaml"
 |---|---|---|
 | `pbm-agent` | the `pbm` container's only process, as the `pbm` user; Docker restarts the container if it stops, without touching the app or MongoDB | `$S exec pbm pbmc status` (Agents) |
 | Point-in-time oplog slices | PBM, every 5 minutes (`pitr.oplogSpanMin: 5`) | `pbmc status` (PITR chunks) |
-| Base backup | the `backup` container: 2 minutes after it starts, then every `ASSURER_BACKUP_INTERVAL_HOURS` (default 24); also by `deploy.sh` before each release | `$S logs backup \| grep 'Base backup'` |
-| Retention | after each base backup: `pbm cleanup --older-than 8d` (`ASSURER_BACKUP_RETENTION`), which removes backups and oplog slices older than that while keeping what PITR needs | `pbmc list` |
+| Base backup | the `backup` container: 2 minutes after it starts, then every `WMS_BACKUP_INTERVAL_HOURS` (default 24); also by `deploy.sh` before each release | `$S logs backup \| grep 'Base backup'` |
+| Retention | after each base backup: `pbm cleanup --older-than 8d` (`WMS_BACKUP_RETENTION`), which removes backups and oplog slices older than that while keeping what PITR needs | `pbmc list` |
 
 With the 5-minute slice, the newest recoverable moment trails by at most about 5 minutes plus the
 upload, and by *slice + base backup duration* while a base backup runs (m1-046 results §3.3). The
@@ -92,8 +92,8 @@ RS="$S --profile restore --profile restore-site"
 
    ```sh
    $RS rm -s -f restore-app restore-pbm restore-pbm-config restore-mongo
-   docker volume rm $(docker volume ls -q | grep '^mimnets-cms_restore-')
-   docker network rm mimnets-cms_restore-db mimnets-cms_restore-edge
+   docker volume rm $(docker volume ls -q | grep '^mimnets-wms_restore-')
+   docker network rm mimnets-wms_restore-db mimnets-wms_restore-edge
    ```
 
    Never run `down -v` on the project: it deletes the site's own volumes too.
@@ -109,10 +109,14 @@ Once the backups are off the server:
    (`mongo-*-password`, `mongo-keyfile`) and `app-secrets` (`session-secret`); the backup holds the
    database users with those passwords. The secret store is not designed yet (m1-046 results §4).
 3. Restore as in §3 step 2, but into the site's own services: start `setup` and `mongo` with
-   `ASSURER_RESTORE=1` on `mongo` (no app user), then `pbm`, configure PBM with PITR off, restore,
+   `WMS_RESTORE=1` on `mongo` (no app user), then `pbm`, configure PBM with PITR off, restore,
    then start the whole stack as usual (`deploy.sh`), which turns PITR on again. Not yet written as
    a script or tested; rehearse it in a drill first.
 4. Restore the media from its own backup, from the same quiet point (ADR-0002 Decision 6).
+5. A backup from before rename stage 5 (m1-078) holds the database `assurer` and the user
+   `assurerApp`. `mongo` moves them to `wms` and `wmsApp` at its next start without
+   `WMS_RESTORE=1` (the `deploy.sh` start above), before the app may connect. A restore of such a
+   backup on a running site leaves `wms` there too: drop it, then restart `mongo` ([staging runbook §12.6](./staging-container.md#126-rename-stage-5-from-mimnets-cms-to-mimnets-wms-once-per-server-m1-078)).
 
 ## 5. Security notes
 
