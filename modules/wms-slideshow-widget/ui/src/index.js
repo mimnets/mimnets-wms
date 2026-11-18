@@ -1,4 +1,4 @@
-// Widget player for the Assurer slideshow. Apostrophe runs players on page
+// Widget player for the slideshow widget. Apostrophe runs players on page
 // load and again whenever an editor re-renders the widget or switches
 // between edit and preview mode.
 //
