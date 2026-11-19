@@ -49,6 +49,21 @@ test('invalidWebUrls reports top-level and array item paths, ignores empty value
   assert.deepEqual(invalidWebUrls({}, [ 'websiteUrl', 'socialLinks.url' ]), []);
 });
 
+test('invalidWebUrls checks nested array paths (m1-082)', () => {
+  const doc = {
+    mainMenu: [
+      { linkUrl: 'https://example.com' },
+      {
+        submenu: [
+          { linkUrl: 'https://example.com/b' },
+          { linkUrl: 'tel:123' }
+        ]
+      }
+    ]
+  };
+  assert.deepEqual(invalidWebUrls(doc, [ 'mainMenu.linkUrl', 'mainMenu.submenu.linkUrl' ]), [ 'mainMenu.1.submenu.1.linkUrl' ]);
+});
+
 test('byDisplayOrder sorts by number, then title', () => {
   const sorted = [
     {

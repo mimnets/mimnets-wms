@@ -7,6 +7,33 @@ import { linkFields } from '../../../lib/link.js';
 import { rejectNonWebUrls, webUrlField } from '../../../lib/web-url.js';
 import { PHONE_PATTERN } from '../../../lib/contact.js';
 
+// m1-082 (D-CONTENT-27): one entry of the main menu. A page link may point
+// at a section of that page (its anchor ID). The page is loaded with only
+// what the menu reads, as the page-tree menu does (m1-053).
+function menuLinkFields() {
+  const fields = linkFields();
+  return {
+    ...fields,
+    _linkPage: {
+      ...fields._linkPage,
+      builders: {
+        project: {
+          title: 1,
+          path: 1,
+          aposDocId: 1,
+          _url: 1
+        }
+      }
+    },
+    section: {
+      type: 'slug',
+      label: 'Section on the page',
+      help: 'Optional. The anchor ID of a section on the linked page, e.g. "services".',
+      if: { linkType: 'page' }
+    }
+  };
+}
+
 export default {
   fields: {
     add: {
@@ -106,6 +133,27 @@ export default {
           add: linkFields()
         }
       },
+      mainMenu: {
+        type: 'array',
+        label: 'Main menu',
+        help: 'Leave empty to build the menu from the page tree. A link to a page appears only while the page is published.',
+        titleField: 'linkText',
+        max: 8,
+        fields: {
+          add: {
+            ...menuLinkFields(),
+            submenu: {
+              type: 'array',
+              label: 'Submenu',
+              titleField: 'linkText',
+              max: 12,
+              fields: {
+                add: menuLinkFields()
+              }
+            }
+          }
+        }
+      },
       showHeaderCta: {
         type: 'boolean',
         label: 'Show a button at the end of the main menu',
@@ -168,7 +216,7 @@ export default {
       },
       navigation: {
         label: 'Navigation',
-        fields: [ 'showHeaderCta', 'linkText', 'linkType', '_linkPage', 'linkUrl' ]
+        fields: [ 'mainMenu', 'showHeaderCta', 'linkText', 'linkType', '_linkPage', 'linkUrl' ]
       },
       privacy: {
         label: 'Privacy',
@@ -198,7 +246,7 @@ export default {
   handlers(self) {
     return {
       beforeSave: {
-        rejectNonWebUrls: rejectNonWebUrls(self, [ 'socialLinks.url', 'footerLinks.linkUrl', 'linkUrl' ])
+        rejectNonWebUrls: rejectNonWebUrls(self, [ 'socialLinks.url', 'footerLinks.linkUrl', 'mainMenu.linkUrl', 'mainMenu.submenu.linkUrl', 'linkUrl' ])
       },
       // @apostrophecms/form adds Google reCAPTCHA settings here under the same
       // handler name. reCAPTCHA sends visitor data to Google, so it is not

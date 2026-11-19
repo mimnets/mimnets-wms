@@ -218,6 +218,38 @@ await api('POST', `@apostrophecms/page/${page._id}/publish`, {});
 html = await publicHtml(SLUG);
 check('full-width band class on the public widget wrapper', /data-apos-widget-style-wrapper-for="[^"]*"[^>]*class="[^"]*\bwms-band-full\b/.test(html));
 
+// --- Main menu (m1-082): Global Content list replaces the page tree -------
+// The site's own list is put back and published at the end.
+const globalList = await api('GET', '@apostrophecms/global');
+let globalDoc = globalList._id ? globalList : globalList.results?.[0];
+const originalMenu = globalDoc.mainMenu || [];
+const navHtml = async () => (await publicHtml('/')).match(/<nav class="wms-nav"[\s\S]*?<\/nav>/)?.[0] || '';
+globalDoc = await api('PATCH', `@apostrophecms/global/${globalDoc._id}`, {
+  mainMenu: [ {
+    _id: id(),
+    linkText: `Menu test ${RUN}`,
+    linkType: 'page',
+    _linkPage: [ { _id: page._id } ],
+    section: 'menu-test',
+    submenu: [ {
+      _id: id(),
+      linkText: 'External test',
+      linkType: 'url',
+      linkUrl: 'https://example.com/'
+    } ]
+  } ]
+});
+check('main menu saved in draft', globalDoc.mainMenu?.[0]?.section === 'menu-test');
+check('draft main menu not public', !(await navHtml()).includes(`Menu test ${RUN}`));
+await api('POST', `@apostrophecms/global/${globalDoc._id}/publish`, {});
+let nav = await navHtml();
+check('published main menu replaces the page tree', nav.includes(`${SLUG}#menu-test"`) && nav.includes(`Menu test ${RUN}`) && (nav.match(/class="wms-nav__link/g) || []).length === 1);
+check('external submenu item marked', /href="https:\/\/example\.com\/"[^>]*>External test<span class="wms-visually-hidden"> \(external site\)/.test(nav));
+await api('PATCH', `@apostrophecms/global/${globalDoc._id}`, { mainMenu: originalMenu });
+await api('POST', `@apostrophecms/global/${globalDoc._id}/publish`, {});
+nav = await navHtml();
+check('original main menu restored', !nav.includes(`Menu test ${RUN}`));
+
 // --- Theme preset (m1-074): saving reaches the public <body> --------------
 // Core Global Styles is `autopublish`: Save publishes at once; the preview
 // before Save is client-side only, in the open panel.
