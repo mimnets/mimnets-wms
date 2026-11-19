@@ -4,6 +4,7 @@
 body {
   // Undoes the development-only guard in views/layout.jsx (m1-024).
   visibility: visible;
+  background: var(--wms-color-surface);
   color: var(--wms-color-text);
 }
 
@@ -68,14 +69,25 @@ body {
   padding: 20px 16px;
 }
 
+// Theme "centred" header (m1-084; Quiet since m1-074): the logo above the
+// menu on desktop. Unset tokens keep the inline header.
+@media (min-width: $bp-desktop) {
+  .wms-header {
+    flex-direction: var(--wms-header-direction, row);
+    justify-content: var(--wms-header-justify, space-between);
+    padding: var(--wms-header-padding, 20px 16px);
+    border-bottom: var(--wms-header-rule, 0);
+  }
+}
+
 .wms-header__brand {
-  color: var(--wms-color-primary);
+  color: var(--wms-color-primary-text);
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 
   span { color: var(--wms-color-accent); }
-  &:visited { color: var(--wms-color-primary); }
+  &:visited { color: var(--wms-color-primary-text); }
 }
 
 .wms-header__logo {
@@ -88,9 +100,16 @@ body {
   flex-grow: 1;
 }
 
+// Theme footer band (m1-084; Bold since m1-074): a full-width background
+// without sideways scroll (the shadow paints the sides; clip-path keeps it to
+// the footer's height). Unset tokens keep the plain footer.
 .wms-footer {
-  padding: 32px 16px;
-  color: var(--wms-color-text-muted);
+  margin-top: var(--wms-footer-margin, 0);
+  padding: var(--wms-footer-padding, 32px 16px);
+  background: var(--wms-footer-bg, transparent);
+  box-shadow: 0 0 0 100vmax var(--wms-footer-bg, transparent);
+  clip-path: inset(0 -100vmax);
+  color: var(--wms-footer-text, var(--wms-color-text-muted));
   font-size: 14px;
   text-align: center;
 }
@@ -107,7 +126,7 @@ body {
   display: inline-block;
   padding: 12px 24px;
   border: 2px solid var(--wms-color-accent);
-  border-radius: 999px;
+  border-radius: var(--wms-button-radius, 999px);
   font-weight: 600;
   line-height: 1;
   text-decoration: none;
@@ -167,13 +186,13 @@ a[data-link-style='button-outline'] {
 
   &--overlay-dark::before { background: var(--wms-overlay-dark); }
   &--overlay-light::before { background: var(--wms-overlay-light); }
-  &--overlay-light { color: var(--wms-color-primary); }
+  &--overlay-light { color: var(--wms-color-primary-text); }
 
   h1, h2 {
     margin: 0 0 16px;
     // `cqi`: the hero's own width, so it also fits in a layout column (m1-071).
     font-size: clamp(2rem, 5cqi, 3.5rem);
-    font-weight: 700;
+    font-weight: var(--wms-heading-weight, 700);
     text-align: left;
   }
 
@@ -189,7 +208,7 @@ a[data-link-style='button-outline'] {
   margin: 0 0 8px;
   font-size: 0.85rem !important;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--wms-eyebrow-tracking, 0.12em);
   text-transform: uppercase;
 }
 
@@ -259,9 +278,10 @@ a[data-link-style='button-outline'] {
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid var(--wms-color-border);
+  border: 1px solid var(--wms-card-border, var(--wms-color-border));
   border-radius: var(--wms-radius);
   background: var(--wms-color-surface);
+  box-shadow: var(--wms-card-shadow, none);
   overflow: hidden;
 }
 
@@ -327,6 +347,8 @@ a[data-link-style='button-outline'] {
   padding: 10px 12px;
   border: 1px solid var(--wms-color-border-strong);
   border-radius: var(--wms-radius-small);
+  background: var(--wms-color-surface);
+  color: var(--wms-color-text);
   font: inherit;
 }
 
@@ -355,7 +377,7 @@ a[data-link-style='button-outline'] {
   margin-top: 16px;
   padding: 12px 28px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--wms-button-radius, 999px);
   background: var(--wms-color-accent);
   color: var(--wms-color-on-accent);
   font: inherit;

@@ -2,16 +2,20 @@
 
 | | |
 |---|---|
-| **Task** | m1-020 (CA-4 scaffolding) · m1-021 (brand values) |
+| **Task** | m1-020 (CA-4 scaffolding) · m1-021 (brand values) · m1-084 (themes as data) |
 | **Date** | 2026-10-31 |
 | **Status** | **Brand values from the live site, pending the owner's confirmation** (m1-021). The owner directed the agent to take colours, font, logo and favicon from the public pages of www.assurerworld.com (D-CONTENT-12). No brand guide or vector logo yet. The site's orange is darkened for text to pass WCAG 2.2 AA (§3). |
-| **Source** | `modules/asset/ui/src/scss/_tokens.scss` · `_fonts.scss` · `public/fonts/roboto/` · `public/images/brand/` |
+| **Source** | `lib/themes.js` (theme values, m1-084) · `modules/asset/ui/src/scss/_tokens.scss` (fixed tokens) · `_fonts.scss` · `public/fonts/` · `public/images/brand/` |
 | **Related** | [Editorial and design requirements](./editorial-and-design-requirements.md) §4–§7 · [Implementation plan](./implementation-plan-and-risks.md) (CA-4) |
 
 ## 1. How the theme is set up
 
-- All colour, type, spacing and shape values live in `_tokens.scss` as CSS custom properties on
-  `:root`. Project styles (`_wms.scss`, `_corporate.scss`, `_sections.scss`, `_type.scss`,
+- **Since m1-084 (D-CONTENT-29)** every theme's colour, type, shape and section-space values are
+  data in `lib/themes.js`: Classic is the brand values below, rendered on `:root`; each other
+  preset renders on its body class. The styles module serves them as one cached stylesheet.
+  `_tokens.scss` keeps only what every theme shares (spacing scale, notice colours). Add or change
+  a preset in `lib/themes.js` only; `npm run test:unit` checks its shape and contrast.
+- All of these are CSS custom properties. Project styles (`_wms.scss`, `_corporate.scss`, `_sections.scss`, `_type.scss`,
   `_layout.scss`) use only these properties. Two exceptions stay literal on purpose: the gallery
   lightbox (a dark media viewer) and the slideshow caption gradient (text over photographs).
 - Breakpoints are Sass variables (`$bp-tablet: 768px`, `$bp-desktop: 1024px`), because media
@@ -27,16 +31,16 @@
 
 | Supplied asset | Change | Token or file |
 |---|---|---|
-| Primary colour | Header text, hero background, stats values, skip link | `--wms-color-primary`, `--wms-color-on-primary`, `--wms-overlay-dark` and `--wms-shadow-raised` (both use the primary's RGB) |
-| Accent colour | Buttons, card links, badges, focus ring | `--wms-color-accent`, `--wms-color-on-accent`, `--wms-color-focus` |
-| Neutrals | Text, muted text, surfaces, borders | `--wms-color-text`, `-text-muted`, `-surface`, `-surface-alt`, `-border`, `-border-subtle`, `-border-strong` |
-| Link colours | Links in content | `--wms-color-link`, `--wms-color-link-visited` |
-| Body font (self-hosted files) | `@font-face` in `_fonts.scss`, files under `public/fonts/` (absolute `/fonts/…` URLs: the dev build does not rewrite relative `url()` in Sass partials) | `--wms-font-body`. Global Styles no longer has a body font control (m1-021) |
-| Heading font | Define the token (headings inherit the body font until then) | `--wms-font-heading` |
+| Primary colour | Hero background, skip link; as text: header, menu, stats values (`primaryText`, `null` = primary) | `primary`, `primaryText`, `onPrimary`, `overlay`, `shadowTint` in the Classic preset, `lib/themes.js` |
+| Accent colour | Buttons, card links, badges, focus ring | `accent`, `onAccent`, `focus` |
+| Neutrals | Text, muted text, surfaces, borders | `text`, `textMuted`, `surface`, `surfaceAlt`, `border`, `borderSubtle`, `borderStrong` |
+| Link colours | Links in content | `link`, `linkVisited` |
+| Body font (self-hosted files) | `@font-face` in `_fonts.scss`, files under `public/fonts/` (absolute `/fonts/…` URLs: the dev build does not rewrite relative `url()` in Sass partials), then a key in `fonts` in `lib/themes.js` | `fontBody`. Global Styles no longer has a body font control (m1-021) |
+| Heading font | A key in `fonts` (`body` = the body font) | `fontHeading` |
 | Vector logo | Point `LOGO` at the SVG; keep the link to `/` and the alternative text | `views/layout.jsx` |
 | Favicon | Replace the three PNGs, or derive them from the vector logo | `public/images/brand/`, `FaviconLinks` |
 
-After any swap, re-check every pair in §3 and update the table.
+After any swap, run `npm run test:unit`: it checks every pair in §3 for every preset.
 
 ### Brand values in use (m1-021)
 
@@ -86,11 +90,20 @@ needs 4.5:1; large text and UI components need 3:1.
 
 The m1-020 placeholder table is in that task's report and in Git history.
 
-### Theme presets (m1-074, D-CONTENT-23)
+### Theme presets (m1-074, D-CONTENT-23; m1-084, D-CONTENT-29)
 
-Quiet and Bold override tokens under `body.wms-theme-quiet` and `body.wms-theme-bold`
-(`modules/asset/ui/src/scss/_themes.scss`). Brand navy, accent and link colours are unchanged, so
-their rows above still hold. New pairs:
+**Since m1-084 the record is the test.** `scripts/themes.test.mjs` checks these pairs for every
+preset in `lib/themes.js` and fails below the minimum: text, text on the alternate surface, muted
+text on both surfaces, primary text on both surfaces, on-primary on primary and on the dark
+overlay colour, accent on both surfaces, on-accent on accent, link on both surfaces, visited link,
+danger, text on the selection colour (all 4.5:1); focus ring and strong border on the surface
+(3:1); and, where a theme has a footer band, its text (4.5:1) and focus ring (3:1). The tables
+above and below are the m1-021 and m1-074 records, kept as history.
+
+The test found one pair under AA in m1-074's Bold: accent `#a85a00` on the alternate surface
+`#eef1f8` (card badge) was 4.4999:1. Bold's alternate surface is `#f0f3f9` since m1-084 (4.58:1).
+
+m1-074 pairs (Quiet and Bold):
 
 | Pair | Ratio | Result |
 |---|---|---|

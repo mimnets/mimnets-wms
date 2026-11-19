@@ -69,15 +69,16 @@
 .wms-stats__item {
   padding: 24px 16px;
   border-radius: var(--wms-radius);
-  background: var(--wms-color-surface-alt);
+  background: var(--wms-stats-item-bg, var(--wms-color-surface-alt));
+  box-shadow: var(--wms-stats-item-shadow, none);
   overflow-wrap: anywhere;
 }
 
 .wms-stats__value {
   margin: 0;
-  color: var(--wms-color-primary);
-  font-size: 2rem;
-  font-weight: 700;
+  color: var(--wms-stats-value-color, var(--wms-color-primary-text));
+  font-size: var(--wms-stats-value-size, 2rem);
+  font-weight: var(--wms-stats-value-weight, 700);
   line-height: 1.2;
 }
 

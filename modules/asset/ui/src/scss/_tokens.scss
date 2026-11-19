@@ -1,63 +1,24 @@
-// Design tokens (m1-020 scaffolding, m1-021 brand values). The only place
-// colour, type, spacing and shape values are set; project styles use these
-// properties.
+// Design tokens (m1-020 scaffolding, m1-021 brand values, m1-084 themes as
+// data). The colour, type, shape and section-space tokens of every theme,
+// Classic included, are data in lib/themes.js; the styles module serves them
+// as a stylesheet (D-CONTENT-29). This file keeps the tokens that are the
+// same in every theme. Project styles use these properties.
 //
 // BRAND (m1-021): colours and font taken from the live assurerworld.com at
-// the owner's direction (D-CONTENT-12), pending the owner's confirmation.
-// The site's orange is darkened for text and buttons to pass WCAG 2.2 AA.
-// After any change, re-run the contrast checks in
-// docs/content/design-tokens.md.
+// the owner's direction (D-CONTENT-12), pending the owner's confirmation;
+// they are the Classic preset in lib/themes.js. Contrast is checked by
+// scripts/themes.test.mjs (docs/content/design-tokens.md §3).
 
 // Breakpoints (Sass, because media queries cannot read custom properties).
-// Mobile first: min-width queries at these widths.
+// Mobile first: min-width queries at these widths. lib/themes.js repeats
+// $bp-desktop for the "airy" section space.
 $bp-tablet: 768px;
 $bp-desktop: 1024px;
 
 :root {
-  // Brand colours. Primary: the site's navy. Accent: the site's orange
-  // #db740c (3.22:1 on white) darkened to pass AA as text and under white.
-  --wms-color-primary: #212d68;
-  --wms-color-accent: #a85a00;
-  --wms-color-on-primary: #fff;
-  --wms-color-on-accent: #fff;
-
-  // Neutrals
-  --wms-color-text: #333;
-  --wms-color-text-muted: #5d5d5d;
-  --wms-color-surface: #fff;
-  --wms-color-surface-alt: #f5f5f5;
-  --wms-color-border: #d5dde5;
-  --wms-color-border-subtle: #eef1f4;
-  // Form fields and controls: at least 3:1 against the surface.
-  --wms-color-border-strong: #6b7785;
-
-  // Links and states
-  --wms-color-link: #1e44a4;
-  --wms-color-link-visited: #434b74;
-  --wms-color-focus: var(--wms-color-accent);
-  --wms-color-danger: #b02a37;
+  // Demonstration notice: the same in every theme.
   --wms-color-notice-bg: #fff3cd;
   --wms-color-notice-text: #664d03;
-  --wms-color-selection: #ff9c38;
-
-  // Image overlays and raised panels
-  --wms-overlay-dark: rgb(33 45 104 / 60%);
-  --wms-overlay-light: rgb(255 255 255 / 70%);
-  --wms-shadow-raised: 0 12px 24px rgb(33 45 104 / 15%);
-
-  // Typography. Roboto is self-hosted (_fonts.scss). Global Styles no
-  // longer sets the body font (m1-021), so this token decides it.
-  --wms-font-body: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  // --wms-font-heading: set when the brand has a separate heading face;
-  // headings inherit the body font until then.
-
-  // Modular scale 1.25, in em so headings follow the body size Global
-  // Styles sets per breakpoint.
-  --wms-text-small: 0.875em;
-  --wms-text-h4: 1.25em;
-  --wms-text-h3: 1.563em;
-  --wms-text-h2: 1.953em;
-  --wms-text-h1: 2.441em;
 
   // Spacing: 4 px base, 8 steps
   --wms-space-1: 4px;
@@ -68,10 +29,4 @@ $bp-desktop: 1024px;
   --wms-space-6: 32px;
   --wms-space-7: 48px;
   --wms-space-8: 64px;
-  // Gap between page sections
-  --wms-space-section: var(--wms-space-7);
-
-  // Shape
-  --wms-radius: 10px;
-  --wms-radius-small: 6px;
 }
