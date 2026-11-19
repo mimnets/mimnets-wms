@@ -8,12 +8,31 @@
 // - Escape closes the open submenu (or the mobile menu) and returns focus to
 //   the button that opened it; clicking outside closes everything.
 // Without JavaScript the buttons stay hidden and every link is visible.
+//
+// An editor refresh replaces the header, so each new nav is enhanced again
+// (m1-083). Page-wide listeners are added once and act on the navs present.
+
+import onPageReady from './on-page-ready.js';
 
 const DESKTOP = '(min-width: 1024px)';
+const READY = '[data-wms-nav-ready]';
 
 function setExpanded(button, open) {
   button.setAttribute('aria-expanded', open ? 'true' : 'false');
   button.closest('li')?.classList.toggle('is-open', open);
+}
+
+function setMenu(nav, open) {
+  nav.querySelector('[data-wms-nav-toggle]').setAttribute('aria-expanded', open ? 'true' : 'false');
+  nav.classList.toggle('is-open', open);
+}
+
+function closeSubmenus(nav, except) {
+  nav.querySelectorAll('[data-wms-submenu-toggle]').forEach(button => {
+    if (button !== except) {
+      setExpanded(button, false);
+    }
+  });
 }
 
 function enhance(nav) {
@@ -30,26 +49,18 @@ function enhance(nav) {
     button.hidden = false;
   });
 
-  const setMenu = (open) => {
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    nav.classList.toggle('is-open', open);
-  };
-  const closeSubmenus = (except) => {
-    expanders.filter(b => b !== except).forEach(b => setExpanded(b, false));
-  };
-
   toggle.addEventListener('click', () => {
     const open = toggle.getAttribute('aria-expanded') !== 'true';
-    setMenu(open);
+    setMenu(nav, open);
     if (!open) {
-      closeSubmenus();
+      closeSubmenus(nav);
     }
   });
 
   expanders.forEach(button => {
     button.addEventListener('click', () => {
       const open = button.getAttribute('aria-expanded') !== 'true';
-      closeSubmenus(button);
+      closeSubmenus(nav, button);
       setExpanded(button, open);
     });
   });
@@ -63,17 +74,8 @@ function enhance(nav) {
       setExpanded(openButton, false);
       openButton.focus();
     } else if (toggle.getAttribute('aria-expanded') === 'true') {
-      setMenu(false);
+      setMenu(nav, false);
       toggle.focus();
-    }
-  });
-
-  document.addEventListener('click', (event) => {
-    if (!nav.contains(event.target)) {
-      closeSubmenus();
-      if (!window.matchMedia(DESKTOP).matches) {
-        setMenu(false);
-      }
     }
   });
 
@@ -90,16 +92,29 @@ function enhance(nav) {
       }
     }
   });
-
-  // Switching between the mobile and desktop layouts starts closed.
-  window.matchMedia(DESKTOP).addEventListener('change', () => {
-    setMenu(false);
-    closeSubmenus();
-  });
 }
 
 export default () => {
-  apos.util.onReady(() => {
+  document.addEventListener('click', (event) => {
+    document.querySelectorAll(READY).forEach(nav => {
+      if (!nav.contains(event.target)) {
+        closeSubmenus(nav);
+        if (!window.matchMedia(DESKTOP).matches) {
+          setMenu(nav, false);
+        }
+      }
+    });
+  });
+
+  // Switching between the mobile and desktop layouts starts closed.
+  window.matchMedia(DESKTOP).addEventListener('change', () => {
+    document.querySelectorAll(READY).forEach(nav => {
+      setMenu(nav, false);
+      closeSubmenus(nav);
+    });
+  });
+
+  onPageReady(() => {
     document.querySelectorAll('[data-wms-nav]').forEach(enhance);
   });
 };

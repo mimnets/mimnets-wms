@@ -9,6 +9,8 @@
 // animated in (`is-visible`), once. `data-wms-enter-state` (waiting,
 // shown) says which, for tests and agents.
 
+import onPageReady from './on-page-ready.js';
+
 const SELECTOR = '.wms-enter-fade, .wms-enter-rise';
 
 let observer = null;
@@ -52,5 +54,5 @@ function setup() {
 
 export default () => {
   // On page load and after every refresh (editing, edit/preview switch).
-  apos.util.onReady(setup);
+  onPageReady(setup);
 };
