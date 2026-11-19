@@ -16,7 +16,7 @@ editor refresh in release builds (`modules/asset/ui/src/on-page-ready.js`). Core
 **Open, for the owner**
 
 1. Review and merge the m1-083 PR; optionally send the core report.
-2. Choose the default preset on the container (D-CONTENT-24 Q4 / D-CONTENT-25 Q7).
+2. Default preset decided 2026-11-19 (D-CONTENT-24 Q4 / D-CONTENT-25 Q7): Bold for the site, Classic stays the code default. The container already publishes Bold; set Bold on OCI after the release. The m1-082 test editor was archived the same day.
 3. Still open from m1-083 handoff §1: the m1-082 test editor, OCI items, WordPress spam check,
    brand values (D-CONTENT-12), the privacy notice to the DPO (D-CONTENT-15).
 
