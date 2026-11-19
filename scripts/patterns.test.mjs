@@ -1,6 +1,7 @@
-// Unit tests for the m1-079 section patterns (modules/wms-patterns/lib/patterns.js):
-// every pattern sits under the parent, has a unique slug, holds only widgets the
-// page area offers, and carries no image or business fact.
+// Unit tests for the m1-079 and m1-085 section patterns
+// (modules/wms-patterns/lib/patterns.js): every pattern sits under the
+// parent, has a unique slug, holds only widgets the page area offers, and
+// carries no image or business fact.
 // Run: npm run test:unit
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -24,8 +25,8 @@ function widgets(area, out = []) {
   return out;
 }
 
-test('six patterns, unique slugs under the parent', () => {
-  assert.equal(pages.length, 6);
+test('nine patterns, unique slugs under the parent', () => {
+  assert.equal(pages.length, 9);
   const slugs = pages.map(page => page.slug);
   assert.equal(new Set(slugs).size, slugs.length);
   for (const slug of slugs) {
@@ -59,4 +60,25 @@ test('one H1 at most per pattern, and only in a hero', () => {
 test('no images and no relationships pre-filled', () => {
   const json = JSON.stringify(pages);
   assert.doesNotMatch(json, /"_(image|images|backgroundImage|products|files)":\[[^\]]/);
+});
+
+// m1-085: columns stay inside the 12-column grid, do not overlap and show
+// on every device.
+test('layout columns fit the grid and show on every device', () => {
+  for (const page of pages) {
+    const layouts = widgets(page.main).filter(item => item.type === '@apostrophecms/layout');
+    for (const layout of layouts) {
+      const used = new Set();
+      for (const column of layout.columns.items) {
+        const { colstart, colspan } = column;
+        assert.ok(colstart >= 1 && colstart + colspan - 1 <= 12, page.slug);
+        // Core's convert stores a missing boolean as false: hidden columns.
+        assert.ok(column.showTablet && column.showMobile, `${page.slug}: column hidden`);
+        for (let c = colstart; c < colstart + colspan; c++) {
+          assert.ok(!used.has(c), `${page.slug}: column ${c} used twice`);
+          used.add(c);
+        }
+      }
+    }
+  }
 });

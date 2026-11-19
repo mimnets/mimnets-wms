@@ -1,7 +1,9 @@
 // modules/@apostrophecms/styles/index.js
 
 import { createHash } from 'node:crypto';
-import { themeCss, themes } from '../../../lib/themes.js';
+import {
+  overrides, themeCss, themes
+} from '../../../lib/themes.js';
 
 export default {
   // Global Styles are site-wide: admins only (D-M0-11, m1-022). Core
@@ -33,6 +35,48 @@ export default {
           label: theme.label,
           value: theme.className
         }))
+      },
+
+      // ============================================
+      // HEADER AND FOOTER STYLE (m1-085, D-CONTENT-30)
+      // ============================================
+
+      // The theme sets the default; a choice here wins over it, also after
+      // the theme changes. Classes on <body> like Theme; the rules are in the
+      // theme stylesheet (`overrides` in lib/themes.js).
+      headerStyle: {
+        type: 'select',
+        label: 'Header Style',
+        help: 'Where the logo sits. "Theme default" uses the theme\'s choice; any other choice wins over the theme.',
+        class: true,
+        def: '',
+        choices: [
+          {
+            label: 'Theme default',
+            value: ''
+          },
+          ...overrides.headerStyle.map(choice => ({
+            label: choice.label,
+            value: choice.className
+          }))
+        ]
+      },
+      footerStyle: {
+        type: 'select',
+        label: 'Footer Style',
+        help: 'A plain footer, or a full-width coloured band in the theme\'s colours. "Theme default" uses the theme\'s choice; any other choice wins over the theme.',
+        class: true,
+        def: '',
+        choices: [
+          {
+            label: 'Theme default',
+            value: ''
+          },
+          ...overrides.footerStyle.map(choice => ({
+            label: choice.label,
+            value: choice.className
+          }))
+        ]
       },
 
       // ============================================
@@ -113,6 +157,7 @@ export default {
       contentMaxWidth: {
         type: 'range',
         label: 'Content Max Width',
+        help: 'The width of the header, the page content and the footer. Full-width bands keep their content inside this width.',
         selector: ':root',
         property: '--content-max-width',
         min: 800,
@@ -365,6 +410,10 @@ export default {
           container: {
             label: 'Container',
             fields: [ 'contentMaxWidth' ]
+          },
+          headerFooter: {
+            label: 'Header and Footer',
+            fields: [ 'headerStyle', 'footerStyle' ]
           },
           // Section: Responsive spacing
           spacing: {

@@ -31,15 +31,26 @@ export function patternPages(id) {
     linkUrl: '/contact-us',
     style: 'primary'
   });
-  const column = (colstart, order, content) => widget('@apostrophecms/layout-column', {
+  // `order` is the phone order: core stacks columns by it below the tablet
+  // breakpoint; on desktop `colstart` places them. `showTablet` and
+  // `showMobile` are explicit because core's boolean `convert` turns a
+  // missing value into false (not the field's `def: true`), which hid the
+  // columns on tablets and phones (found in m1-085).
+  const column = (colstart, order, content, colspan = 6) => widget('@apostrophecms/layout-column', {
     colstart,
-    colspan: 6,
+    colspan,
     rowstart: 1,
     rowspan: 1,
     order,
+    showTablet: true,
+    showMobile: true,
     content
   });
   const howTo = line => text(`<p><em>How to use: ${line}</em></p>`);
+  const imageHere = () => area(text('<p>Add an image widget here.</p>'));
+  const oneIdea = () => area(text('<h2>Replace with one idea</h2>' +
+    '<p>Two or three short sentences. Long text belongs on its own page.</p>'));
+  const layout = (...columns) => widget('@apostrophecms/layout', { columns: area(...columns) });
 
   const hero = (heading, line, buttons) => widget('wms-hero', {
     overlay: 'dark',
@@ -89,13 +100,48 @@ export function patternPages(id) {
       main: area(
         howTo('an image beside a short text. Add an image widget to the left column. ' +
           'Use it to break up long text; one idea per band.'),
-        widget('@apostrophecms/layout', {
-          columns: area(
-            column(1, 0, area(text('<p>Add an image widget here.</p>'))),
-            column(7, 1, area(text('<h2>Replace with one idea</h2>' +
-              '<p>Two or three short sentences. Long text belongs on its own page.</p>')))
-          )
-        })
+        layout(
+          column(1, 0, imageHere()),
+          column(7, 1, oneIdea())
+        )
+      )
+    },
+    // Layout patterns (m1-085, D-CONTENT-30): split media and text, and an
+    // offset grid, on the core 12-column grid.
+    {
+      slug: '/patterns/split-image-left',
+      title: 'Pattern: split, image left',
+      main: area(
+        howTo('an image beside text, the image narrower. Replace the placeholder in the ' +
+          'left column with an image widget. On a phone the image comes first.'),
+        layout(
+          column(1, 0, imageHere(), 5),
+          column(6, 1, oneIdea(), 7)
+        )
+      )
+    },
+    {
+      slug: '/patterns/split-image-right',
+      title: 'Pattern: split, image right',
+      main: area(
+        howTo('text beside an image, the image on the right. Replace the placeholder in the ' +
+          'right column with an image widget. On a phone the text comes first.'),
+        layout(
+          column(1, 0, oneIdea(), 7),
+          column(8, 1, imageHere(), 5)
+        )
+      )
+    },
+    {
+      slug: '/patterns/offset-grid',
+      title: 'Pattern: offset grid',
+      main: area(
+        howTo('two columns with space on both sides, for a calmer section. Keep one short ' +
+          'text in each. For columns at different heights, set the Stagger style on the layout.'),
+        layout(
+          column(2, 0, oneIdea(), 5),
+          column(7, 1, oneIdea(), 5)
+        )
       )
     },
     {

@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { contrast } from '../lib/contrast.js';
 import {
-  themeCss, themeProperties, themes, validateTheme
+  overrides, themeCss, themeProperties, themes, validateTheme
 } from '../lib/themes.js';
 import styles from '../modules/@apostrophecms/styles/index.js';
 
@@ -70,7 +70,8 @@ test('Classic, Quiet and Bold resolve to their m1-074 values', () => {
   assert.equal(bold['--wms-shadow-raised'], '0 16px 32px rgb(23 33 82 / 18%)');
   assert.equal(bold['--wms-text-h1'], '3.157em');
   assert.equal(bold['--wms-heading-weight-h1'], 800);
-  assert.equal(bold['--wms-footer-bg'], '#172152');
+  assert.equal(bold['--wms-footer-bg'], 'var(--wms-footer-band-bg)');
+  assert.equal(bold['--wms-footer-band-bg'], '#172152');
   assert.equal(bold['--wms-cta-border'], 'var(--wms-color-primary-text)');
   assert.equal(bold['--wms-color-primary-text'], '#212d68');
   assert.equal(bold['--wms-space-section'], '64px');
@@ -86,9 +87,49 @@ test('the stylesheet puts Classic on :root, every other preset on its body class
   assert.match(css, /@media \(min-width: 1024px\) \{\n {2}body\.wms-theme-quiet \{ --wms-space-section: 96px; \}/);
   // Every preset sets every property, so nothing leaks from Classic.
   const count = Object.keys(themeProperties(byName.classic)).length;
-  for (const block of css.split(/\n\}\n/).filter(part => part.includes(' {\n  --'))) {
+  const presetBlocks = css.split(/\n\}\n/)
+    .filter(part => /^(:root|body\.wms-theme-[a-z-]+) \{$/m.test(part));
+  assert.equal(presetBlocks.length, themes.length);
+  for (const block of presetBlocks) {
     assert.equal(block.split('\n').filter(line => line.startsWith('  --')).length, count);
   }
+});
+
+// m1-085 (D-CONTENT-30): an explicit header or footer style wins over the
+// theme because its rule comes after every theme rule.
+test('header and footer overrides come after every theme and match the select', () => {
+  const css = themeCss(themes);
+  const lastTheme = Math.max(...themes.slice(1).map(theme => css.indexOf(`body.${theme.className} {`)));
+  for (const [ field, choices ] of Object.entries(overrides)) {
+    assert.deepEqual(styles.styles.add[field].choices, [
+      {
+        label: 'Theme default',
+        value: ''
+      },
+      ...choices.map(choice => ({
+        label: choice.label,
+        value: choice.className
+      }))
+    ]);
+    for (const choice of choices) {
+      assert.ok(css.indexOf(`body.${choice.className} {`) > lastTheme, choice.className);
+    }
+  }
+  // An override writes the same properties as a theme with that choice.
+  const quiet = themeProperties(byName.quiet);
+  const centred = overrides.headerStyle.find(choice => choice.className === 'wms-header-centred');
+  for (const [ name, value ] of Object.entries(centred.properties)) {
+    assert.equal(value, quiet[name], name);
+  }
+  const bold = themeProperties(byName.bold);
+  const band = overrides.footerStyle.find(choice => choice.className === 'wms-footer-band');
+  for (const [ name, value ] of Object.entries(band.properties)) {
+    assert.equal(value, bold[name], name);
+  }
+  // Classic has no band: the band colours fall back to primary and on-primary.
+  const classic = themeProperties(byName.classic);
+  assert.equal(classic['--wms-footer-band-bg'], byName.classic.tokens.primary);
+  assert.equal(classic['--wms-footer-band-text'], byName.classic.tokens.onPrimary);
 });
 
 // [foreground, background, minimum ratio, where it is used]
@@ -112,12 +153,10 @@ const pairs = ({ primaryText, ...t }) => [
   [ t.text, t.selection, 4.5, 'selected text' ],
   [ t.focus, t.surface, 3, 'focus ring' ],
   [ t.borderStrong, t.surface, 3, 'form fields, Menu button' ],
-  ...(t.footerBand
-    ? [
-      [ t.footerBand.text, t.footerBand.background, 4.5, 'footer band text' ],
-      [ t.footerBand.focus, t.footerBand.background, 3, 'footer band focus ring' ]
-    ]
-    : [])
+  // The theme's own band, or the fallback of the "Coloured band" footer
+  // style (m1-085): every preset can show a band.
+  [ t.footerBand?.text ?? t.onPrimary, t.footerBand?.background ?? t.primary, 4.5, 'footer band text' ],
+  [ t.footerBand?.focus ?? t.onPrimary, t.footerBand?.background ?? t.primary, 3, 'footer band focus ring' ]
 ];
 
 test('every colour pair passes WCAG 2.2 AA', () => {

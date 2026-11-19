@@ -1,0 +1,9 @@
+// Stagger (m1-085, D-CONTENT-30): the "Stagger" style (lib/stagger.js) puts
+// `wms-layout-stagger` on the layout widget's styles wrapper. Desktop only:
+// below it core stacks or pairs the columns, where a shift has no meaning.
+// Child combinators, so a layout nested in a column is not staggered.
+@media (min-width: $bp-desktop) {
+  .wms-layout-stagger > .layout-widget > :nth-child(even) {
+    margin-top: calc(var(--wms-space-section) / 2);
+  }
+}
