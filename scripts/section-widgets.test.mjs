@@ -193,3 +193,20 @@ test('every project: translation key used in code exists in en.json', () => {
   const missing = [ ...used ].filter(key => !(key in phrases));
   assert.deepEqual(missing, []);
 });
+
+test('bandStyle is a class style on the section, layout and hero widgets (m1-081)', async () => {
+  const { bandStyle } = await import('../lib/band.js');
+  assert.equal(bandStyle.class, true);
+  assert.equal(bandStyle.def, '');
+  assert.deepEqual(bandStyle.choices.map(c => c.value), [ '', 'wms-band-full' ]);
+  for (const name of [
+    'wms-feature-grid-widget', 'wms-stats-widget', 'wms-organizations-widget',
+    'wms-hero-widget', '@apostrophecms/layout-widget'
+  ]) {
+    const { default: mod } = await import(`../modules/${name}/index.js`);
+    assert.equal(mod.styles.add.band, bandStyle, name);
+  }
+  // The slideshow keeps its own Width field (D-CONTENT-26 Q3).
+  const { default: slideshow } = await import('../modules/wms-slideshow-widget/index.js');
+  assert.equal(slideshow.styles?.add?.band, undefined);
+});

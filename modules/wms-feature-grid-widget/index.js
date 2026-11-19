@@ -5,6 +5,7 @@
 // item schema keeps titles and text short and typed.
 import { requireAltText } from '../../lib/alt-text.js';
 import { linkFields } from '../../lib/link.js';
+import { bandStyle } from '../../lib/band.js';
 import { entranceStyle } from '../../lib/motion.js';
 import {
   anchorField, columnsField, introField
@@ -27,6 +28,8 @@ export default {
       // Core presets, as on the layout widget.
       background: 'background',
       padding: 'padding',
+      // m1-081: background edge to edge, content at page width.
+      band: bandStyle,
       entrance: entranceStyle
     }
   },

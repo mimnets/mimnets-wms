@@ -1,3 +1,4 @@
+import { bandStyle } from '../../../lib/band.js';
 import { entranceStyle } from '../../../lib/motion.js';
 
 export default {
@@ -15,6 +16,8 @@ export default {
       // m1-080: inner space, so content stays off the background's edges.
       padding: 'padding',
       // m1-072: animate the whole layout, or one column (layout-column-widget).
+      // m1-081: background edge to edge, content at page width.
+      band: bandStyle,
       entrance: entranceStyle
     }
   }

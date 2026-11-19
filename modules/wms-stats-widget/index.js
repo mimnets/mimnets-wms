@@ -5,6 +5,7 @@
 import {
   anchorField, introField
 } from '../../lib/listing.js';
+import { bandStyle } from '../../lib/band.js';
 import { entranceStyle } from '../../lib/motion.js';
 
 export default {
@@ -24,6 +25,8 @@ export default {
       // Core presets, as on the layout widget.
       background: 'background',
       padding: 'padding',
+      // m1-081: background edge to edge, content at page width.
+      band: bandStyle,
       entrance: entranceStyle
     }
   },
