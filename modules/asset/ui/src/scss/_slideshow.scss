@@ -131,7 +131,7 @@
 
   &--overlay-light {
     background: var(--wms-overlay-light);
-    color: var(--wms-color-primary);
+    color: var(--wms-color-primary-text);
   }
 
   &--left { justify-content: flex-start; }
@@ -157,7 +157,7 @@
   margin: 0 0 8px;
   font-size: 0.85rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--wms-eyebrow-tracking, 0.12em);
   text-transform: uppercase;
 }
 
@@ -165,7 +165,7 @@
   margin: 0 0 12px;
   color: inherit;
   font-size: clamp(1.5rem, 5cqi, 3rem);
-  font-weight: 700;
+  font-weight: var(--wms-heading-weight, 700);
   line-height: 1.15;
   text-align: inherit;
 }
@@ -230,7 +230,7 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  color: var(--wms-color-primary);
+  color: var(--wms-color-primary-text);
 
   svg { fill: currentcolor; }
   .wms-slideshow__icon-play { display: none; }
@@ -241,7 +241,7 @@
 .wms-slideshow__prev,
 .wms-slideshow__next {
   padding: 4px 12px;
-  color: var(--wms-color-primary);
+  color: var(--wms-color-primary-text);
   font-size: 1.75rem;
   line-height: 1;
 }

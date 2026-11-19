@@ -4,22 +4,47 @@ h3 {
   text-align: center;
 }
 
+// Heading face, weight, tracking and line height come from the theme
+// (lib/themes.js, m1-084); unset ones inherit from the body.
 h1,
 h2,
 h3,
 h4 {
   font-family: var(--wms-font-heading, inherit);
+  letter-spacing: var(--wms-heading-tracking, inherit);
+
+  strong,
+  b {
+    font-weight: var(--wms-heading-strong-weight, bolder);
+  }
 }
 
-// Modular scale from _tokens.scss (m1-020).
+h1,
+h2,
+h3 {
+  line-height: var(--wms-heading-line-height, inherit);
+}
+
+// Modular scale from the theme (m1-020, m1-084).
 h1 {
   font-size: var(--wms-text-h1);
-  font-weight: 600;
+  font-weight: var(--wms-heading-weight-h1, 600);
 }
 
-h2 { font-size: var(--wms-text-h2); }
-h3 { font-size: var(--wms-text-h3); }
-h4 { font-size: var(--wms-text-h4); }
+h2 {
+  font-size: var(--wms-text-h2);
+  font-weight: var(--wms-heading-weight, 700);
+}
+
+h3 {
+  font-size: var(--wms-text-h3);
+  font-weight: var(--wms-heading-weight, 700);
+}
+
+h4 {
+  font-size: var(--wms-text-h4);
+  font-weight: var(--wms-heading-weight-h4, 700);
+}
 
 a {
   color: var(--wms-color-link);

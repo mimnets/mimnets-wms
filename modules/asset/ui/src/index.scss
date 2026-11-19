@@ -13,5 +13,5 @@
 @import './scss/_slideshow';
 @import './scss/_bands';
 @import './scss/_motion';
-// Last: theme presets override tokens and a few component rules (m1-074).
-@import './scss/_themes';
+// Theme presets are data in lib/themes.js, served by the styles module
+// (m1-084); the partials above read their tokens.

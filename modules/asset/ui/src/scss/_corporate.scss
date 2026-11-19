@@ -74,11 +74,11 @@ $nav-desktop: $bp-desktop;
 .wms-nav__sublink {
   display: inline-block;
   padding: 10px 4px;
-  color: var(--wms-color-primary);
+  color: var(--wms-color-primary-text);
   text-decoration: none;
   overflow-wrap: anywhere;
 
-  &:visited { color: var(--wms-color-primary); }
+  &:visited { color: var(--wms-color-primary-text); }
   &:hover { text-decoration: underline; }
 
   &[aria-current="page"],
@@ -101,7 +101,7 @@ $nav-desktop: $bp-desktop;
   border: 1px solid transparent;
   border-radius: 6px;
   background: none;
-  color: var(--wms-color-primary);
+  color: var(--wms-color-primary-text);
   font: inherit;
   cursor: pointer;
 }
@@ -172,6 +172,13 @@ $nav-desktop: $bp-desktop;
 
 .wms-nav__item--cta {
   margin-left: 8px;
+}
+
+// Theme "outline" header button (m1-084; Bold since m1-074).
+.wms-nav__item--cta .wms-button--primary {
+  border-color: var(--wms-cta-border, var(--wms-color-accent));
+  background: var(--wms-cta-bg, var(--wms-color-accent));
+  color: var(--wms-cta-text, var(--wms-color-on-accent));
 }
 
 // With JavaScript: closed submenus are hidden.
@@ -378,6 +385,10 @@ $nav-desktop: $bp-desktop;
   display: inline-block;
   padding: 4px 0;
   color: inherit;
+
+  &:focus-visible {
+    outline-color: var(--wms-footer-focus, var(--wms-color-focus));
+  }
 }
 
 // ---------------------------------------------------------------------------

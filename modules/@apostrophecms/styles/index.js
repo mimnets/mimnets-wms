@@ -1,5 +1,8 @@
 // modules/@apostrophecms/styles/index.js
 
+import { createHash } from 'node:crypto';
+import { themeCss, themes } from '../../../lib/themes.js';
+
 export default {
   // Global Styles are site-wide: admins only (D-M0-11, m1-022). Core
   // permission options, enforced server side by apos.permission.can(), so an
@@ -16,30 +19,20 @@ export default {
 
       // Core `class: true`: the value becomes a class on <body> (stored on
       // the global doc as `stylesClasses`, so visitors get the published
-      // choice). Each class overrides the design tokens in _themes.scss.
-      // Classic is the empty value: no class, today's look, no migration.
-      // Values use the final `wms-` prefix (m1-073) so they never need a
-      // rename. An unknown value has no rules and renders as Classic.
+      // choice). The presets and their values are data in lib/themes.js
+      // (m1-084, D-CONTENT-29); the stylesheet route below serves them.
+      // Classic is the empty value: no class. An unknown value has no rules
+      // and renders as Classic.
       theme: {
         type: 'select',
         label: 'Theme',
         help: 'The overall look of the site. The settings in the other tabs apply on top of every theme.',
         class: true,
         def: '',
-        choices: [
-          {
-            label: 'Classic',
-            value: ''
-          },
-          {
-            label: 'Quiet: calm and editorial',
-            value: 'wms-theme-quiet'
-          },
-          {
-            label: 'Bold: dark sections and heavy headings',
-            value: 'wms-theme-bold'
-          }
-        ]
+        choices: themes.map(theme => ({
+          label: theme.label,
+          value: theme.className
+        }))
       },
 
       // ============================================
@@ -422,6 +415,36 @@ export default {
         }
       }
     }
+  },
+  init(self) {
+    // The theme stylesheet (m1-084): every preset, built once at start, linked
+    // from <head> on every page. The URL carries a hash of the CSS, so it can
+    // be cached for a year and a release with changed themes gets a new URL.
+    self.wmsThemeCss = themeCss(themes);
+    self.wmsThemeVersion = createHash('sha256').update(self.wmsThemeCss).digest('hex').slice(0, 12);
+    self.apos.template.prepend('head', '@apostrophecms/styles:wmsThemeStylesheet');
+  },
+  apiRoutes(self) {
+    return {
+      get: {
+        // GET /api/v1/@apostrophecms/styles/wms-themes, public: the same
+        // stylesheet for everyone, no user or document data.
+        wmsThemes(req) {
+          req.res.setHeader('Content-Type', 'text/css');
+          req.res.setHeader('Cache-Control', 'public, max-age=31557600, immutable');
+          return self.wmsThemeCss;
+        }
+      }
+    };
+  },
+  components(self) {
+    return {
+      wmsThemeStylesheet(req) {
+        return {
+          href: `${self.apos.prefix || ''}${self.action}/wms-themes?version=${self.wmsThemeVersion}`
+        };
+      }
+    };
   },
   handlers(self) {
     return {
