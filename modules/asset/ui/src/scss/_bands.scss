@@ -1,0 +1,60 @@
+// Full-width bands (m1-081, D-CONTENT-26). The "Band width" style
+// (lib/band.js) puts `wms-band-full` on the widget's styles wrapper, which
+// carries the core Background and Padding styles. The wrapper runs edge to
+// edge, as the slideshow's "Full width" does (_slideshow.scss); the widget
+// inside keeps the page's content line. Only in the page's centred <main>
+// and only when `--wms-vw` is known (page-width.js): otherwise, and in a
+// layout column, a band stays content width.
+
+// The page's content line inside a band as wide as the window: the side
+// margin of `.wms-main` plus the space either side of `--content-max-width`.
+$wms-band-inset: max(var(--wms-space-4), (100% - var(--content-max-width)) / 2 + var(--wms-space-4));
+
+.has-wms-vw .wms-main .wms-band-full {
+  width: var(--wms-vw);
+  // Core writes the layout widget's Width style inline (`width: N%`);
+  // `min-width` wins over it, so a full band is never narrower.
+  min-width: var(--wms-vw);
+  margin-left: calc(50% - var(--wms-vw) / 2);
+  margin-right: calc(50% - var(--wms-vw) / 2);
+  // Keeps the section's own top and bottom margins inside the band, so
+  // bands next to each other touch, as on the original site (Q1).
+  display: flow-root;
+
+  // `width: auto`: core gives the layout grid `width: 100%`, which the
+  // margins would push past the window's edge.
+  > * {
+    width: auto;
+    margin-left: $wms-band-inset;
+    margin-right: $wms-band-inset;
+  }
+
+  // The hero paints its own background: it fills the band, square, and its
+  // padding keeps the text on the content line.
+  > .wms-hero {
+    margin: 0;
+    padding-left: max(24px, $wms-band-inset);
+    padding-right: max(24px, $wms-band-inset);
+    border-radius: 0;
+  }
+}
+
+// A layout column is narrower than the window: no breakout.
+.has-wms-vw .wms-main .layout-widget .wms-band-full {
+  width: auto;
+  min-width: 0;
+  margin-left: 0;
+  margin-right: 0;
+
+  > * {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  > .wms-hero {
+    margin-bottom: var(--wms-space-section);
+    padding-left: 24px;
+    padding-right: 24px;
+    border-radius: var(--wms-radius);
+  }
+}

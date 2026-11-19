@@ -199,6 +199,25 @@ await api('POST', `@apostrophecms/page/${page._id}/revert-draft-to-published`, {
 page = await api('GET', `@apostrophecms/page/${page._id}`);
 check('draft reverted to published version', JSON.stringify(page.main).includes(EDITED));
 
+// --- Full-width band (m1-081): the style class reaches the public page ----
+page.main.items.push({
+  _id: id(),
+  metaType: 'widget',
+  type: 'wms-feature-grid',
+  band: 'wms-band-full',
+  items: [ {
+    _id: id(),
+    metaType: 'arrayItem',
+    scopedArrayName: 'wms-feature-grid.items',
+    title: 'Band item'
+  } ]
+});
+page = await api('PATCH', `@apostrophecms/page/${page._id}`, { main: page.main });
+check('band width saved in draft', page.main.items.at(-1).band === 'wms-band-full', page.main.items.at(-1).band);
+await api('POST', `@apostrophecms/page/${page._id}/publish`, {});
+html = await publicHtml(SLUG);
+check('full-width band class on the public widget wrapper', /data-apos-widget-style-wrapper-for="[^"]*"[^>]*class="[^"]*\bwms-band-full\b/.test(html));
+
 // --- Theme preset (m1-074): saving reaches the public <body> --------------
 // Core Global Styles is `autopublish`: Save publishes at once; the preview
 // before Save is client-side only, in the open panel.

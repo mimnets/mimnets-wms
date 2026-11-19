@@ -4,6 +4,7 @@
 // The heading and body live in an area so editors change them in place on
 // the page; image and buttons are edited through the widget's modal.
 import { bannerButtons } from '../../lib/banner.js';
+import { bandStyle } from '../../lib/band.js';
 import { entranceStyle } from '../../lib/motion.js';
 
 export default {
@@ -79,6 +80,8 @@ export default {
   },
   styles: {
     add: {
+      // m1-081: background edge to edge, content at page width.
+      band: bandStyle,
       entrance: entranceStyle
     }
   }
