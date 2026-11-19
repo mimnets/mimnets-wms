@@ -1,5 +1,6 @@
 import { bandStyle } from '../../../lib/band.js';
 import { entranceStyle } from '../../../lib/motion.js';
+import { staggerStyle } from '../../../lib/stagger.js';
 
 export default {
   options: {
@@ -18,6 +19,8 @@ export default {
       // m1-072: animate the whole layout, or one column (layout-column-widget).
       // m1-081: background edge to edge, content at page width.
       band: bandStyle,
+      // m1-085: every second column lower on desktop.
+      stagger: staggerStyle,
       entrance: entranceStyle
     }
   }

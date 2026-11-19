@@ -97,7 +97,9 @@ preset in `lib/themes.js` and fails below the minimum: text, text on the alterna
 text on both surfaces, primary text on both surfaces, on-primary on primary and on the dark
 overlay colour, accent on both surfaces, on-accent on accent, link on both surfaces, visited link,
 danger, text on the selection colour (all 4.5:1); focus ring and strong border on the surface
-(3:1); and, where a theme has a footer band, its text (4.5:1) and focus ring (3:1). The tables
+(3:1); and the footer band's text (4.5:1) and focus ring (3:1): the theme's own band, or, for a
+theme without one, `onPrimary` on `primary`, which the Global Styles "Coloured band" footer uses
+(m1-085). The tables
 above and below are the m1-021 and m1-074 records, kept as history.
 
 The test found one pair under AA in m1-074's Bold: accent `#a85a00` on the alternate surface
