@@ -13,6 +13,7 @@
 import { breadcrumbItems } from '../lib/breadcrumbs.js';
 import { readDemoSite } from '../lib/demo-site.js';
 import { linkHref } from '../lib/link.js';
+import { mainMenu } from '../lib/menu.js';
 import { pageTitle } from '../lib/seo-title.js';
 
 // Demonstration sites only (APOS_DEMO_SITE=1, lib/demo-site.js; m1-029):
@@ -40,24 +41,20 @@ const SOCIAL_LABELS = {
   x: 'X (Twitter)'
 };
 
-// Main menu: the home page's children and grandchildren from the page tree
-// (two levels, see modules/@apostrophecms/page/index.js). Pages marked "Hide
-// in Navigation" and, for visitors, unpublished pages are already excluded
-// by core. A parent keeps its own link; a separate button opens its submenu,
-// so the parent stays reachable on touch screens. Behaviour:
-// modules/asset/ui/src/nav.js. Without JavaScript the submenus stay visible.
-function NavLink({
-  item, page, className
-}) {
-  const current = page && page.aposDocId === item.aposDocId;
-  const inBranch = !current && page?.path?.startsWith(`${item.path}/`);
+// Main menu: the "Main menu" list in Global Content, or, while that is empty,
+// the page tree (lib/menu.js, m1-082). A parent keeps its own link; a
+// separate button opens its submenu, so the parent stays reachable on touch
+// screens. Behaviour: modules/asset/ui/src/nav.js. Without JavaScript the
+// submenus stay visible.
+function NavLink({ item, className }) {
   return (
     <a
-      className={`${className}${inBranch ? ' is-current-branch' : ''}`}
-      href={item._url}
-      aria-current={current ? 'page' : undefined}
+      className={`${className}${item.inBranch ? ' is-current-branch' : ''}`}
+      href={item.href}
+      aria-current={item.current ? 'page' : undefined}
     >
-      {item.title}
+      {item.text}
+      {item.external && <span className="wms-visually-hidden"> (external site)</span>}
     </a>
   );
 }
@@ -65,7 +62,7 @@ function NavLink({
 function Nav({
   home, page, global
 }) {
-  const items = home?._children || [];
+  const items = mainMenu(home, global, page);
   const ctaHref = global?.showHeaderCta ? linkHref(global) : null;
   if (!items.length && !ctaHref) {
     return null;
@@ -85,12 +82,11 @@ function Nav({
       </button>
       <ul className="wms-nav__menu" id="wms-nav-menu">
         {items.map(item => {
-          const children = item._children || [];
-          const submenuId = `wms-submenu-${item.aposDocId}`;
+          const submenuId = `wms-submenu-${item.id}`;
           return (
-            <li className={`wms-nav__item${children.length ? ' wms-nav__item--parent' : ''}`}>
-              <NavLink item={item} page={page} className="wms-nav__link" />
-              {children.length > 0 && (
+            <li className={`wms-nav__item${item.children.length ? ' wms-nav__item--parent' : ''}`}>
+              <NavLink item={item} className="wms-nav__link" />
+              {item.children.length > 0 && (
                 <>
                   <button
                     className="wms-nav__expand"
@@ -100,11 +96,11 @@ function Nav({
                     data-wms-submenu-toggle
                     hidden
                   >
-                    <span className="wms-visually-hidden">{`${item.title} submenu`}</span>
+                    <span className="wms-visually-hidden">{`${item.text} submenu`}</span>
                   </button>
                   <ul className="wms-nav__submenu" id={submenuId}>
-                    {children.map(child => (
-                      <li><NavLink item={child} page={page} className="wms-nav__sublink" /></li>
+                    {item.children.map(child => (
+                      <li><NavLink item={child} className="wms-nav__sublink" /></li>
                     ))}
                   </ul>
                 </>
