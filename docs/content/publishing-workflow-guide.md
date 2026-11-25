@@ -116,3 +116,40 @@ Points to know:
   it. "Started from" records where it came from.
 - The other Global Styles settings (line height, font sizes, header and footer style and so on)
   apply on top of every theme, custom or not.
+
+## 7. Design suggestions from AI (admins only, m1-088)
+
+On a site with an AI key, an admin can ask for a theme or a page layout from a short brief. The
+result is always a draft that you review; nothing is published for you. Editors do not see Design
+suggestions, and the menu entry is hidden on a site without a key.
+
+1. Admin bar → **Site admin** → **Design suggestions** → **New Design suggestion**.
+2. Give it a name for your own list, choose **A theme** or **A page layout**, and write the
+   **Brief**: the mood, the audience and any colours, in a few sentences.
+   The brief is sent to an external AI service. Write no names of people or customers, no
+   contact details and no prices. A brief with an e-mail address or a phone number is not saved.
+3. Save. The suggestion runs in the background (usually under a minute); a notification says when
+   it is ready or failed. Open the suggestion again: **Result** shows the status, the model's
+   notes and the draft it made.
+4. **Theme:** open the suggested theme (Site admin → Themes, named "… (AI suggestion)"). It is
+   checked for readable colours like any theme. Change what you like, then follow §6 from step 4:
+   publish, reload, choose it in Global Styles, preview, save.
+5. **Page layout:** open the page under **Templates (do not publish)** named "Suggestion: …". It is
+   built only from the section patterns (§5), with placeholders. Use it like a template:
+   Duplicate, move the copy, replace every placeholder with confirmed facts, add photos, publish
+   the copy. The suggestion page itself can never be published.
+
+Points to know:
+
+- **A brief cannot be changed after saving.** To try another brief, choose **Duplicate** on the
+  suggestion, change the brief and save.
+- **Daily limit:** 20 suggestions per site per day (UTC) unless the site sets another number.
+  Every suggestion counts, failed ones too.
+- **Usage** shows the model and the tokens billed for each suggestion.
+- **Failed** shows why: the model declined the brief, the service did not answer, or the theme
+  failed the readability check twice (the colour pairs are named). Nothing is created then.
+- **Not useful?** Archive the suggestion. For a suggested theme that was never published, the
+  theme's menu (⋮ in Themes) offers **Delete Draft**: that removes it for good. Leaving it as a
+  draft is harmless: Global Styles offers published themes only. Avoid **Archive** in the Themes
+  list for a never-published theme: the CMS version in use answers that request with an error
+  through its API (found in m1-088; the list button itself was not tried).

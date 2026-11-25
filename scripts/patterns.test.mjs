@@ -7,7 +7,9 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { pageArea } from '../lib/area.js';
-import { PARENT, patternPages } from '../modules/wms-patterns/lib/patterns.js';
+import {
+  PARENT, patternDefs, patternPages
+} from '../modules/wms-patterns/lib/patterns.js';
 
 let n = 0;
 const pages = patternPages(() => `id${++n}`);
@@ -90,4 +92,29 @@ test('layout columns fit the grid and show on every device', () => {
 test('the nine m1-079 and m1-085 patterns are unchanged', () => {
   const hash = createHash('sha256').update(JSON.stringify(pages.slice(0, 9))).digest('hex');
   assert.equal(hash, '685406838c2645c0ebec6be61133d20ece2c1fc61e2d57dc90e186e01bdb3dec');
+});
+
+// m1-088 (D-CONTENT-33 Q8): patterns are described by key (patternDefs) and
+// the pages built from that. All fourteen pattern pages are seeded exactly as
+// before the change.
+test('all fourteen patterns are unchanged by the keyed descriptions', () => {
+  const hash = createHash('sha256').update(JSON.stringify(pages)).digest('hex');
+  assert.equal(hash, '1861278e011a6262149334770ed582516464d2a1e02466cb9e10255451da8f7b');
+});
+
+test('each pattern has a key, a summary and sections without the note', () => {
+  const defs = patternDefs(() => 'x');
+  assert.deepEqual(defs.map(def => `${PARENT.slug}/${def.key}`), pages.map(page => page.slug));
+  for (const def of defs) {
+    assert.match(def.key, /^[a-z]+(?:-[a-z]+)*$/);
+    assert.ok(def.summary.length > 10 && def.summary.length <= 120, def.key);
+    assert.ok(def.sections().length >= 1, def.key);
+    assert.doesNotMatch(JSON.stringify(def.sections()), /How to use/, def.key);
+  }
+});
+
+test('heroLevel h2 leaves no H1 in any pattern', () => {
+  const all = patternDefs(() => 'x', { heroLevel: 'h2' })
+    .flatMap(def => def.sections().flatMap(item => widgets({ items: [ item ] })));
+  assert.ok(all.every(item => !/<h1>/.test(item.content || '')));
 });

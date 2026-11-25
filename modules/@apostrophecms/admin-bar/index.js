@@ -35,6 +35,7 @@ export default {
           '@apostrophecms/user',
           '@apostrophecms/redirect',
           'wms-theme',
+          'wms-design-suggestion',
           'wms-data-dashboard'
         ]
       }
