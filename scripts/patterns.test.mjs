@@ -1,9 +1,10 @@
-// Unit tests for the m1-079 and m1-085 section patterns
+// Unit tests for the m1-079, m1-085 and m1-086 section patterns
 // (modules/wms-patterns/lib/patterns.js): every pattern sits under the
 // parent, has a unique slug, holds only widgets the page area offers, and
 // carries no image or business fact.
 // Run: npm run test:unit
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { pageArea } from '../lib/area.js';
 import { PARENT, patternPages } from '../modules/wms-patterns/lib/patterns.js';
@@ -25,8 +26,8 @@ function widgets(area, out = []) {
   return out;
 }
 
-test('nine patterns, unique slugs under the parent', () => {
-  assert.equal(pages.length, 9);
+test('fourteen patterns, unique slugs under the parent', () => {
+  assert.equal(pages.length, 14);
   const slugs = pages.map(page => page.slug);
   assert.equal(new Set(slugs).size, slugs.length);
   for (const slug of slugs) {
@@ -81,4 +82,12 @@ test('layout columns fit the grid and show on every device', () => {
       }
     }
   }
+});
+
+// m1-086 (D-CONTENT-31 Q7): the section builders moved to sections.js. The
+// nine patterns from before are seeded exactly as before. Change this hash
+// only on purpose, when a pattern's content is meant to change.
+test('the nine m1-079 and m1-085 patterns are unchanged', () => {
+  const hash = createHash('sha256').update(JSON.stringify(pages.slice(0, 9))).digest('hex');
+  assert.equal(hash, '685406838c2645c0ebec6be61133d20ece2c1fc61e2d57dc90e186e01bdb3dec');
 });
