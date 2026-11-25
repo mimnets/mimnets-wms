@@ -25,6 +25,7 @@
 // publishing-workflow suite (D-CONTENT-11) before and after a restart.
 // m1-070 adds the data dashboard suite (D-DB-24). m1-086 seeds the patterns
 // and templates twice and adds the page templates suite (D-CONTENT-31).
+// m1-087 adds the custom themes suite (D-CONTENT-32).
 // Uses Node built-ins only.
 
 import { spawn } from 'node:child_process';
@@ -232,6 +233,7 @@ async function steps() {
     await run('publishing workflow test', [ 'scripts/publishing-workflow-test.mjs' ], { PUBLISH_TEST_DISPOSABLE: '1' }) &&
     await run('data dashboard test', [ 'scripts/data-dashboard-test.mjs' ], { DASHBOARD_TEST_DISPOSABLE: '1' }) &&
     await run('page templates test', [ 'scripts/templates-test.mjs' ], { TEMPLATES_TEST_DISPOSABLE: '1' }) &&
+    await run('custom themes test', [ 'scripts/custom-themes-test.mjs' ], { CUSTOM_THEMES_TEST_DISPOSABLE: '1' }) &&
     await stopServer().then(() => run('seed legacy redirects (wms-seo:seed-redirects)', [
       'app', 'wms-seo:seed-redirects', '--strict'
     ])) &&

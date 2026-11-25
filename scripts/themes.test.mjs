@@ -7,7 +7,10 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { contrast } from '../lib/contrast.js';
 import {
-  overrides, themeCss, themeProperties, themes, validateTheme
+  contrastPairs, contrastProblems, contrastResults
+} from '../lib/theme-contrast.js';
+import {
+  overrides, themeChoices, themeCss, themeProperties, themes, validateTheme
 } from '../lib/themes.js';
 import styles from '../modules/@apostrophecms/styles/index.js';
 
@@ -40,8 +43,9 @@ test('names and classes are unique; Classic, Quiet and Bold keep theirs', () => 
 });
 
 test('the Theme select lists every preset in order', () => {
-  const choices = styles.styles.add.theme.choices;
-  assert.deepEqual(choices, themes.map(theme => ({
+  // Custom themes follow the presets (m1-087): the choices come from a method.
+  assert.equal(styles.styles.add.theme.choices, 'wmsThemeChoices');
+  assert.deepEqual(themeChoices(themes), themes.map(theme => ({
     label: theme.label,
     value: theme.className
   })));
@@ -132,44 +136,27 @@ test('header and footer overrides come after every theme and match the select', 
   assert.equal(classic['--wms-footer-band-text'], byName.classic.tokens.onPrimary);
 });
 
-// [foreground, background, minimum ratio, where it is used]
-const pairs = ({ primaryText, ...t }) => [
-  [ t.text, t.surface, 4.5, 'text' ],
-  [ t.text, t.surfaceAlt, 4.5, 'text on alternate surface' ],
-  [ t.textMuted, t.surface, 4.5, 'muted text (footer, breadcrumbs)' ],
-  [ t.textMuted, t.surfaceAlt, 4.5, 'muted text on alternate surface' ],
-  [ primaryText ?? t.primary, t.surface, 4.5, 'menu links, header button outline' ],
-  [ primaryText ?? t.primary, t.surfaceAlt, 4.5, 'key figures' ],
-  [ t.onPrimary, t.primary, 4.5, 'hero text, skip link' ],
-  // Hero text on a photo: the dark overlay's own colour is the lower bound.
-  [ t.onPrimary, t.overlay, 4.5, 'hero text on the dark overlay' ],
-  [ t.accent, t.surface, 4.5, 'card links, outline button' ],
-  [ t.accent, t.surfaceAlt, 4.5, 'card badge, key figures' ],
-  [ t.onAccent, t.accent, 4.5, 'primary button, submit' ],
-  [ t.link, t.surface, 4.5, 'links' ],
-  [ t.link, t.surfaceAlt, 4.5, 'links on alternate surface' ],
-  [ t.linkVisited, t.surface, 4.5, 'visited links' ],
-  [ t.danger, t.surface, 4.5, 'form errors' ],
-  [ t.text, t.selection, 4.5, 'selected text' ],
-  [ t.focus, t.surface, 3, 'focus ring' ],
-  [ t.borderStrong, t.surface, 3, 'form fields, Menu button' ],
-  // The theme's own band, or the fallback of the "Coloured band" footer
-  // style (m1-085): every preset can show a band.
-  [ t.footerBand?.text ?? t.onPrimary, t.footerBand?.background ?? t.primary, 4.5, 'footer band text' ],
-  [ t.footerBand?.focus ?? t.onPrimary, t.footerBand?.background ?? t.primary, 3, 'footer band focus ring' ]
-];
-
+// The pairs are shared with the server's check of custom themes
+// (lib/theme-contrast.js, m1-087).
 test('every colour pair passes WCAG 2.2 AA', () => {
   const failures = [];
   for (const theme of themes) {
-    for (const [ fg, bg, min, use ] of pairs(theme.tokens)) {
-      const ratio = contrast(fg, bg);
-      if (ratio < min) {
-        failures.push(`${theme.name}: ${use} ${fg} on ${bg} = ${ratio.toFixed(2)} (needs ${min})`);
-      }
+    for (const problem of contrastProblems(theme.tokens)) {
+      failures.push(`${theme.name}: ${problem}`);
     }
   }
   assert.deepEqual(failures, []);
+});
+
+test('the contrast check names a failing pair', () => {
+  const tokens = {
+    ...byName.classic.tokens,
+    textMuted: '#999999'
+  };
+  const problems = contrastProblems(tokens);
+  assert.equal(problems.length, 2);
+  assert.match(problems[0], /^Muted text \(footer, breadcrumbs\): #999999 on #ffffff is 2\.84:1, needs 4\.5:1\.$/);
+  assert.equal(contrastResults(byName.classic.tokens).length, contrastPairs.length);
 });
 
 test('contrast matches the recorded m1-021 values', () => {

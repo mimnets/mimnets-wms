@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Task** | m1-020 (CA-4 scaffolding) · m1-021 (brand values) · m1-084 (themes as data) |
+| **Task** | m1-020 (CA-4 scaffolding) · m1-021 (brand values) · m1-084 (themes as data) · m1-087 (custom themes) |
 | **Date** | 2026-10-31 |
 | **Status** | **Brand values from the live site, pending the owner's confirmation** (m1-021). The owner directed the agent to take colours, font, logo and favicon from the public pages of www.assurerworld.com (D-CONTENT-12). No brand guide or vector logo yet. The site's orange is darkened for text to pass WCAG 2.2 AA (§3). |
 | **Source** | `lib/themes.js` (theme values, m1-084) · `modules/asset/ui/src/scss/_tokens.scss` (fixed tokens) · `_fonts.scss` · `public/fonts/` · `public/images/brand/` |
@@ -15,6 +15,12 @@
   preset renders on its body class. The styles module serves them as one cached stylesheet.
   `_tokens.scss` keeps only what every theme shares (spacing scale, notice colours). Add or change
   a preset in `lib/themes.js` only; `npm run test:unit` checks its shape and contrast.
+- **Since m1-087 (D-CONTENT-32)** admins also make **custom themes**: full copies of a preset's
+  tokens, stored as `wms-theme` pieces (`modules/wms-theme`) and edited in the admin UI. Published
+  custom themes are added to the same stylesheet (on body class `wms-theme-custom-<aposDocId>`)
+  and to Global Styles → Theme. The server checks every save with `validateTheme()` and the
+  contrast pairs below. A change to `themeFields` ships a migration for stored custom themes (rule
+  in `lib/themes.js`). Admin steps: [publishing workflow guide](./publishing-workflow-guide.md) §6.
 - All of these are CSS custom properties. Project styles (`_wms.scss`, `_corporate.scss`, `_sections.scss`, `_type.scss`,
   `_layout.scss`) use only these properties. Two exceptions stay literal on purpose: the gallery
   lightbox (a dark media viewer) and the slideshow caption gradient (text over photographs).
@@ -93,7 +99,8 @@ The m1-020 placeholder table is in that task's report and in Git history.
 ### Theme presets (m1-074, D-CONTENT-23; m1-084, D-CONTENT-29)
 
 **Since m1-084 the record is the test.** `scripts/themes.test.mjs` checks these pairs for every
-preset in `lib/themes.js` and fails below the minimum: text, text on the alternate surface, muted
+preset in `lib/themes.js` and fails below the minimum (since m1-087 the pairs are in
+`lib/theme-contrast.js`, and the server applies them to every custom theme on save): text, text on the alternate surface, muted
 text on both surfaces, primary text on both surfaces, on-primary on primary and on the dark
 overlay colour, accent on both surfaces, on-accent on accent, link on both surfaces, visited link,
 danger, text on the selection colour (all 4.5:1); focus ring and strong border on the surface
