@@ -61,3 +61,29 @@ text, and anything in Global Content (it appears on every page).
   Preview to see it move. An "Entrance animation" (Styles button on layouts, columns and
   sections) plays once when the section scrolls into view; visitors who ask their device for
   less motion see no animation.
+
+## 5. Start from a pattern or a template (m1-079, m1-086)
+
+Patterns and templates are draft pages with placeholder text ("Replace …"). An admin adds them
+with `node app wms-patterns:seed` (it only adds missing pages and never publishes). They are never
+published: the site refuses to publish anything under "Patterns (do not publish)" or "Templates
+(do not publish)", and visitors cannot see them.
+
+**A section from a pattern.** Open a page under "Patterns (do not publish)", copy the section
+(the widget's copy button) and paste it into your own page.
+
+**A whole page from a template** (about the company, division overview, product category,
+leadership, contact):
+
+1. Open **Pages**, find the template under "Templates (do not publish)" and choose **Duplicate**
+   in its menu.
+2. Change the title and the slug, and save the draft. The copy is placed under the page you were
+   viewing when you chose Duplicate.
+3. If the copy is under "Templates (do not publish)" or in the wrong place, drag it to where it
+   belongs in **Pages**. A copy under Templates cannot be published. Moving a page that was never
+   published may show a short "notfound" notice; the move has worked (it is a core message).
+4. Replace every placeholder, add your images, delete the "How to use" line and publish (or
+   submit it for review).
+
+The new page has no link to its template: changing a template later changes only the pages made
+from it afterwards. Edit a template only to improve it for everyone; never put real content in it.

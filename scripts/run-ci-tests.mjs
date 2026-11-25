@@ -23,7 +23,8 @@
 // after the restart, requests every legacy URL (one 301 hop each). m1-037
 // adds a test contributor (wms-test:ensure-contributor) and runs the
 // publishing-workflow suite (D-CONTENT-11) before and after a restart.
-// m1-070 adds the data dashboard suite (D-DB-24).
+// m1-070 adds the data dashboard suite (D-DB-24). m1-086 seeds the patterns
+// and templates twice and adds the page templates suite (D-CONTENT-31).
 // Uses Node built-ins only.
 
 import { spawn } from 'node:child_process';
@@ -221,6 +222,8 @@ async function steps() {
     await run('seed demo content (wms-demo:seed)', [ 'app', 'wms-demo:seed' ]) &&
     await run('seed corporate demo records (wms-demo:seed-corporate)', [ 'app', 'wms-demo:seed-corporate' ]) &&
     await run('seed corporate demo records again (must add nothing)', [ 'app', 'wms-demo:seed-corporate' ]) &&
+    await run('seed patterns and templates (wms-patterns:seed)', [ 'app', 'wms-patterns:seed' ]) &&
+    await run('seed patterns and templates again (must add nothing)', [ 'app', 'wms-patterns:seed' ]) &&
     await startServer('first') &&
     await run('smoke test', [ 'scripts/smoke-test.mjs' ]) &&
     await run('editor workflow test', [ 'scripts/editor-workflow-test.mjs' ]) &&
@@ -228,6 +231,7 @@ async function steps() {
     await run('SEO test', [ 'scripts/seo-test.mjs' ], { SEO_TEST_DISPOSABLE: '1' }) &&
     await run('publishing workflow test', [ 'scripts/publishing-workflow-test.mjs' ], { PUBLISH_TEST_DISPOSABLE: '1' }) &&
     await run('data dashboard test', [ 'scripts/data-dashboard-test.mjs' ], { DASHBOARD_TEST_DISPOSABLE: '1' }) &&
+    await run('page templates test', [ 'scripts/templates-test.mjs' ], { TEMPLATES_TEST_DISPOSABLE: '1' }) &&
     await stopServer().then(() => run('seed legacy redirects (wms-seo:seed-redirects)', [
       'app', 'wms-seo:seed-redirects', '--strict'
     ])) &&

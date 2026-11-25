@@ -30,8 +30,8 @@ Project modules by kind:
 - **Page types:** `wms-division-page`, `wms-product-category-page` (and the starter kit's `default-page`)
 - **Widgets:** hero, slideshow, product grid and card, feature grid, stats, gallery, downloads,
   and listings of products, people, locations and organisations (`wms-*-widget`)
-- **Tools:** `wms-wp-import` (WordPress import into drafts), `wms-patterns` (section patterns for
-  editors), `wms-seo`, `wms-security`, `wms-forms`, `wms-data-dashboard`, `wms-demo` (demo
+- **Tools:** `wms-wp-import` (WordPress import into drafts), `wms-patterns` (section patterns and
+  page templates for editors), `wms-seo`, `wms-security`, `wms-forms`, `wms-data-dashboard`, `wms-demo` (demo
   content), `wms-test` (CI only)
 
 ### What happens when the site runs
@@ -134,7 +134,7 @@ code conventions are in [ARCHITECTURE.md](./ARCHITECTURE.md) and [AGENTS.md](./A
 | `wms-product-grid-widget` | Product section; cards are widgets in an area (add / reorder in place) |
 | `wms-product-card-widget` | Single product card |
 | `wms-demo` | `wms-demo:seed` task for demonstration content |
-| `wms-patterns` | `wms-patterns:seed`: section patterns as draft pages under "Patterns (do not publish)"; never publishes |
+| `wms-patterns` | `wms-patterns:seed`: section patterns and page templates as draft pages under "Patterns (do not publish)" and "Templates (do not publish)"; never publishes, and refuses publishing under either parent (m1-086) |
 | `wms-test` | `wms-test:ensure-admin`: creates the CI test admin; refuses anything but a temporary SQLite database |
 | `@apostrophecms/form` (+ field widgets) | Contact forms (Community, MIT) |
 
