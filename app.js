@@ -111,6 +111,9 @@ apostrophe({
     'wms-wp-import': {},
     // Section patterns as draft pages for editors (m1-079, D-CONTENT-24).
     'wms-patterns': {},
+    // Custom themes for admins, offered in Global Styles → Theme (m1-087,
+    // D-CONTENT-32).
+    'wms-theme': {},
     // Database dashboard, layer 1 (m1-070, D-DB-24): export and import of
     // content (official module, MIT), for site administrators only, and the
     // admin-only dashboard.

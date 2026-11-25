@@ -87,3 +87,32 @@ leadership, contact):
 
 The new page has no link to its template: changing a template later changes only the pages made
 from it afterwards. Edit a template only to improve it for everyone; never put real content in it.
+
+## 6. Custom themes (admins only, m1-087)
+
+Global Styles → Theme offers 12 ready-made themes. An admin can also make a custom theme: a copy
+of one of them with changed colours, type, shape or layout. Editors do not see Themes.
+
+1. Admin bar → **Site admin** → **Themes** → **New Theme**. Give it a unique name (for example
+   "Ocean (customised)"), choose **Start from**, and save.
+2. Open the theme again. The Colours, Type, Shape and Layout tabs now hold the copied values.
+   Change what you need and save.
+3. Every save is checked for readable colours (WCAG 2.2 AA). If a pair is too weak, the theme is
+   not saved and the message names the pair and both colours, for example "Muted text (footer,
+   breadcrumbs): #999999 on #ffffff is 2.84:1, needs 4.5:1". Change one of the two colours and
+   save again.
+4. **Publish** the theme. This only adds it to Global Styles → Theme; visitors see no change yet.
+5. Reload the page, open **Global Styles → Theme**, choose the theme, check the preview, and save.
+   Visitors see the new look from then on (within about 10 seconds on every server process).
+
+Points to know:
+
+- **A theme in use cannot be archived or unpublished.** Choose another theme in Global Styles
+  first.
+- **Publishing changes to a theme in use changes the live site.** To try changes first, choose
+  **Duplicate** on the theme, change and publish the copy (not in use, so nothing changes), choose
+  the copy in Global Styles to preview it, and save Global Styles only if you like it.
+- **A custom theme is a copy.** Later releases that change the theme it started from do not change
+  it. "Started from" records where it came from.
+- The other Global Styles settings (line height, font sizes, header and footer style and so on)
+  apply on top of every theme, custom or not.

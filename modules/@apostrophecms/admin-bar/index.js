@@ -34,6 +34,7 @@ export default {
         items: [
           '@apostrophecms/user',
           '@apostrophecms/redirect',
+          'wms-theme',
           'wms-data-dashboard'
         ]
       }

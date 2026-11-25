@@ -2,8 +2,14 @@
 
 import { createHash } from 'node:crypto';
 import {
-  overrides, themeCss, themes
+  overrides, themeChoices, themeCss, themes
 } from '../../../lib/themes.js';
+
+// How often a process looks for changed custom themes (m1-087, D-CONTENT-32
+// Q6): a site runs more than one process, so each one checks the database
+// instead of waiting for a message from the process that saved.
+const THEME_CHECK_MS = 10 * 1000;
+const hash = css => createHash('sha256').update(css).digest('hex').slice(0, 12);
 
 export default {
   // Global Styles are site-wide: admins only (D-M0-11, m1-022). Core
@@ -24,17 +30,15 @@ export default {
       // choice). The presets and their values are data in lib/themes.js
       // (m1-084, D-CONTENT-29); the stylesheet route below serves them.
       // Classic is the empty value: no class. An unknown value has no rules
-      // and renders as Classic.
+      // and renders as Classic. The presets, then the published custom
+      // themes (m1-087, modules/wms-theme); core refuses any other value.
       theme: {
         type: 'select',
         label: 'Theme',
-        help: 'The overall look of the site. The settings in the other tabs apply on top of every theme.',
+        help: 'The overall look of the site. The settings in the other tabs apply on top of every theme. Admins add their own under Themes.',
         class: true,
         def: '',
-        choices: themes.map(theme => ({
-          label: theme.label,
-          value: theme.className
-        }))
+        choices: 'wmsThemeChoices'
       },
 
       // ============================================
@@ -466,31 +470,86 @@ export default {
     }
   },
   init(self) {
-    // The theme stylesheet (m1-084): every preset, built once at start, linked
-    // from <head> on every page. The URL carries a hash of the CSS, so it can
-    // be cached for a year and a release with changed themes gets a new URL.
-    self.wmsThemeCss = themeCss(themes);
-    self.wmsThemeVersion = createHash('sha256').update(self.wmsThemeCss).digest('hex').slice(0, 12);
+    // The theme stylesheet (m1-084): every preset and, since m1-087, every
+    // published custom theme, linked from <head> on every page. The URL
+    // carries a hash of the CSS, so it can be cached for a year and any
+    // change to the themes gets a new URL. Presets only until the first
+    // check of the database.
+    const css = themeCss(themes);
+    self.wmsThemes = {
+      css,
+      version: hash(css),
+      revision: null,
+      checkedAt: 0
+    };
     self.apos.template.prepend('head', '@apostrophecms/styles:wmsThemeStylesheet');
+  },
+  methods(self) {
+    return {
+      // Choices for the Theme select: presets, then published custom themes.
+      async wmsThemeChoices() {
+        const custom = await self.apos.modules['wms-theme'].publishedThemes();
+        return [ ...themeChoices(themes), ...themeChoices(custom) ];
+      },
+      // Rebuilds the stylesheet when the published custom themes changed,
+      // checking the database at most every THEME_CHECK_MS (or now, when
+      // `force`). On a database error the last stylesheet stays.
+      async wmsRefreshThemes({ force = false } = {}) {
+        const now = Date.now();
+        if (!force && now - self.wmsThemes.checkedAt < THEME_CHECK_MS) {
+          return self.wmsThemes;
+        }
+        // Set first, so concurrent requests do not all query.
+        self.wmsThemes.checkedAt = now;
+        try {
+          const customThemes = self.apos.modules['wms-theme'];
+          const revision = await customThemes.revision();
+          if (revision !== self.wmsThemes.revision) {
+            const css = themeCss([ ...themes, ...await customThemes.publishedThemes() ]);
+            self.wmsThemes = {
+              css,
+              version: hash(css),
+              revision,
+              checkedAt: now
+            };
+          }
+        } catch (e) {
+          self.apos.util.error('Custom themes: the stylesheet was not refreshed', e);
+        }
+        return self.wmsThemes;
+      }
+    };
   },
   apiRoutes(self) {
     return {
       get: {
         // GET /api/v1/@apostrophecms/styles/wms-themes, public: the same
-        // stylesheet for everyone, no user or document data.
-        wmsThemes(req) {
+        // stylesheet for everyone; class names and token values only, no
+        // theme names, user or document data.
+        async wmsThemes(req) {
+          let themesNow = await self.wmsRefreshThemes();
+          const asked = self.apos.launder.string(req.query.version);
+          if (asked && asked !== themesNow.version) {
+            // A page from another process may know a newer version.
+            themesNow = await self.wmsRefreshThemes({ force: true });
+          }
           req.res.setHeader('Content-Type', 'text/css');
-          req.res.setHeader('Cache-Control', 'public, max-age=31557600, immutable');
-          return self.wmsThemeCss;
+          // Immutable only under its own version: an old or unknown version
+          // gets today's CSS without being cached.
+          req.res.setHeader('Cache-Control', asked === themesNow.version
+            ? 'public, max-age=31557600, immutable'
+            : 'no-store');
+          return themesNow.css;
         }
       }
     };
   },
   components(self) {
     return {
-      wmsThemeStylesheet(req) {
+      async wmsThemeStylesheet(req) {
+        const { version } = await self.wmsRefreshThemes();
         return {
-          href: `${self.apos.prefix || ''}${self.action}/wms-themes?version=${self.wmsThemeVersion}`
+          href: `${self.apos.prefix || ''}${self.action}/wms-themes?version=${version}`
         };
       }
     };
