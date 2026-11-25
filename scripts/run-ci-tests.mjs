@@ -25,7 +25,10 @@
 // publishing-workflow suite (D-CONTENT-11) before and after a restart.
 // m1-070 adds the data dashboard suite (D-DB-24). m1-086 seeds the patterns
 // and templates twice and adds the page templates suite (D-CONTENT-31).
-// m1-087 adds the custom themes suite (D-CONTENT-32).
+// m1-087 adds the custom themes suite (D-CONTENT-32). m1-088 adds the design
+// suggestions suite (D-CONTENT-33): once without a key (feature off), then on
+// a server restarted with core's AI mock (APOS_AI_MOCK=1: no network, no key)
+// and a daily limit of 6.
 // Uses Node built-ins only.
 
 import { spawn } from 'node:child_process';
@@ -234,6 +237,12 @@ async function steps() {
     await run('data dashboard test', [ 'scripts/data-dashboard-test.mjs' ], { DASHBOARD_TEST_DISPOSABLE: '1' }) &&
     await run('page templates test', [ 'scripts/templates-test.mjs' ], { TEMPLATES_TEST_DISPOSABLE: '1' }) &&
     await run('custom themes test', [ 'scripts/custom-themes-test.mjs' ], { CUSTOM_THEMES_TEST_DISPOSABLE: '1' }) &&
+    await run('design suggestions test, no key', [ 'scripts/design-suggestion-test.mjs', '--off' ], { DESIGN_TEST_DISPOSABLE: '1' }) &&
+    await stopServer().then(() => startServer('ai-mock', {
+      APOS_AI_MOCK: '1',
+      WMS_AI_DAILY_LIMIT: '6'
+    })) &&
+    await run('design suggestions test (AI mock)', [ 'scripts/design-suggestion-test.mjs' ], { DESIGN_TEST_DISPOSABLE: '1' }) &&
     await stopServer().then(() => run('seed legacy redirects (wms-seo:seed-redirects)', [
       'app', 'wms-seo:seed-redirects', '--strict'
     ])) &&

@@ -79,6 +79,10 @@ const choiceLabel = (key, value) => choiceLabels[key]?.[value] ??
   fontNames[value] ??
   String(value).charAt(0).toUpperCase() + String(value).slice(1);
 
+// The token names in words, also given to the design suggestion's model
+// (m1-088, modules/wms-design-suggestion/lib/prompts.js).
+export { labels as tokenLabels, help as tokenHelp };
+
 const steps = {
   overlayOpacity: 1,
   headingTracking: 0.005,

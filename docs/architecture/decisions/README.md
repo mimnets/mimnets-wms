@@ -9,6 +9,7 @@ sequentially and never renumbered.
 | [ADR-0002](./ADR-0002-database-strategy.md) | Database and media storage strategy | Accepted 2026-10-19 (PostgreSQL conditional); in part superseded by ADR-0004 |
 | [ADR-0003](./ADR-0003-corporate-content-model.md) | Corporate content model | Accepted 2026-10-20 |
 | [ADR-0004](./ADR-0004-mongodb-for-staging-and-production.md) | MongoDB for staging and production | Accepted 2026-11-08 (m1-052); supersedes ADR-0002 in part |
+| [ADR-0005](./ADR-0005-ai-assisted-design.md) | AI-assisted design through Apostrophe's core AI engine | Accepted 2026-11-25 (m1-088, D-CONTENT-33) |
 
 ## Lifecycle
 

@@ -167,6 +167,12 @@ PBM's values into their volumes at each start when they differ.
   `mongo-secrets` volume, then `$S up -d` (setup copies it) and restart the app or `pbm` and
   `backup`. Take a base backup after the change, because a restore needs the passwords that were
   current when its backup was taken.
+- **AI key (optional, m1-088, ADR-0005):** design suggestions are off until the site has a key.
+  The owner creates a key in a provider workspace of this site's own, with a monthly spend limit,
+  writes it to `anthropic-key` in the `app-secrets` volume (one line, readable by the app user
+  only) and recreates the app. To rotate, replace the file and recreate the app; to turn the
+  feature off, delete the file and recreate the app. Production only after the DPO has confirmed
+  the provider (D-CONTENT-33 Q3).
 - **MongoDB TLS certificate:** `setup` makes a new CA and certificate when fewer than 30 days are
   left; `deploy.sh` then restarts `mongo` and its clients (§12). To force it, delete `tls/` in the
   `mongo-secrets` volume and run `deploy.sh` again.

@@ -114,6 +114,8 @@ apostrophe({
     // Custom themes for admins, offered in Global Styles → Theme (m1-087,
     // D-CONTENT-32).
     'wms-theme': {},
+    // AI-assisted design (m1-088, ADR-0005): admin-only, off without a key.
+    'wms-design-suggestion': {},
     // Database dashboard, layer 1 (m1-070, D-DB-24): export and import of
     // content (official module, MIT), for site administrators only, and the
     // admin-only dashboard.
